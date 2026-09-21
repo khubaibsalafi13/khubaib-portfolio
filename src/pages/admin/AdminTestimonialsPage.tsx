@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Star, Eye } from 'lucide-react';
 import { testimonialService } from '../../services/testimonialService';
 import { Testimonial } from '../../types';
@@ -8,7 +8,18 @@ export const AdminTestimonialsPage: React.FC = () => {
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const refresh = () => setTestimonials(testimonialService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await testimonialService.getAllAsync();
+      setTestimonials(data);
+    } catch {
+      setTestimonials(testimonialService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -30,25 +41,25 @@ export const AdminTestimonialsPage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.clientName.trim() || !editing.reviewTextEn.trim()) return;
-    testimonialService.save(editing);
+    await testimonialService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this testimonial?')) {
-      testimonialService.delete(id);
-      refresh();
+      await testimonialService.delete(id);
+      await refresh();
     }
   };
 
-  const handleTogglePublish = (t: Testimonial) => {
-    testimonialService.save({ ...t, published: !t.published });
-    refresh();
+  const handleTogglePublish = async (t: Testimonial) => {
+    await testimonialService.save({ ...t, published: !t.published });
+    await refresh();
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Image as ImageIcon, ExternalLink } from 'lucide-react';
 import { clientLogoService } from '../../services/clientLogoService';
 import { imageService } from '../../services/imageService';
@@ -10,7 +10,18 @@ export const AdminClientLogosPage: React.FC = () => {
   const [isNew, setIsNew] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const refresh = () => setLogos(clientLogoService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await clientLogoService.getAllAsync();
+      setLogos(data);
+    } catch {
+      setLogos(clientLogoService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -27,25 +38,25 @@ export const AdminClientLogosPage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.companyName.trim()) return;
-    clientLogoService.save(editing);
+    await clientLogoService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this client logo?')) {
-      clientLogoService.delete(id);
-      refresh();
+      await clientLogoService.delete(id);
+      await refresh();
     }
   };
 
-  const handleTogglePublish = (item: ClientLogo) => {
-    clientLogoService.save({ ...item, published: !item.published });
-    refresh();
+  const handleTogglePublish = async (item: ClientLogo) => {
+    await clientLogoService.save({ ...item, published: !item.published });
+    await refresh();
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

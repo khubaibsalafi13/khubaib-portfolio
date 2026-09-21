@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Calendar, DollarSign, Clock, Trash2, CheckCircle, Eye, X } from 'lucide-react';
 import { consultationService } from '../../services/consultationService';
 import { ConsultationRequest, ConsultationStatus } from '../../types';
@@ -10,25 +10,36 @@ export const AdminConsultationsPage: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [activeItem, setActiveItem] = useState<ConsultationRequest | null>(null);
 
-  const refresh = () => setConsultations(consultationService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await consultationService.getAllAsync();
+      setConsultations(data);
+    } catch {
+      setConsultations(consultationService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const filtered = consultations.filter((c) => {
     if (filterStatus === 'all') return true;
     return c.status === filterStatus;
   });
 
-  const handleStatusChange = (id: string, newStatus: ConsultationStatus) => {
-    consultationService.updateStatus(id, newStatus);
-    refresh();
+  const handleStatusChange = async (id: string, newStatus: ConsultationStatus) => {
+    await consultationService.updateStatus(id, newStatus);
+    await refresh();
     if (activeItem?.id === id) {
       setActiveItem({ ...activeItem, status: newStatus });
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this consultation inquiry permanently?')) {
-      consultationService.delete(id);
-      refresh();
+      await consultationService.delete(id);
+      await refresh();
       if (activeItem?.id === id) {
         setActiveItem(null);
       }

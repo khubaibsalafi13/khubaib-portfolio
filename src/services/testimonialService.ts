@@ -1,6 +1,12 @@
 import { Testimonial } from '../types';
 import { initialTestimonials } from '../data/seedData';
 import { getItem, setItem } from './storage';
+import {
+  supabase,
+  isSupabaseConfigured,
+  testimonialToDb,
+  testimonialFromDb,
+} from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'ks_portfolio_testimonials';
 
@@ -9,11 +15,50 @@ export const testimonialService = {
     return getItem<Testimonial[]>(STORAGE_KEY, initialTestimonials).sort((a, b) => a.sortOrder - b.sortOrder);
   },
 
+  async getAllAsync(): Promise<Testimonial[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (!error && data) {
+          const list = data.map(testimonialFromDb);
+          setItem(STORAGE_KEY, list);
+          return list;
+        }
+      } catch (err) {
+        console.warn('Supabase testimonials fetch error:', err);
+      }
+    }
+    return this.getAll();
+  },
+
   getPublished(): Testimonial[] {
     return this.getAll().filter((t) => t.published);
   },
 
-  save(testimonial: Partial<Testimonial> & { clientName: string; reviewTextEn: string }): Testimonial {
+  async getPublishedAsync(): Promise<Testimonial[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('testimonials')
+          .select('*')
+          .eq('published', true)
+          .order('sort_order', { ascending: true });
+
+        if (!error && data) {
+          return data.map(testimonialFromDb);
+        }
+      } catch (err) {
+        console.warn('Supabase getPublishedAsync testimonials error:', err);
+      }
+    }
+    return this.getPublished();
+  },
+
+  async save(testimonial: Partial<Testimonial> & { clientName: string; reviewTextEn: string }): Promise<Testimonial> {
     const all = this.getAll();
     let updated: Testimonial;
 
@@ -57,16 +102,43 @@ export const testimonialService = {
     }
 
     setItem(STORAGE_KEY, all);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('testimonials').upsert(testimonialToDb(updated));
+      } catch (err) {
+        console.error('Supabase testimonial save error:', err);
+      }
+    }
+
     return updated;
   },
 
-  delete(id: string): void {
+  async delete(id: string): Promise<void> {
     const all = this.getAll().filter((t) => t.id !== id);
     setItem(STORAGE_KEY, all);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('testimonials').delete().eq('id', id);
+      } catch (err) {
+        console.error('Supabase testimonial delete error:', err);
+      }
+    }
   },
 
-  reorder(testimonials: Testimonial[]): void {
+  async reorder(testimonials: Testimonial[]): Promise<void> {
     const updated = testimonials.map((t, i) => ({ ...t, sortOrder: i + 1 }));
     setItem(STORAGE_KEY, updated);
+
+    if (isSupabaseConfigured()) {
+      try {
+        for (const t of updated) {
+          await supabase.from('testimonials').update({ sort_order: t.sortOrder }).eq('id', t.id);
+        }
+      } catch (err) {
+        console.error('Supabase testimonials reorder error:', err);
+      }
+    }
   },
 };

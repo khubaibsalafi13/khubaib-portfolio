@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
 import { servicesService } from '../../services/servicesService';
 import { ServiceItem } from '../../types';
@@ -8,7 +8,18 @@ export const AdminServicesPage: React.FC = () => {
   const [editing, setEditing] = useState<ServiceItem | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const refresh = () => setServices(servicesService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await servicesService.getAllAsync();
+      setServices(data);
+    } catch {
+      setServices(servicesService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -24,25 +35,25 @@ export const AdminServicesPage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.titleEn.trim()) return;
-    servicesService.save(editing);
+    await servicesService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this service offering?')) {
-      servicesService.delete(id);
-      refresh();
+      await servicesService.delete(id);
+      await refresh();
     }
   };
 
-  const handleTogglePublish = (srv: ServiceItem) => {
-    servicesService.save({ ...srv, published: !srv.published });
-    refresh();
+  const handleTogglePublish = async (srv: ServiceItem) => {
+    await servicesService.save({ ...srv, published: !srv.published });
+    await refresh();
   };
 
   return (

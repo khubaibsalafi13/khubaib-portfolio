@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Calendar, Tag, Sparkles } from 'lucide-react';
 import { projectService } from '../../services/projectService';
@@ -7,18 +7,39 @@ import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
 import { settingsService } from '../../services/settingsService';
 import { CursorGlow } from '../../components/public/CursorGlow';
+import { Project, SiteSettings } from '../../types';
 
 export const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { localized, t } = useLanguage();
 
-  const allProjects = useMemo(() => projectService.getPublished(), []);
+  const [allProjects, setAllProjects] = useState<Project[]>(() => projectService.getPublished());
+  const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const [latestProjects, latestSettings] = await Promise.all([
+          projectService.getPublishedAsync(),
+          settingsService.getSettingsAsync(),
+        ]);
+        if (isMounted) {
+          if (latestProjects) setAllProjects(latestProjects);
+          if (latestSettings) setSettings(latestSettings);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch project detail from Supabase:', err);
+      }
+    }
+    loadData();
+    return () => { isMounted = false; };
+  }, []);
+
   const project = useMemo(() => {
     return allProjects.find((p) => p.slug === slug);
   }, [allProjects, slug]);
-
-  const settings = useMemo(() => settingsService.getSettings(), []);
 
   // Determine previous and next projects
   const { prevProject, nextProject } = useMemo(() => {

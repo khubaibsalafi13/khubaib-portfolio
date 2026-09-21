@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { educationService } from '../../services/educationService';
 import { Education } from '../../types';
@@ -8,7 +8,18 @@ export const AdminEducationPage: React.FC = () => {
   const [editing, setEditing] = useState<Education | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const refresh = () => setEducation(educationService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await educationService.getAllAsync();
+      setEducation(data);
+    } catch {
+      setEducation(educationService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -23,19 +34,19 @@ export const AdminEducationPage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.degreeEn.trim()) return;
-    educationService.save(editing);
+    await educationService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this education entry?')) {
-      educationService.delete(id);
-      refresh();
+      await educationService.delete(id);
+      await refresh();
     }
   };
 

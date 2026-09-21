@@ -1,6 +1,12 @@
 import { Service } from '../types';
 import { initialServices } from '../data/seedData';
 import { getItem, setItem } from './storage';
+import {
+  supabase,
+  isSupabaseConfigured,
+  serviceToDb,
+  serviceFromDb,
+} from '../lib/supabaseClient';
 
 const STORAGE_KEY = 'ks_portfolio_services';
 
@@ -9,11 +15,50 @@ export const servicesService = {
     return getItem<Service[]>(STORAGE_KEY, initialServices).sort((a, b) => a.sortOrder - b.sortOrder);
   },
 
+  async getAllAsync(): Promise<Service[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .order('sort_order', { ascending: true });
+
+        if (!error && data) {
+          const list = data.map(serviceFromDb);
+          setItem(STORAGE_KEY, list);
+          return list;
+        }
+      } catch (err) {
+        console.warn('Supabase services fetch error:', err);
+      }
+    }
+    return this.getAll();
+  },
+
   getPublished(): Service[] {
     return this.getAll().filter((s) => s.published);
   },
 
-  save(service: Partial<Service> & { titleEn: string }): Service {
+  async getPublishedAsync(): Promise<Service[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('services')
+          .select('*')
+          .eq('published', true)
+          .order('sort_order', { ascending: true });
+
+        if (!error && data) {
+          return data.map(serviceFromDb);
+        }
+      } catch (err) {
+        console.warn('Supabase getPublishedAsync services error:', err);
+      }
+    }
+    return this.getPublished();
+  },
+
+  async save(service: Partial<Service> & { titleEn: string }): Promise<Service> {
     const all = this.getAll();
     let updated: Service;
 
@@ -42,16 +87,43 @@ export const servicesService = {
     }
 
     setItem(STORAGE_KEY, all);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('services').upsert(serviceToDb(updated));
+      } catch (err) {
+        console.error('Supabase service save error:', err);
+      }
+    }
+
     return updated;
   },
 
-  delete(id: string): void {
+  async delete(id: string): Promise<void> {
     const all = this.getAll().filter((s) => s.id !== id);
     setItem(STORAGE_KEY, all);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('services').delete().eq('id', id);
+      } catch (err) {
+        console.error('Supabase service delete error:', err);
+      }
+    }
   },
 
-  reorder(services: Service[]): void {
+  async reorder(services: Service[]): Promise<void> {
     const updated = services.map((s, i) => ({ ...s, sortOrder: i + 1 }));
     setItem(STORAGE_KEY, updated);
+
+    if (isSupabaseConfigured()) {
+      try {
+        for (const s of updated) {
+          await supabase.from('services').update({ sort_order: s.sortOrder }).eq('id', s.id);
+        }
+      } catch (err) {
+        console.error('Supabase services reorder error:', err);
+      }
+    }
   },
 };

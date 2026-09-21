@@ -16,13 +16,16 @@ import {
   ExternalLink,
   Menu,
   X,
+  Database,
 } from 'lucide-react';
 import { authService } from '../../services/authService';
+import { isSupabaseConfigured } from '../../lib/supabaseClient';
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const supabaseActive = isSupabaseConfigured();
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
@@ -93,6 +96,22 @@ export const AdminLayout: React.FC = () => {
               <X className="w-5 h-5" />
             </button>
           </div>
+
+          {/* Supabase Status Pill */}
+          <Link
+            to="/admin/settings"
+            className={`mb-4 px-2.5 py-1.5 rounded-lg text-[11px] font-mono flex items-center justify-between transition-colors ${
+              supabaseActive
+                ? 'bg-[#092a18] border border-[#165a36] text-[#34d399] hover:border-[#10b981]'
+                : 'bg-[#261d08] border border-[#523d0d] text-[#facc15] hover:border-[#ca8a04]'
+            }`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${supabaseActive ? 'bg-[#10b981] animate-pulse' : 'bg-[#eab308]'}`} />
+              <span>{supabaseActive ? 'Supabase Connected' : 'Local Storage Mode'}</span>
+            </div>
+            <Database className="w-3 h-3 opacity-60" />
+          </Link>
 
           {/* Navigation links */}
           <nav className="space-y-1">

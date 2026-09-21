@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { experienceService } from '../../services/experienceService';
 import { Experience } from '../../types';
@@ -8,7 +8,18 @@ export const AdminExperiencePage: React.FC = () => {
   const [editing, setEditing] = useState<Experience | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const refresh = () => setExperience(experienceService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await experienceService.getAllAsync();
+      setExperience(data);
+    } catch {
+      setExperience(experienceService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -24,19 +35,19 @@ export const AdminExperiencePage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.company.trim()) return;
-    experienceService.save(editing);
+    await experienceService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this experience entry?')) {
-      experienceService.delete(id);
-      refresh();
+      await experienceService.delete(id);
+      await refresh();
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Save, Check, RefreshCw, Upload, Trash2, Image as ImageIcon, RotateCcw, AlertCircle } from 'lucide-react';
 import { contentService } from '../../services/contentService';
 import { imageService } from '../../services/imageService';
@@ -10,6 +10,24 @@ export const AdminHomepageEditorPage: React.FC = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        const latest = await contentService.getContentAsync();
+        if (isMounted && latest) {
+          setContent(latest);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch site content from Supabase:', err);
+      }
+    }
+    loadData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleChange = (field: keyof SiteContent, value: string) => {
     setContent((prev) => ({ ...prev, [field]: value }));
@@ -43,16 +61,16 @@ export const AdminHomepageEditorPage: React.FC = () => {
     handleChange('heroPersonalImage', '/assets/khubaib_portrait.jpg');
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    contentService.updateContent(content);
+    await contentService.updateContent(content);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (window.confirm('Reset all homepage text back to original seed defaults?')) {
-      const resetData = contentService.resetToDefault();
+      const resetData = await contentService.resetToDefault();
       setContent(resetData);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

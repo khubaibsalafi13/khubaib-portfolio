@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Edit2,
@@ -11,22 +11,42 @@ import {
   Save,
   X,
   Check,
+  RefreshCw,
 } from 'lucide-react';
 import { projectService } from '../../services/projectService';
 import { categoryService } from '../../services/categoryService';
 import { imageService } from '../../services/imageService';
-import { Project, ProjectImage } from '../../types';
+import { Project, ProjectImage, Category } from '../../types';
 
 export const AdminPortfolioPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>(() => projectService.getAll());
-  const categories = categoryService.getAll();
+  const [categories, setCategories] = useState<Category[]>(() => categoryService.getAll());
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const refresh = () => {
-    setProjects(projectService.getAll());
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const [fetchedProjects, fetchedCats] = await Promise.all([
+        projectService.getAllAsync(),
+        categoryService.getAllAsync(),
+      ]);
+      setProjects(fetchedProjects);
+      setCategories(fetchedCats);
+    } catch (err) {
+      console.error('Error refreshing projects:', err);
+      setProjects(projectService.getAll());
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsCreating(true);
@@ -61,29 +81,29 @@ export const AdminPortfolioPage: React.FC = () => {
     setEditingProject({ ...proj });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
-      projectService.delete(id);
-      refresh();
+      await projectService.delete(id);
+      await refresh();
       if (editingProject?.id === id) {
         setEditingProject(null);
       }
     }
   };
 
-  const handleTogglePublish = (proj: Project) => {
-    projectService.save({ id: proj.id, published: !proj.published });
-    refresh();
+  const handleTogglePublish = async (proj: Project) => {
+    await projectService.save({ id: proj.id, published: !proj.published });
+    await refresh();
   };
 
-  const handleToggleFeatured = (proj: Project) => {
-    projectService.save({ id: proj.id, featured: !proj.featured });
-    refresh();
+  const handleToggleFeatured = async (proj: Project) => {
+    await projectService.save({ id: proj.id, featured: !proj.featured });
+    await refresh();
   };
 
-  const handleSetHeroFeatured = (id: string) => {
-    projectService.setHeroFeatured(id);
-    refresh();
+  const handleSetHeroFeatured = async (id: string) => {
+    await projectService.setHeroFeatured(id);
+    await refresh();
   };
 
   const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +119,7 @@ export const AdminPortfolioPage: React.FC = () => {
     }
   };
 
-  const handleSaveForm = (e: React.FormEvent) => {
+  const handleSaveForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProject) return;
 
@@ -108,10 +128,17 @@ export const AdminPortfolioPage: React.FC = () => {
       return;
     }
 
-    projectService.save(editingProject);
-    setEditingProject(null);
-    setIsCreating(false);
-    refresh();
+    setSaving(true);
+    try {
+      await projectService.save(editingProject);
+      setEditingProject(null);
+      setIsCreating(false);
+      await refresh();
+    } catch (err: any) {
+      alert(err?.message || 'Failed to save project');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

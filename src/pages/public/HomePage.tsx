@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnnouncementBar } from '../../components/public/AnnouncementBar';
 import { Header } from '../../components/public/Header';
 import { Hero } from '../../components/public/Hero';
@@ -24,19 +24,84 @@ import { testimonialService } from '../../services/testimonialService';
 import { experienceService } from '../../services/experienceService';
 import { educationService } from '../../services/educationService';
 import { settingsService } from '../../services/settingsService';
+import {
+  Project,
+  Category,
+  Service,
+  Experience,
+  Education,
+  ClientLogo,
+  Testimonial,
+  SiteContent,
+  SiteSettings,
+} from '../../types';
 
 export const HomePage: React.FC = () => {
-  // Fetch real/localStorage service data
-  const content = useMemo(() => contentService.getContent(), []);
-  const settings = useMemo(() => settingsService.getSettings(), []);
-  const projects = useMemo(() => projectService.getPublished(), []);
-  const heroProject = useMemo(() => projectService.getHeroFeatured(), []);
-  const categories = useMemo(() => categoryService.getAll(), []);
-  const services = useMemo(() => servicesService.getPublished(), []);
-  const experience = useMemo(() => experienceService.getAll(), []);
-  const education = useMemo(() => educationService.getAll(), []);
-  const clientLogos = useMemo(() => clientLogoService.getPublished(), []);
-  const testimonials = useMemo(() => testimonialService.getPublished(), []);
+  // Initial state from cached data for fast paint
+  const [content, setContent] = useState<SiteContent>(() => contentService.getContent());
+  const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
+  const [projects, setProjects] = useState<Project[]>(() => projectService.getPublished());
+  const [heroProject, setHeroProject] = useState<Project | undefined>(() => projectService.getHeroFeatured());
+  const [categories, setCategories] = useState<Category[]>(() => categoryService.getAll());
+  const [services, setServices] = useState<Service[]>(() => servicesService.getPublished());
+  const [experience, setExperience] = useState<Experience[]>(() => experienceService.getAll());
+  const [education, setEducation] = useState<Education[]>(() => educationService.getAll());
+  const [clientLogos, setClientLogos] = useState<ClientLogo[]>(() => clientLogoService.getPublished());
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(() => testimonialService.getPublished());
+
+  // Dynamic Supabase data hydration on mount
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSupabaseData() {
+      try {
+        const [
+          latestContent,
+          latestSettings,
+          latestProjects,
+          latestHeroProject,
+          latestCategories,
+          latestServices,
+          latestExperience,
+          latestEducation,
+          latestLogos,
+          latestTestimonials,
+        ] = await Promise.all([
+          contentService.getContentAsync(),
+          settingsService.getSettingsAsync(),
+          projectService.getPublishedAsync(),
+          projectService.getHeroFeaturedAsync(),
+          categoryService.getAllAsync(),
+          servicesService.getPublishedAsync(),
+          experienceService.getAllAsync(),
+          educationService.getAllAsync(),
+          clientLogoService.getPublishedAsync(),
+          testimonialService.getPublishedAsync(),
+        ]);
+
+        if (isMounted) {
+          if (latestContent) setContent(latestContent);
+          if (latestSettings) setSettings(latestSettings);
+          if (latestProjects) setProjects(latestProjects);
+          if (latestHeroProject) setHeroProject(latestHeroProject);
+          if (latestCategories) setCategories(latestCategories);
+          if (latestServices) setServices(latestServices);
+          if (latestExperience) setExperience(latestExperience);
+          if (latestEducation) setEducation(latestEducation);
+          if (latestLogos) setClientLogos(latestLogos);
+          if (latestTestimonials) setTestimonials(latestTestimonials);
+        }
+      } catch (err) {
+        console.warn('Error loading dynamic Supabase data in HomePage:', err);
+      }
+    }
+
+    loadSupabaseData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[var(--selection-bg)] selection:text-[var(--selection-text)] transition-colors duration-200 relative">

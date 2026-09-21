@@ -1,24 +1,92 @@
-import React, { useState } from 'react';
-import { Save, Check, Moon, Sun, Palette } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Check, Moon, Sun, Palette, Database, ExternalLink, ShieldCheck, Key } from 'lucide-react';
 import { settingsService } from '../../services/settingsService';
 import { SiteSettings } from '../../types';
 import { useTheme } from '../../context/ThemeContext';
+import { isSupabaseConfigured, getSupabaseConfig, setRuntimeSupabaseConfig, supabase } from '../../lib/supabaseClient';
 
 export const AdminSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
   const [saved, setSaved] = useState(false);
   const { setTheme } = useTheme();
 
+  // Supabase dynamic config state
+  const [currentConfig, setCurrentConfig] = useState(() => getSupabaseConfig());
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(currentConfig.url);
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(currentConfig.anonKey);
+  const [dbStatus, setDbStatus] = useState<'connected' | 'unconfigured' | 'error'>(
+    isSupabaseConfigured() ? 'connected' : 'unconfigured'
+  );
+  const [dbTestMessage, setDbTestMessage] = useState('');
+  const [testingConnection, setTestingConnection] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadSettings() {
+      try {
+        const latest = await settingsService.getSettingsAsync();
+        if (isMounted && latest) {
+          setSettings(latest);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch settings from Supabase:', err);
+      }
+    }
+    loadSettings();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleChange = <K extends keyof SiteSettings>(key: K, value: SiteSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
     setSaved(false);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    settingsService.updateSettings(settings);
+    await settingsService.updateSettings(settings);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handleSaveSupabaseConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRuntimeSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
+    setCurrentConfig(getSupabaseConfig());
+    if (supabaseUrlInput.trim() && supabaseKeyInput.trim()) {
+      setDbStatus('connected');
+      setDbTestMessage('Configuration saved to application.');
+    } else {
+      setDbStatus('unconfigured');
+      setDbTestMessage('Supabase credentials cleared. Using local persistence.');
+    }
+  };
+
+  const handleTestSupabaseConnection = async () => {
+    setTestingConnection(true);
+    setDbTestMessage('');
+    try {
+      if (!supabaseUrlInput.trim() || !supabaseKeyInput.trim()) {
+        setDbStatus('unconfigured');
+        setDbTestMessage('Please enter both Supabase Project URL and Anon Key.');
+        return;
+      }
+      setRuntimeSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
+      const { error } = await supabase.from('site_settings').select('id').limit(1);
+      if (error) {
+        setDbStatus('error');
+        setDbTestMessage(`Connection warning: ${error.message}. Ensure supabase_schema.sql has been run in Supabase SQL Editor.`);
+      } else {
+        setDbStatus('connected');
+        setDbTestMessage('Connected successfully to Supabase database!');
+      }
+    } catch (err: any) {
+      setDbStatus('error');
+      setDbTestMessage(`Connection error: ${err.message || 'Check URL and key.'}`);
+    } finally {
+      setTestingConnection(false);
+    }
   };
 
   return (
@@ -332,6 +400,113 @@ export const AdminSettingsPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* 06. Supabase Cloud Database */}
+        <div id="supabase" className="rounded-2xl bg-[#06140d] border border-[#143222] p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Database className="w-4 h-4 text-[#10b981]" />
+              <h2 className="text-sm font-bold text-[#10b981] font-mono uppercase tracking-wider">
+                06. Supabase Cloud Database Integration
+              </h2>
+            </div>
+            <div className={`px-2.5 py-1 rounded-full text-xs font-mono flex items-center gap-1.5 ${
+              dbStatus === 'connected'
+                ? 'bg-[#0a2f1b] border border-[#1b6b3e] text-[#34d399]'
+                : dbStatus === 'error'
+                ? 'bg-[#310d0d] border border-[#6b1b1b] text-[#f87171]'
+                : 'bg-[#281e09] border border-[#6b501b] text-[#fbbf24]'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${dbStatus === 'connected' ? 'bg-[#10b981]' : dbStatus === 'error' ? 'bg-[#ef4444]' : 'bg-[#f59e0b]'}`} />
+              <span>
+                {dbStatus === 'connected' ? 'Connected' : dbStatus === 'error' ? 'Connection Alert' : 'Local Fallback'}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#8ba394] leading-relaxed">
+            Your portfolio features PostgreSQL backend capability via Supabase. When configured, all projects, design categories, services, client logos, testimonials, and consultation messages synchronize to your live Supabase cloud database with Row Level Security (RLS).
+          </p>
+
+          <div className="p-4 rounded-xl bg-[#030905] border border-[#112a1c] space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono text-[#8ba394]">
+              <span className="flex items-center gap-1.5 text-white font-semibold">
+                <ShieldCheck className="w-4 h-4 text-[#10b981]" /> Setup Instructions
+              </span>
+              <a
+                href="https://supabase.com/dashboard"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#10b981] hover:underline flex items-center gap-1"
+              >
+                <span>Supabase Dashboard</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+            <ol className="text-xs text-[#7f998a] space-y-1.5 list-decimal pl-4">
+              <li>Open your project on Supabase and go to the <strong>SQL Editor</strong>.</li>
+              <li>Paste and run the contents of the generated <code className="text-[#34d399] bg-[#05180e] px-1 py-0.5 rounded">supabase_schema.sql</code> file.</li>
+              <li>Add <code className="text-[#34d399]">VITE_SUPABASE_URL</code> and <code className="text-[#34d399]">VITE_SUPABASE_ANON_KEY</code> to your environment or input them below.</li>
+            </ol>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-mono text-[#8ba394] mb-1">
+                Supabase Project URL
+              </label>
+              <input
+                type="text"
+                placeholder="https://your-project-ref.supabase.co"
+                value={supabaseUrlInput}
+                onChange={(e) => setSupabaseUrlInput(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-xl bg-[#040e08] border border-[#143322] text-xs text-white outline-none font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-mono text-[#8ba394] mb-1">
+                Supabase Anon (Public) Key
+              </label>
+              <input
+                type="password"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                value={supabaseKeyInput}
+                onChange={(e) => setSupabaseKeyInput(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-xl bg-[#040e08] border border-[#143322] text-xs text-white outline-none font-mono"
+              />
+            </div>
+
+            {dbTestMessage && (
+              <div className={`p-3 rounded-xl text-xs font-mono ${
+                dbStatus === 'connected'
+                  ? 'bg-[#0a2c1a] border border-[#165a36] text-[#34d399]'
+                  : 'bg-[#291212] border border-[#582020] text-[#fca5a5]'
+              }`}>
+                {dbTestMessage}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={handleSaveSupabaseConfig}
+                className="px-4 py-2 rounded-xl bg-[#0a2617] border border-[#1a5534] text-[#34d399] hover:bg-[#0e3721] text-xs font-mono font-semibold transition-colors cursor-pointer"
+              >
+                Save Credentials
+              </button>
+              <button
+                type="button"
+                onClick={handleTestSupabaseConnection}
+                disabled={testingConnection}
+                className="px-4 py-2 rounded-xl bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-mono font-bold transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {testingConnection ? 'Testing Connection...' : 'Test Connection'}
+              </button>
+            </div>
+          </div>
+        </div>
+
 
       </form>
     </div>

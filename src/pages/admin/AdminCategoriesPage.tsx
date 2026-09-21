@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import { categoryService } from '../../services/categoryService';
 import { Category } from '../../types';
@@ -8,7 +8,18 @@ export const AdminCategoriesPage: React.FC = () => {
   const [editing, setEditing] = useState<Category | null>(null);
   const [isNew, setIsNew] = useState(false);
 
-  const refresh = () => setCategories(categoryService.getAll());
+  const refresh = async () => {
+    try {
+      const data = await categoryService.getAllAsync();
+      setCategories(data);
+    } catch (e) {
+      setCategories(categoryService.getAll());
+    }
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
 
   const handleStartNew = () => {
     setIsNew(true);
@@ -21,19 +32,19 @@ export const AdminCategoriesPage: React.FC = () => {
     });
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing || !editing.nameEn.trim()) return;
-    categoryService.save(editing);
+    await categoryService.save(editing);
     setEditing(null);
     setIsNew(false);
-    refresh();
+    await refresh();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Delete this design category?')) {
-      categoryService.delete(id);
-      refresh();
+      await categoryService.delete(id);
+      await refresh();
     }
   };
 
