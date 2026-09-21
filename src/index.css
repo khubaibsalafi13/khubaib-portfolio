@@ -256,6 +256,16 @@
   }
 }
 
+/* Continuous moving edge glow rotation */
+@keyframes testimonial-border-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-marquee {
   animation: marquee 35s linear infinite;
 }
@@ -264,9 +274,14 @@
   animation: marquee-reverse 35s linear infinite;
 }
 
+.animate-border-beam {
+  animation: testimonial-border-rotate 8s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee,
-  .animate-marquee-reverse {
+  .animate-marquee-reverse,
+  .animate-border-beam {
     animation: none;
   }
 }
