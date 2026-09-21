@@ -126,8 +126,8 @@ export const AdminTestimonialsPage: React.FC = () => {
                 <div className="relative group">
                   <img
                     src={editing.avatarImage}
-                    alt="Client Preview"
-                    className="w-16 h-16 rounded-full object-cover border-2 border-[#10b981] shadow-md"
+                    alt="Client Photo Preview"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-[#10b981] shadow-md bg-[#081a10]"
                   />
                   <button
                     type="button"
@@ -147,16 +147,16 @@ export const AdminTestimonialsPage: React.FC = () => {
             </div>
 
             <div className="flex-1 min-w-0">
-              <label className="block text-xs font-mono font-semibold text-[#f0f6f2] mb-1">
-                Client Photo / Avatar
+              <label className="block text-xs font-mono font-bold text-[#f0f6f2] uppercase tracking-wider mb-1">
+                Client Photo
               </label>
-              <p className="text-[11px] text-[#8ba394] font-mono mb-2">
-                Upload portrait photo (JPG, PNG, WebP). If omitted, an initial-based avatar fallback will display.
+              <p className="text-[11px] text-[#8ba394] font-mono mb-2.5">
+                Upload client portrait image (JPG, PNG, WebP). If omitted, an initial-based avatar fallback will display.
               </p>
               <div className="flex flex-wrap items-center gap-2">
-                <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0d2a1b] hover:bg-[#123824] border border-[#1e4832] text-xs font-mono text-[#a5c2b0] hover:text-white cursor-pointer transition-colors">
+                <label className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0d2a1b] hover:bg-[#123824] border border-[#1e4832] text-xs font-mono text-[#a5c2b0] hover:text-white cursor-pointer transition-colors">
                   <Upload className="w-3.5 h-3.5 text-[#10b981]" />
-                  <span>{uploading ? 'Uploading...' : editing.avatarImage ? 'Replace Photo' : 'Upload Photo'}</span>
+                  <span>{uploading ? 'Uploading...' : editing.avatarImage ? 'Replace Image' : 'Upload Image'}</span>
                   <input
                     type="file"
                     accept="image/*"

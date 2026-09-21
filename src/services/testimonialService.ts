@@ -15,6 +15,10 @@ export const testimonialService = {
     return getItem<Testimonial[]>(STORAGE_KEY, initialTestimonials).sort((a, b) => a.sortOrder - b.sortOrder);
   },
 
+  getTestimonials(): Testimonial[] {
+    return this.getAll();
+  },
+
   async getAllAsync(): Promise<Testimonial[]> {
     if (isSupabaseConfigured()) {
       try {
@@ -39,6 +43,10 @@ export const testimonialService = {
     return this.getAll().filter((t) => t.published);
   },
 
+  getPublishedTestimonials(): Testimonial[] {
+    return this.getPublished();
+  },
+
   async getPublishedAsync(): Promise<Testimonial[]> {
     if (isSupabaseConfigured()) {
       try {
@@ -56,6 +64,14 @@ export const testimonialService = {
       }
     }
     return this.getPublished();
+  },
+
+  async createTestimonial(testimonial: Omit<Testimonial, 'id' | 'createdAt'>): Promise<Testimonial> {
+    return this.save(testimonial);
+  },
+
+  async updateTestimonial(id: string, updates: Partial<Testimonial>): Promise<Testimonial> {
+    return this.save({ ...updates, id } as any);
   },
 
   async save(testimonial: Partial<Testimonial> & { clientName: string; reviewTextEn: string }): Promise<Testimonial> {
