@@ -18,7 +18,7 @@ const AdminSettingsContent: React.FC = () => {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const { setTheme } = useTheme();
+  const { setTheme, setAccentColor } = useTheme();
 
   // Supabase dynamic config state
   const [currentConfig, setCurrentConfig] = useState(() => getSupabaseConfig());
@@ -249,23 +249,84 @@ const AdminSettingsContent: React.FC = () => {
           </div>
 
           <div className="pt-4 border-t border-[#12281a]">
-            <label className="block text-xs font-mono text-[#8ba394] mb-2 uppercase tracking-wider">Primary Accent Color</label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-mono text-[#8ba394] uppercase tracking-wider">
+                Primary Accent Color
+              </label>
+              <span className="text-[11px] font-mono text-[#10b981] flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[var(--primary-accent)] inline-block shadow-[0_0_8px_var(--primary-accent)]" />
+                Live Preview Active
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 mb-3">
               <input
                 type="color"
-                value={settings.accentColor}
-                onChange={(e) => handleChange('accentColor', e.target.value)}
-                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
+                value={settings.accentColor || '#10b981'}
+                onInput={(e: any) => {
+                  const val = e.target.value;
+                  handleChange('accentColor', val);
+                  setAccentColor(val);
+                }}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  handleChange('accentColor', val);
+                  setAccentColor(val);
+                }}
+                className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border border-[#143322]"
+                title="Choose custom color"
               />
               <input
                 type="text"
-                value={settings.accentColor}
-                onChange={(e) => handleChange('accentColor', e.target.value)}
-                className="max-w-xs px-3 py-2 rounded-xl bg-[#040e08] border border-[#143322] text-xs font-mono text-white outline-none"
+                value={settings.accentColor || '#10b981'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  handleChange('accentColor', val);
+                  if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+                    setAccentColor(val);
+                  }
+                }}
+                placeholder="#10b981"
+                className="w-32 px-3 py-2 rounded-xl bg-[#040e08] border border-[#143322] text-xs font-mono text-white outline-none focus:border-[#10b981]"
               />
               <span className="text-xs font-mono text-[#6c8777]">
-                Used across buttons, active pills, badges, and focus rings in both themes.
+                Used across buttons, active pills, badges, highlights, and glow effects.
               </span>
+            </div>
+
+            {/* Quick Preset Palette Swatches */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[11px] font-mono text-[#587363] mr-1">Presets:</span>
+              {[
+                { name: 'Emerald', hex: '#10b981' },
+                { name: 'Neon Mint', hex: '#00df81' },
+                { name: 'Cyan', hex: '#00e5ff' },
+                { name: 'Electric Blue', hex: '#3b82f6' },
+                { name: 'Cyber Violet', hex: '#a855f7' },
+                { name: 'Vivid Coral', hex: '#f97316' },
+                { name: 'Amber Gold', hex: '#f59e0b' },
+                { name: 'Ruby Rose', hex: '#f43f5e' },
+              ].map((preset) => (
+                <button
+                  key={preset.hex}
+                  type="button"
+                  onClick={() => {
+                    handleChange('accentColor', preset.hex);
+                    setAccentColor(preset.hex);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono transition-all cursor-pointer ${
+                    (settings.accentColor || '#10b981').toLowerCase() === preset.hex.toLowerCase()
+                      ? 'bg-[#0b2818] border-[#10b981] text-white ring-1 ring-[var(--primary-accent)]'
+                      : 'bg-[#040e08] border-[#143322] text-[#8ba394] hover:border-[#1e462d]'
+                  }`}
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                    style={{ backgroundColor: preset.hex }}
+                  />
+                  <span>{preset.name}</span>
+                </button>
+              ))}
             </div>
           </div>
 

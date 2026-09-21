@@ -9,11 +9,54 @@ interface ThemeContextType {
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   accentColor: string;
+  setAccentColor: (color: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'ks_portfolio_theme';
+
+// Helper to convert hex to RGB
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  let clean = hex.replace('#', '').trim();
+  if (clean.length === 3) {
+    clean = clean.split('').map((c) => c + c).join('');
+  }
+  const num = parseInt(clean, 16);
+  if (isNaN(num) || clean.length !== 6) {
+    return { r: 16, g: 185, b: 129 }; // Default emerald
+  }
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+}
+
+// Helper to apply dynamic accent variables to root DOM element
+export function applyAccentColorToDOM(color: string) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  const { r, g, b } = hexToRgb(color);
+
+  // Calculate contrast text (dark vs light)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  const contrastText = luminance > 0.55 ? '#022013' : '#ffffff';
+
+  // Hover color: lightened version
+  const hoverR = Math.min(255, Math.round(r * 1.15));
+  const hoverG = Math.min(255, Math.round(g * 1.15));
+  const hoverB = Math.min(255, Math.round(b * 1.15));
+  const hoverHex = `#${hoverR.toString(16).padStart(2, '0')}${hoverG.toString(16).padStart(2, '0')}${hoverB.toString(16).padStart(2, '0')}`;
+
+  root.style.setProperty('--primary-accent', color);
+  root.style.setProperty('--accent', color);
+  root.style.setProperty('--border-focus', color);
+  root.style.setProperty('--primary-accent-hover', hoverHex);
+  root.style.setProperty('--primary-accent-glow', `rgba(${r}, ${g}, ${b}, 0.28)`);
+  root.style.setProperty('--primary-accent-muted', `rgba(${r}, ${g}, ${b}, 0.15)`);
+  root.style.setProperty('--primary-accent-contrast', contrastText);
+}
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
@@ -22,7 +65,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (saved === 'dark' || saved === 'light') {
         return saved;
       }
-      // If no saved preference exists, check Admin's configured default public theme
       const adminDefault = settingsService.getSettings().defaultTheme;
       if (adminDefault === 'dark' || adminDefault === 'light') {
         return adminDefault;
@@ -33,9 +75,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   });
 
-  const [accentColor, setAccentColor] = useState<string>(() => {
+  const [accentColor, setAccentColorState] = useState<string>(() => {
     try {
-      return settingsService.getSettings().accentColor || '#10b981';
+      const initial = settingsService.getSettings().accentColor || '#10b981';
+      applyAccentColorToDOM(initial);
+      return initial;
     } catch {
       return '#10b981';
     }
@@ -61,22 +105,51 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       body.classList.remove('dark');
     }
 
-    // Apply primary brand color variables
-    root.style.setProperty('--accent', currentAccent);
-    root.style.setProperty('--border-focus', currentAccent);
+    applyAccentColorToDOM(currentAccent);
+  }, []);
+
+  const setAccentColor = useCallback((newColor: string) => {
+    setAccentColorState(newColor);
+    applyAccentColorToDOM(newColor);
   }, []);
 
   useEffect(() => {
     applyTheme(theme, accentColor);
   }, [theme, accentColor, applyTheme]);
 
-  // Keep accent in sync if updated in settings
+  // Initial cloud fetch to sync latest settings without flicker
+  useEffect(() => {
+    let isMounted = true;
+    async function syncFromCloud() {
+      try {
+        const latest = await settingsService.getSettingsAsync();
+        if (isMounted && latest) {
+          if (latest.accentColor) {
+            setAccentColorState(latest.accentColor);
+            applyAccentColorToDOM(latest.accentColor);
+          }
+          if (latest.defaultTheme && !localStorage.getItem(THEME_STORAGE_KEY)) {
+            setThemeState(latest.defaultTheme);
+          }
+        }
+      } catch (err) {
+        console.warn('Theme cloud sync notice:', err);
+      }
+    }
+    syncFromCloud();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Keep accent in sync if updated in settings from another window/tab
   useEffect(() => {
     const syncSettings = () => {
       try {
         const s = settingsService.getSettings();
         if (s.accentColor && s.accentColor !== accentColor) {
-          setAccentColor(s.accentColor);
+          setAccentColorState(s.accentColor);
+          applyAccentColorToDOM(s.accentColor);
         }
       } catch {
         // ignore
@@ -113,6 +186,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setTheme,
         toggleTheme,
         accentColor,
+        setAccentColor,
       }}
     >
       {children}

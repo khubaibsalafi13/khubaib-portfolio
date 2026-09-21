@@ -393,7 +393,9 @@ export const siteSettingsToDb = (s: Partial<SiteSettings>): Record<string, any> 
   if (s.linkedinUrl !== undefined) db.linkedin_url = s.linkedinUrl;
   if (s.footerTextEn !== undefined) db.footer_text_en = s.footerTextEn;
   if (s.footerTextBn !== undefined) db.footer_text_bn = s.footerTextBn;
-  if (s.accentColor !== undefined) db.accent_color = s.accentColor;
+  if (s.accentColor !== undefined) {
+    db.accent_color = s.accentColor;
+  }
   if (s.defaultTheme !== undefined) db.default_theme = s.defaultTheme;
   if (s.cursorGlowSize !== undefined) db.cursor_glow_size = s.cursorGlowSize;
   if (s.logoMarqueeSpeed !== undefined) db.logo_marquee_speed = s.logoMarqueeSpeed;
@@ -415,7 +417,7 @@ export const siteSettingsFromDb = (row: any): SiteSettings => ({
   linkedinUrl: row.linkedin_url || '',
   footerTextEn: row.footer_text_en || '',
   footerTextBn: row.footer_text_bn || '',
-  accentColor: row.accent_color || '#10b981',
+  accentColor: row.primary_accent_color || row.accent_color || '#10b981',
   defaultTheme: (row.default_theme as any) || 'dark',
   cursorGlowSize: (row.cursor_glow_size as any) || 'small',
   logoMarqueeSpeed: Number(row.logo_marquee_speed ?? 25),

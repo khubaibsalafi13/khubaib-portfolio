@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+:root {
+  --primary-accent: #10b981;
+  --primary-accent-hover: #05df72;
+  --primary-accent-glow: rgba(16, 185, 129, 0.25);
+  --primary-accent-muted: rgba(16, 185, 129, 0.15);
+  --primary-accent-contrast: #022013;
+}
+
 @layer base {
   /* DARK MODE (Default & [data-theme="dark"]) */
   :root,
@@ -25,12 +33,12 @@
     --border-subtle: #0f2418;
     --border-medium: #132a1d;
     --border-hover: #1e452e;
-    --border-focus: #10b981;
+    --border-focus: var(--primary-accent, #10b981);
 
-    --accent: #10b981;
-    --accent-glow: rgba(16, 185, 129, 0.25);
-    --accent-hover: #05df72;
-    --accent-contrast: #022013;
+    --accent: var(--primary-accent, #10b981);
+    --accent-glow: var(--primary-accent-glow, rgba(16, 185, 129, 0.25));
+    --accent-hover: var(--primary-accent-hover, #05df72);
+    --accent-contrast: var(--primary-accent-contrast, #022013);
 
     --card-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55);
 
@@ -73,11 +81,11 @@
     --border-subtle: #e2ebe4;
     --border-medium: #cfded3;
     --border-hover: #b4cbbd;
-    --border-focus: #10b981;
+    --border-focus: var(--primary-accent, #10b981);
 
-    --accent: #10b981;
-    --accent-glow: rgba(16, 185, 129, 0.12);
-    --accent-hover: #059669;
+    --accent: var(--primary-accent, #10b981);
+    --accent-glow: var(--primary-accent-glow, rgba(16, 185, 129, 0.12));
+    --accent-hover: var(--primary-accent-hover, #059669);
     --accent-contrast: #ffffff;
 
     --card-shadow: 0 12px 32px -8px rgba(18, 40, 26, 0.08), 0 2px 6px rgba(18, 40, 26, 0.04);
@@ -91,10 +99,10 @@
     --pill-text: #3c5445;
 
     --code-tag-bg: #e6f5ec;
-    --code-tag-text: #047857;
+    --code-tag-text: var(--primary-accent, #047857);
     --code-tag-border: #b7e4ca;
 
-    --selection-bg: rgba(16, 185, 129, 0.2);
+    --selection-bg: var(--primary-accent-muted, rgba(16, 185, 129, 0.2));
     --selection-text: #064e3b;
   }
 
@@ -111,6 +119,72 @@
     font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
     line-height: 1.65;
   }
+}
+
+/* Global Dynamic Primary Accent Utilities & Overrides */
+.bg-accent,
+.bg-primary-accent,
+[class*="bg-emerald-"],
+[class*="bg-teal-"],
+.bg-\[\#10b981\] {
+  background-color: var(--primary-accent) !important;
+}
+
+.text-accent,
+.text-primary-accent,
+[class*="text-emerald-"],
+[class*="text-teal-"],
+.text-\[\#10b981\] {
+  color: var(--primary-accent) !important;
+}
+
+.border-accent,
+.border-primary-accent,
+[class*="border-emerald-"],
+[class*="border-teal-"],
+.border-\[\#10b981\] {
+  border-color: var(--primary-accent) !important;
+}
+
+.ring-accent,
+[class*="ring-emerald-"],
+[class*="ring-teal-"],
+.ring-\[\#10b981\] {
+  --tw-ring-color: var(--primary-accent) !important;
+}
+
+.accent-accent,
+[class*="accent-emerald-"],
+[class*="accent-teal-"],
+.accent-\[\#10b981\] {
+  accent-color: var(--primary-accent) !important;
+}
+
+/* Hover dynamic accent states */
+.hover\:bg-\[\#05df72\]:hover,
+.hover\:bg-emerald-400:hover,
+.hover\:bg-emerald-500:hover {
+  background-color: var(--primary-accent-hover, #05df72) !important;
+}
+
+.hover\:text-\[\#10b981\]:hover,
+.hover\:text-emerald-400:hover {
+  color: var(--primary-accent) !important;
+}
+
+.hover\:border-\[\#10b981\]:hover,
+.hover\:border-emerald-500:hover {
+  border-color: var(--primary-accent) !important;
+}
+
+/* Dynamic Primary Accent Button Helper */
+.btn-primary-accent {
+  background-color: var(--primary-accent);
+  color: var(--primary-accent-contrast, #022013);
+  transition: all 0.2s ease;
+}
+.btn-primary-accent:hover {
+  background-color: var(--primary-accent-hover, #05df72);
 }
 
 /* Reusable Theme Semantic Classes */
