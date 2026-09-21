@@ -14,6 +14,26 @@ export const authService = {
     return Boolean(user && user.isAuthenticated);
   },
 
+  async restoreSession(): Promise<AdminUser | null> {
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!error && data?.session?.user) {
+          const user: AdminUser = {
+            username: data.session.user.email || 'admin',
+            isAuthenticated: true,
+            token: data.session.access_token,
+          };
+          setItem(AUTH_KEY, user);
+          return user;
+        }
+      } catch (err) {
+        console.warn('Supabase restoreSession error:', err);
+      }
+    }
+    return this.getCurrentUser();
+  },
+
   async login(username: string, pass: string): Promise<{ success: boolean; error?: string }> {
     const trimmedUser = username.trim().toLowerCase();
 

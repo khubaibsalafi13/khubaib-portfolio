@@ -12,7 +12,8 @@ const STORAGE_KEY = 'ks_portfolio_settings';
 
 export const settingsService = {
   getSettings(): SiteSettings {
-    return getItem<SiteSettings>(STORAGE_KEY, initialSiteSettings);
+    const stored = getItem<SiteSettings>(STORAGE_KEY, initialSiteSettings);
+    return { ...initialSiteSettings, ...(stored || {}) };
   },
 
   async getSettingsAsync(): Promise<SiteSettings> {
@@ -25,7 +26,7 @@ export const settingsService = {
           .maybeSingle();
 
         if (!error && data) {
-          const settings = siteSettingsFromDb(data);
+          const settings = { ...initialSiteSettings, ...siteSettingsFromDb(data) };
           setItem(STORAGE_KEY, settings);
           return settings;
         }

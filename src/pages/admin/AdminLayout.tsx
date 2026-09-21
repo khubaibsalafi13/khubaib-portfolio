@@ -18,12 +18,13 @@ import {
   X,
   Database,
 } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const supabaseActive = isSupabaseConfigured();
 
@@ -41,8 +42,8 @@ export const AdminLayout: React.FC = () => {
     { label: 'Site Settings', icon: Settings, path: '/admin/settings' },
   ];
 
-  const handleLogout = () => {
-    authService.logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/admin/login');
   };
 

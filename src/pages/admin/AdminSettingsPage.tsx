@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Check, Moon, Sun, Palette, Database, ExternalLink, ShieldCheck, Key } from 'lucide-react';
+import { Save, Check, Moon, Sun, Palette, Database, ExternalLink, ShieldCheck, RotateCcw, AlertCircle } from 'lucide-react';
 import { settingsService } from '../../services/settingsService';
 import { SiteSettings } from '../../types';
+import { initialSiteSettings } from '../../data/seedData';
 import { useTheme } from '../../context/ThemeContext';
 import { isSupabaseConfigured, getSupabaseConfig, setRuntimeSupabaseConfig, supabase } from '../../lib/supabaseClient';
+import { AdminErrorBoundary } from '../../components/common/AdminErrorBoundary';
 
-export const AdminSettingsPage: React.FC = () => {
-  const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
+const AdminSettingsContent: React.FC = () => {
+  const [settings, setSettings] = useState<SiteSettings>(() => {
+    try {
+      return { ...initialSiteSettings, ...settingsService.getSettings() };
+    } catch {
+      return initialSiteSettings;
+    }
+  });
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { setTheme } = useTheme();
 
   // Supabase dynamic config state
@@ -23,13 +33,20 @@ export const AdminSettingsPage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     async function loadSettings() {
+      setLoading(true);
+      setFetchError(null);
       try {
         const latest = await settingsService.getSettingsAsync();
         if (isMounted && latest) {
-          setSettings(latest);
+          setSettings((prev) => ({ ...initialSiteSettings, ...prev, ...latest }));
         }
-      } catch (err) {
+      } catch (err: any) {
         console.warn('Failed to fetch settings from Supabase:', err);
+        if (isMounted) {
+          setFetchError(err?.message || 'Using local settings backup.');
+        }
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
     loadSettings();
@@ -45,21 +62,42 @@ export const AdminSettingsPage: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await settingsService.updateSettings(settings);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      await settingsService.updateSettings(settings);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+    }
+  };
+
+  const handleResetToDefaults = async () => {
+    if (window.confirm('Reset all site display, theme, SEO, and social settings to their default values?')) {
+      try {
+        const resetData = await settingsService.reset();
+        setSettings({ ...initialSiteSettings, ...resetData });
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } catch (err) {
+        console.error('Failed to reset settings:', err);
+      }
+    }
   };
 
   const handleSaveSupabaseConfig = (e: React.FormEvent) => {
     e.preventDefault();
-    setRuntimeSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
-    setCurrentConfig(getSupabaseConfig());
-    if (supabaseUrlInput.trim() && supabaseKeyInput.trim()) {
-      setDbStatus('connected');
-      setDbTestMessage('Configuration saved to application.');
-    } else {
-      setDbStatus('unconfigured');
-      setDbTestMessage('Supabase credentials cleared. Using local persistence.');
+    try {
+      setRuntimeSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
+      setCurrentConfig(getSupabaseConfig());
+      if (supabaseUrlInput.trim() && supabaseKeyInput.trim()) {
+        setDbStatus('connected');
+        setDbTestMessage('Configuration saved to application.');
+      } else {
+        setDbStatus('unconfigured');
+        setDbTestMessage('Supabase credentials cleared. Using local persistence.');
+      }
+    } catch (err: any) {
+      setDbTestMessage(`Failed to save configuration: ${err.message}`);
     }
   };
 
@@ -83,7 +121,7 @@ export const AdminSettingsPage: React.FC = () => {
       }
     } catch (err: any) {
       setDbStatus('error');
-      setDbTestMessage(`Connection error: ${err.message || 'Check URL and key.'}`);
+      setDbTestMessage(`Connection error: ${err.message || 'Check URL and key format.'}`);
     } finally {
       setTestingConnection(false);
     }
@@ -101,15 +139,41 @@ export const AdminSettingsPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-bold uppercase tracking-wider transition-all shadow-sm cursor-pointer"
-        >
-          {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          <span>{saved ? 'Settings Saved!' : 'Save Settings'}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleResetToDefaults}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0a2315] hover:bg-[#0e331f] border border-[#143d26] text-[#8ba395] hover:text-[#f3f9f5] text-xs font-mono transition-all cursor-pointer"
+            title="Reset settings to original defaults"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Reset Defaults</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-bold uppercase tracking-wider transition-all shadow-sm cursor-pointer"
+          >
+            {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            <span>{saved ? 'Settings Saved!' : 'Save Settings'}</span>
+          </button>
+        </div>
       </div>
+
+      {fetchError && (
+        <div className="p-3.5 rounded-xl bg-[#26150a] border border-[#522a10] text-[#fcd34d] text-xs font-mono flex items-center gap-2.5">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>Note: Supabase settings fetch returned: {fetchError}. Loaded local cache.</span>
+        </div>
+      )}
+
+      {loading && (
+        <div className="text-xs font-mono text-[#10b981] flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#10b981] animate-ping" />
+          <span>Synchronizing settings with cloud database...</span>
+        </div>
+      )}
 
       <form onSubmit={handleSave} className="space-y-8 max-w-4xl">
         {/* Theme & Appearance */}
@@ -510,5 +574,13 @@ export const AdminSettingsPage: React.FC = () => {
 
       </form>
     </div>
+  );
+};
+
+export const AdminSettingsPage: React.FC = () => {
+  return (
+    <AdminErrorBoundary pageTitle="Site & Display Settings">
+      <AdminSettingsContent />
+    </AdminErrorBoundary>
   );
 };

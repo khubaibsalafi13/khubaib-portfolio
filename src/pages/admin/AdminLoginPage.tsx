@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Lock, ArrowLeft, ShieldCheck, AlertCircle } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 export const AdminLoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Target destination after successful sign-in
+  const destination = (location.state as any)?.from?.pathname || '/admin';
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      navigate(destination, { replace: true });
+    }
+  }, [isAuthenticated, isLoading, navigate, destination]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const res = await authService.login(username, password);
+    const res = await login(username, password);
     setLoading(false);
 
     if (res.success) {
-      navigate('/admin');
+      navigate(destination, { replace: true });
     } else {
       setError(res.error || 'Login failed.');
     }
