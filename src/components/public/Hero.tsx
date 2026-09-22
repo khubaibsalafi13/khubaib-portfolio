@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowUpRight, Sparkles, User, ArrowDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent, Project } from '../../types';
+import { smoothScrollTo } from '../../lib/scrollUtils';
 
 interface HeroProps {
   content: SiteContent;
@@ -207,7 +208,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('work')?.scrollIntoView({ behavior: 'smooth' });
+                  smoothScrollTo('#work', true);
                 }}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] border border-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_20px_var(--accent-glow)] cursor-pointer"
               >
@@ -222,7 +223,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                 whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
+                  smoothScrollTo('#consultation', true);
                 }}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--bg-card)] text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 cursor-pointer shadow-sm"
               >

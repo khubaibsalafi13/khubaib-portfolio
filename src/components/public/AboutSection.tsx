@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent } from '../../types';
+import { smoothScrollTo } from '../../lib/scrollUtils';
 
 interface AboutSectionProps {
   content: SiteContent;
@@ -82,7 +83,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
                 href="#consultation"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
+                  smoothScrollTo('#consultation', true);
                 }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm cursor-pointer"
               >

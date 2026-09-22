@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, ArrowUpRight, Tag, Calendar } from 'lucide-r
 import { Link } from 'react-router-dom';
 import { Project } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
+import { Observer } from '../../lib/gsap';
 
 interface ProjectCarouselProps {
   projects: Project[];
@@ -19,55 +20,133 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const { localized, t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const isTransitioningRef = useRef<boolean>(false);
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const total = projects.length;
 
-  // Auto-rotation timer
+  // Unified transition dispatcher with transition lock to prevent rapid skipped states
+  const changeSlide = (direction: 'next' | 'prev' | number) => {
+    if (isTransitioningRef.current || total <= 1) return;
+    isTransitioningRef.current = true;
+
+    setCurrentIndex((prev) => {
+      if (typeof direction === 'number') {
+        return (direction + total) % total;
+      } else if (direction === 'next') {
+        return (prev + 1) % total;
+      } else {
+        return (prev - 1 + total) % total;
+      }
+    });
+
+    // Reset autoplay timer whenever user interacts
+    resetAutoplayTimer();
+
+    // Release lock after animation finishes
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, 480);
+  };
+
+  const prevSlide = () => changeSlide('prev');
+  const nextSlide = () => changeSlide('next');
+  const goToSlide = (idx: number) => changeSlide(idx);
+
+  const resetAutoplayTimer = () => {
+    if (autoplayTimerRef.current) {
+      clearInterval(autoplayTimerRef.current);
+      autoplayTimerRef.current = null;
+    }
+  };
+
+  // Autoplay management
   useEffect(() => {
-    if (!autoplay || isHovered || total <= 1) return;
-
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % total);
-    }, intervalSeconds * 1000);
-
-    return () => clearInterval(timer);
-  }, [autoplay, intervalSeconds, isHovered, total]);
-
-  if (total === 0) return null;
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + total) % total);
-  };
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % total);
-  };
-
-  // Swipe handling for touch devices
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
-    const distance = touchStartX.current - touchEndX.current;
-    const minSwipeDistance = 50;
-
-    if (distance > minSwipeDistance) {
-      nextSlide();
-    } else if (distance < -minSwipeDistance) {
-      prevSlide();
+    if (!autoplay || isHovered || total <= 1) {
+      resetAutoplayTimer();
+      return;
     }
 
-    touchStartX.current = null;
-    touchEndX.current = null;
-  };
+    autoplayTimerRef.current = setInterval(() => {
+      if (!isTransitioningRef.current) {
+        changeSlide('next');
+      }
+    }, intervalSeconds * 1000);
+
+    return () => resetAutoplayTimer();
+  }, [autoplay, intervalSeconds, isHovered, total]);
+
+  // GSAP Observer Integration for deliberate horizontal gestures without scroll-trapping
+  useEffect(() => {
+    if (!carouselRef.current || total <= 1) return;
+
+    let accumulatedDeltaX = 0;
+    let gestureCooldown = false;
+
+    const observer = Observer.create({
+      target: carouselRef.current,
+      type: 'wheel,touch,pointer',
+      tolerance: 25,
+      preventDefault: false, // CRITICAL: Never hijack vertical page scrolling!
+
+      // Horizontal touch/pointer swipe gestures
+      onLeft: () => {
+        if (!isTransitioningRef.current && !gestureCooldown) {
+          gestureCooldown = true;
+          nextSlide();
+          setTimeout(() => {
+            gestureCooldown = false;
+          }, 480);
+        }
+      },
+      onRight: () => {
+        if (!isTransitioningRef.current && !gestureCooldown) {
+          gestureCooldown = true;
+          prevSlide();
+          setTimeout(() => {
+            gestureCooldown = false;
+          }, 480);
+        }
+      },
+
+      // Intentional horizontal wheel/trackpad gestures
+      onWheel: (self) => {
+        const absX = Math.abs(self.deltaX);
+        const absY = Math.abs(self.deltaY);
+
+        // If gesture is vertical (page scrolling), ignore completely to let page scroll naturally
+        if (absY >= absX) {
+          accumulatedDeltaX = 0;
+          return;
+        }
+
+        // Only react to clear, deliberate horizontal gestures
+        accumulatedDeltaX += self.deltaX;
+
+        if (Math.abs(accumulatedDeltaX) > 35 && !isTransitioningRef.current && !gestureCooldown) {
+          gestureCooldown = true;
+          if (accumulatedDeltaX > 0) {
+            nextSlide();
+          } else {
+            prevSlide();
+          }
+          accumulatedDeltaX = 0;
+          setTimeout(() => {
+            gestureCooldown = false;
+            accumulatedDeltaX = 0;
+          }, 480);
+        }
+      },
+    });
+
+    return () => {
+      observer.kill();
+    };
+  }, [total]);
+
+  if (total === 0) return null;
 
   const activeProject = projects[currentIndex];
   const prevProject = projects[(currentIndex - 1 + total) % total];
@@ -75,13 +154,11 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
   return (
     <div
+      ref={carouselRef}
       id="featured-project-carousel"
-      className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 select-none"
+      className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 select-none touch-pan-y"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
     >
       {/* Outer Showcase Enclosure Frame */}
       <div className="relative rounded-3xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-4 sm:p-7 md:p-9 shadow-[var(--card-shadow)] overflow-hidden transition-colors">
@@ -133,6 +210,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 src={prevProject.coverImage}
                 alt={localized(prevProject.titleEn, prevProject.titleBn)}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6">
@@ -221,6 +299,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 src={nextProject.coverImage}
                 alt={localized(nextProject.titleEn, nextProject.titleBn)}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-l from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6 text-right">
@@ -242,7 +321,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
             {projects.map((p, idx) => (
               <button
                 key={p.id}
-                onClick={() => setCurrentIndex(idx)}
+                onClick={() => goToSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   currentIndex === idx

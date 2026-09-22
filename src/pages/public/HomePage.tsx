@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { AnnouncementBar } from '../../components/public/AnnouncementBar';
-import { Header } from '../../components/public/Header';
 import { Hero } from '../../components/public/Hero';
 import { ExpertiseMarquee } from '../../components/public/ExpertiseMarquee';
 import { ProjectCarousel } from '../../components/public/ProjectCarousel';
@@ -13,7 +12,6 @@ import { TestimonialsSection } from '../../components/public/TestimonialsSection
 import { ConsultationSection } from '../../components/public/ConsultationSection';
 import { FinalCta } from '../../components/public/FinalCta';
 import { Footer } from '../../components/public/Footer';
-import { CursorGlow } from '../../components/public/CursorGlow';
 
 import { projectService } from '../../services/projectService';
 import { contentService } from '../../services/contentService';
@@ -24,6 +22,7 @@ import { testimonialService } from '../../services/testimonialService';
 import { experienceService } from '../../services/experienceService';
 import { educationService } from '../../services/educationService';
 import { settingsService } from '../../services/settingsService';
+import { refreshScroll } from '../../lib/scrollUtils';
 import {
   Project,
   Category,
@@ -90,6 +89,8 @@ export const HomePage: React.FC = () => {
           if (latestEducation) setEducation(latestEducation);
           if (latestLogos) setClientLogos(latestLogos);
           if (latestTestimonials) setTestimonials(latestTestimonials);
+
+          refreshScroll();
         }
       } catch (err) {
         console.warn('Error loading dynamic Supabase data in HomePage:', err);
@@ -104,15 +105,11 @@ export const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[var(--selection-bg)] selection:text-[var(--selection-text)] transition-colors duration-200 relative">
-      {/* Brand-colored cursor glow (adapts opacity to theme, disabled on touch) */}
-      <CursorGlow />
-
-      {/* 01. Thin Announcement Bar */}
-      <AnnouncementBar content={content} />
-
-      {/* 02. Sticky Main Header with Animated Navigation & Theme Toggle */}
-      <Header />
+    <>
+      {/* 01. Thin Announcement Bar with header offset */}
+      <div className="pt-16 sm:pt-20">
+        <AnnouncementBar content={content} />
+      </div>
 
       <main className="flex-1">
         {/* 03. Hero Section (Visual Left, Typography Right) */}
@@ -173,6 +170,6 @@ export const HomePage: React.FC = () => {
 
       {/* 17. Footer */}
       <Footer settings={settings} />
-    </div>
+    </>
   );
 };

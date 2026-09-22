@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent } from '../../types';
+import { smoothScrollTo } from '../../lib/scrollUtils';
 
 interface FinalCtaProps {
   content: SiteContent;
@@ -46,7 +47,7 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
               href="#consultation-form"
               onClick={(e) => {
                 e.preventDefault();
-                document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' });
+                smoothScrollTo('#consultation-form', true);
               }}
               className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_24px_var(--accent-glow)] cursor-pointer"
             >
@@ -61,3 +62,4 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
     </section>
   );
 };
+

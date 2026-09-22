@@ -5,6 +5,8 @@ import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
 import { ThemeToggle } from './ThemeToggle';
+import { smoothScrollTo } from '../../lib/scrollUtils';
+import { ScrollTrigger, ScrollSmoother } from '../../lib/gsap';
 
 export const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -26,7 +28,8 @@ export const Header: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const scrollY = window.scrollY || ScrollSmoother.get()?.scrollTop() || 0;
+      setScrolled(scrollY > 20);
 
       // Determine active section on scroll if on home page
       if (location.pathname === '/') {
@@ -45,8 +48,17 @@ export const Header: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Also attach to ScrollTrigger if smoother is running
+    const st = ScrollTrigger.create({
+      onUpdate: () => handleScroll(),
+    });
+
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      st.kill();
+    };
   }, [location.pathname]);
 
   const scrollToSection = (href: string) => {
@@ -56,7 +68,7 @@ export const Header: React.FC = () => {
       if (location.pathname === '/') {
         const el = document.getElementById(targetId);
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
+          smoothScrollTo('#' + targetId, true);
           return;
         }
       }
@@ -66,7 +78,7 @@ export const Header: React.FC = () => {
   return (
     <header
       id="main-header"
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
         scrolled
           ? 'bg-[var(--bg-header)] backdrop-blur-md border-b border-[var(--border-subtle)] shadow-[var(--card-shadow)] py-3'
           : 'bg-transparent py-4 sm:py-5 border-b border-transparent'

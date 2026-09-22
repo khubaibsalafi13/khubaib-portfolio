@@ -1,17 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Calendar, Tag, Sparkles } from 'lucide-react';
 import { projectService } from '../../services/projectService';
 import { useLanguage } from '../../context/LanguageContext';
-import { Header } from '../../components/public/Header';
 import { Footer } from '../../components/public/Footer';
 import { settingsService } from '../../services/settingsService';
-import { CursorGlow } from '../../components/public/CursorGlow';
+import { refreshScroll } from '../../lib/scrollUtils';
 import { Project, SiteSettings } from '../../types';
 
 export const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const { localized, t } = useLanguage();
 
   const [allProjects, setAllProjects] = useState<Project[]>(() => projectService.getPublished());
@@ -28,13 +26,16 @@ export const ProjectDetailPage: React.FC = () => {
         if (isMounted) {
           if (latestProjects) setAllProjects(latestProjects);
           if (latestSettings) setSettings(latestSettings);
+          refreshScroll();
         }
       } catch (err) {
         console.warn('Failed to fetch project detail from Supabase:', err);
       }
     }
     loadData();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const project = useMemo(() => {
@@ -50,17 +51,14 @@ export const ProjectDetailPage: React.FC = () => {
     return { prevProject: prev, nextProject: next };
   }, [project, allProjects]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [slug]);
-
   if (!project) {
     return (
-      <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex flex-col justify-between transition-colors">
-        <Header />
-        <div className="max-w-xl mx-auto text-center px-4 py-32">
+      <>
+        <main className="flex-1 max-w-xl mx-auto text-center px-4 pt-32 pb-24">
           <h1 className="text-3xl font-bold text-[var(--text-heading)] mb-4">Project Not Found</h1>
-          <p className="text-[var(--text-secondary)] mb-8">The requested portfolio case study does not exist or has been unpublished.</p>
+          <p className="text-[var(--text-secondary)] mb-8">
+            The requested portfolio case study does not exist or has been unpublished.
+          </p>
           <Link
             to="/#work"
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold text-xs uppercase tracking-wider shadow-sm"
@@ -68,9 +66,9 @@ export const ProjectDetailPage: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             <span>{t('work.backToProjects')}</span>
           </Link>
-        </div>
+        </main>
         <Footer settings={settings} />
-      </div>
+      </>
     );
   }
 
@@ -81,13 +79,9 @@ export const ProjectDetailPage: React.FC = () => {
   const role = localized(project.roleEn, project.roleBn);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] flex flex-col justify-between selection:bg-[var(--selection-bg)] selection:text-[var(--selection-text)] transition-colors duration-200 relative">
-      <CursorGlow />
-      <Header />
-
-      <main className="flex-1 py-10 sm:py-16">
+    <>
+      <main className="flex-1 pt-24 sm:pt-28 pb-16 sm:pb-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          
           {/* Back link */}
           <div className="mb-8">
             <Link
@@ -102,7 +96,7 @@ export const ProjectDetailPage: React.FC = () => {
           {/* Project Header & Metadata */}
           <div className="mb-10 sm:mb-14">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-4 font-semibold">
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-3 h-3 text-[var(--accent)]" />
               <span>{project.category}</span>
             </div>
 
@@ -110,110 +104,129 @@ export const ProjectDetailPage: React.FC = () => {
               {title}
             </h1>
 
-            <p className="text-lg sm:text-xl text-[var(--text-secondary)] leading-relaxed max-w-3xl mb-8">
-              {shortDesc}
-            </p>
-
-            {/* Metadata Pills Strip */}
-            <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-medium)] shadow-[var(--card-shadow)] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 sm:p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] shadow-[var(--card-shadow)]">
               <div>
-                <span className="text-[var(--text-muted)] block mb-1 uppercase tracking-wider">{t('work.year')}</span>
-                <span className="text-[var(--text-heading)] font-semibold flex items-center gap-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                  {t('work.client')}
+                </span>
+                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                  {project.client || 'Direct Client'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                  {t('work.year')}
+                </span>
+                <span className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[var(--accent)]" />
                   {project.year}
                 </span>
               </div>
-
               <div>
-                <span className="text-[var(--text-muted)] block mb-1 uppercase tracking-wider">{t('work.category')}</span>
-                <span className="text-[var(--text-heading)] font-semibold flex items-center gap-1.5">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                  {t('work.category')}
+                </span>
+                <span className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
                   <Tag className="w-3.5 h-3.5 text-[var(--accent)]" />
                   {project.category}
                 </span>
               </div>
-
               <div>
-                <span className="text-[var(--text-muted)] block mb-1 uppercase tracking-wider">{t('work.client')}</span>
-                <span className="text-[var(--text-heading)] font-semibold truncate block">
-                  {project.client || 'Creative Initiative'}
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                  {t('work.role')}
                 </span>
-              </div>
-
-              <div>
-                <span className="text-[var(--text-muted)] block mb-1 uppercase tracking-wider">{t('work.role')}</span>
-                <span className="text-[var(--accent)] font-semibold truncate block">
-                  {role}
+                <span className="text-sm font-semibold text-[var(--text-primary)]">
+                  {role || 'Lead Designer'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Large Hero Showcase Visual */}
-          <div className="mb-14 rounded-3xl overflow-hidden border border-[var(--border-medium)] bg-[var(--bg-card)] shadow-[var(--card-shadow)]">
+          {/* Hero Cover Image */}
+          <div className="w-full h-[360px] sm:h-[480px] md:h-[560px] rounded-3xl overflow-hidden border border-[var(--border-medium)] mb-12 shadow-2xl bg-[var(--bg-card)]">
             <img
               src={project.coverImage}
               alt={title}
-              className="w-full h-auto max-h-[680px] object-cover object-center"
+              onLoad={() => refreshScroll()}
+              className="w-full h-full object-cover object-center"
             />
           </div>
 
-          {/* Narrative Section: Overview & Concept */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 sm:gap-14 mb-16 pt-8 border-t border-[var(--border-subtle)]">
-            <div className="md:col-span-6">
-              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest block mb-3 font-semibold">
-                // {t('work.overview')}
-              </span>
-              <h3 className="text-2xl font-bold text-[var(--text-heading)] mb-4">
-                The Objective
-              </h3>
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                {overview}
-              </p>
+          {/* Project Summary / Short Desc */}
+          {shortDesc && (
+            <div className="mb-14 p-6 sm:p-8 rounded-2xl bg-[var(--bg-card-subtle)] border-l-4 border-[var(--accent)] text-base sm:text-lg text-[var(--text-primary)] leading-relaxed italic">
+              "{shortDesc}"
             </div>
+          )}
 
-            <div className="md:col-span-6">
-              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest block mb-3 font-semibold">
-                // {t('work.concept')}
-              </span>
-              <h3 className="text-2xl font-bold text-[var(--text-heading)] mb-4">
-                The Creative Approach
-              </h3>
-              <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-                {concept}
-              </p>
-            </div>
+          {/* Editorial Grid: Overview & Concept */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16">
+            {overview && (
+              <div className="md:col-span-6 space-y-3">
+                <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block font-semibold">
+                  // {t('work.overview')}
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)]">
+                  The Brief & Scope
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+                  {overview}
+                </p>
+              </div>
+            )}
+
+            {concept && (
+              <div className="md:col-span-6 space-y-3">
+                <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block font-semibold">
+                  // {t('work.concept')}
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)]">
+                  Creative Direction
+                </h2>
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+                  {concept}
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Gallery Images */}
+          {/* Gallery Showcase */}
           {project.galleryImages && project.galleryImages.length > 0 && (
-            <div className="mb-16">
-              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest block mb-6 font-semibold">
-                // {t('work.gallery')}
+            <div className="mb-20">
+              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block mb-6 font-semibold">
+                // {t('work.gallery')} ({project.galleryImages.length} Artifacts)
               </span>
-
               <div className="space-y-8">
-                {project.galleryImages.map((img) => (
-                  <figure
-                    key={img.id}
-                    className="rounded-2xl overflow-hidden border border-[var(--border-medium)] bg-[var(--bg-card)] shadow-[var(--card-shadow)]"
-                  >
-                    <img
-                      src={img.url}
-                      alt={localized(img.altTextEn, img.altTextBn) || title}
-                      className="w-full h-auto object-cover"
-                    />
-                    {(img.captionEn || img.captionBn) && (
-                      <figcaption className="p-4 text-xs font-mono text-[var(--text-secondary)] bg-[var(--bg-surface)] border-t border-[var(--border-subtle)]">
-                        {localized(img.captionEn, img.captionBn)}
-                      </figcaption>
-                    )}
-                  </figure>
-                ))}
+                {project.galleryImages.map((img, i) => {
+                  const src = typeof img === 'string' ? img : img.url;
+                  const caption = typeof img === 'object' ? localized(img.captionEn, img.captionBn) : undefined;
+                  const alt = typeof img === 'object' ? localized(img.altTextEn, img.altTextBn) : `${title} showcase artifact ${i + 1}`;
+
+                  return (
+                    <div
+                      key={typeof img === 'object' ? img.id : i}
+                      className="w-full rounded-2xl overflow-hidden border border-[var(--border-medium)] bg-[var(--bg-card)] shadow-lg"
+                    >
+                      <img
+                        src={src}
+                        alt={alt || `${title} showcase artifact ${i + 1}`}
+                        loading="lazy"
+                        onLoad={() => refreshScroll()}
+                        className="w-full h-auto object-cover"
+                      />
+                      {caption && (
+                        <div className="p-3 bg-[var(--bg-card-subtle)] text-xs font-mono text-[var(--text-muted)] border-t border-[var(--border-subtle)]">
+                          {caption}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {/* Previous / Next Project Navigation Bar */}
+          {/* Prev / Next Project Navigation Bar */}
           <div className="pt-10 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4">
             {prevProject ? (
               <Link
@@ -230,7 +243,9 @@ export const ProjectDetailPage: React.FC = () => {
                   </span>
                 </div>
               </Link>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
 
             {nextProject ? (
               <Link
@@ -247,13 +262,14 @@ export const ProjectDetailPage: React.FC = () => {
                 </div>
                 <ArrowRight className="w-4 h-4 text-[var(--accent)] transition-transform group-hover:translate-x-1" />
               </Link>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
           </div>
-
         </div>
       </main>
 
       <Footer settings={settings} />
-    </div>
+    </>
   );
 };

@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ShieldCheck } from 'lucide-react';
 
 // Public Views
+import { PublicLayout } from './components/public/PublicLayout';
 import { HomePage } from './pages/public/HomePage';
 import { ProjectDetailPage } from './pages/public/ProjectDetailPage';
 
@@ -93,9 +94,11 @@ export default function App() {
         <AuthProvider>
           <BrowserRouter>
             <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/work/:slug" element={<ProjectDetailPage />} />
+              {/* Public Routes with GSAP ScrollSmoother */}
+              <Route element={<PublicLayout />}>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/work/:slug" element={<ProjectDetailPage />} />
+              </Route>
 
               {/* Admin Auth Route */}
               <Route path="/admin/login" element={<AdminLoginWrapper />} />
