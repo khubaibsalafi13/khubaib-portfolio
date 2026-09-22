@@ -8,6 +8,18 @@ interface AboutSectionProps {
   content: SiteContent;
 }
 
+// Official Behance Mark Icon
+const BehanceIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5' }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M22 7h-7v-2h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-4.044 0-6.173-2.686-6.173-6.257 0-3.834 2.478-6.284 6.134-6.284 3.738 0 5.868 2.502 5.868 6.577 0 .428-.052.923-.098 1.229h-9.762c.074 1.761 1.282 3.111 3.515 3.111 1.42 0 2.41-.659 2.871-1.376h2.746zm-7.669-4.757h5.811c-.085-1.579-.955-2.686-2.825-2.686-1.76 0-2.82 1.077-2.986 2.686zm-8.877-3.243c.961 0 1.726-.261 2.228-.755.452-.444.693-1.07.693-1.804 0-.829-.313-1.479-.904-1.879-.623-.42-1.554-.606-2.766-.606h-5.431v14.044h5.922c1.425 0 2.545-.331 3.241-.958.749-.675 1.149-1.678 1.149-2.898 0-1.223-.464-2.185-1.341-2.784.975-.626 1.458-1.55 1.458-2.682 0-.258-.027-.514-.079-.76-.237-.899-.861-1.547-1.829-1.884-.668-.233-1.472-.345-2.341-.345v-.002zm-3.349-4.148h2.365c1.473 0 2.28.608 2.28 1.714 0 1.157-.849 1.764-2.383 1.764h-2.262v-3.478zm0 5.485h2.646c1.649 0 2.531.671 2.531 1.905 0 1.281-.926 1.954-2.607 1.954h-2.57v-3.859z" />
+  </svg>
+);
+
 export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
   const { localized, t } = useLanguage();
 
@@ -65,14 +77,14 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
               ))}
             </div>
 
-            <div className="flex items-center gap-4 pt-4 border-t border-[var(--border-subtle)]">
+            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[var(--border-subtle)]">
               <a
                 href="#consultation"
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById('consultation')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm cursor-pointer"
               >
                 <span>{t('about.contactButton')}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -82,10 +94,11 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
                 href="https://www.behance.net/khubaibsalafi13"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors shadow-sm"
+                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] transition-all duration-200 shadow-sm cursor-pointer"
               >
+                <BehanceIcon className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors shrink-0" />
                 <span>Behance Profile</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
               </a>
             </div>
           </motion.div>

@@ -257,7 +257,7 @@
 }
 
 /* Continuous moving edge glow rotation */
-@keyframes testimonial-border-rotate {
+@keyframes testimonial-glow-spin {
   0% {
     transform: rotate(0deg);
   }
@@ -275,13 +275,21 @@
 }
 
 .animate-border-beam {
-  animation: testimonial-border-rotate 8s linear infinite;
+  animation: testimonial-glow-spin 5.5s linear infinite;
+  will-change: transform;
+}
+
+.animate-border-beam-bloom {
+  animation: testimonial-glow-spin 5.5s linear infinite;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee,
   .animate-marquee-reverse,
-  .animate-border-beam {
-    animation: none;
+  .animate-border-beam,
+  .animate-border-beam-bloom {
+    animation: none !important;
+    transform: none !important;
   }
 }

@@ -52,22 +52,34 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                 viewport={{ once: true, margin: '-40px' }}
                 transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="group relative rounded-2xl p-[1px] overflow-hidden transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl"
+                className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl isolate"
               >
-                {/* Static subtle base border */}
-                <div className="absolute inset-0 rounded-2xl border border-[var(--border-subtle)] pointer-events-none z-10" />
-
-                {/* Continuously Moving Dynamic Brand-Color Edge Beam */}
+                {/* 1. Outer Bloom Layer - soft halo following the moving segment */}
                 <div
-                  className="absolute -inset-[100%] pointer-events-none opacity-45 dark:opacity-70 group-hover:opacity-100 transition-opacity duration-500 animate-border-beam"
+                  className="absolute -inset-[150%] pointer-events-none opacity-40 dark:opacity-70 group-hover:opacity-95 transition-opacity duration-500 animate-border-beam-bloom z-0"
                   style={{
-                    background: `conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 290deg, var(--primary-accent, #10b981) 330deg, transparent 360deg)`,
+                    background: `conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 290deg, var(--primary-accent, #10b981) 325deg, var(--primary-accent, #10b981) 345deg, transparent 360deg)`,
+                    filter: 'blur(10px)',
+                    animationDelay: `${-(index * 1.8)}s`,
                   }}
                   aria-hidden="true"
                 />
 
-                {/* Inner Card Body */}
-                <div className="relative z-20 w-full h-full rounded-[15px] bg-[var(--bg-card)] p-6 sm:p-7 flex flex-col justify-between transition-colors">
+                {/* 2. Sharp Core Edge Beam - bright focused Brand Color segment */}
+                <div
+                  className="absolute -inset-[150%] pointer-events-none opacity-65 dark:opacity-90 group-hover:opacity-100 transition-opacity duration-500 animate-border-beam z-0"
+                  style={{
+                    background: `conic-gradient(from 0deg at 50% 50%, transparent 0deg, transparent 285deg, var(--primary-accent, #10b981) 325deg, var(--primary-accent, #10b981) 345deg, transparent 360deg)`,
+                    animationDelay: `${-(index * 1.8)}s`,
+                  }}
+                  aria-hidden="true"
+                />
+
+                {/* 3. Static subtle base border */}
+                <div className="absolute inset-0 rounded-2xl border border-[var(--border-subtle)] pointer-events-none z-10" />
+
+                {/* 4. Inner Card Body */}
+                <div className="relative z-20 w-full h-full rounded-[14.5px] bg-[var(--bg-card)] p-6 sm:p-7 flex flex-col justify-between transition-colors">
                   {/* Top: Star rating & Quote icon */}
                   <div>
                     <div className="flex items-center justify-between mb-5">
