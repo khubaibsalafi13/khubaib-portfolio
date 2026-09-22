@@ -29,7 +29,6 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
   return (
     <section id="work" className="py-20 sm:py-28 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Section Heading & Category Filter Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--border-subtle)] mb-12">
           <div>
@@ -78,16 +77,15 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
         {/* Editorial Project Grid */}
         <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           <AnimatePresence>
-            {filteredProjects.map((project, idx) => (
+            {filteredProjects.map((project) => (
               <motion.article
                 layout
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: Math.min(idx * 0.05, 0.3) }}
                 key={project.id}
-                className="group relative flex flex-col rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors duration-300 overflow-hidden shadow-[var(--card-shadow)] hover:shadow-xl"
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="group relative flex flex-col rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors duration-300 overflow-hidden shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1"
               >
                 {/* Project Cover Image with Aspect Ratio */}
                 <Link
@@ -100,7 +98,7 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/80 via-transparent to-transparent opacity-80" />
-                  
+
                   {/* Category Pill */}
                   <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-mono tracking-wider text-[var(--accent)] uppercase bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] font-semibold shadow-sm">
                     {project.category}
@@ -136,7 +134,9 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
 
                   <div className="mt-auto pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
                     <span>{project.client ? `Client: ${project.client}` : 'Creative Work'}</span>
-                    <span className="text-[var(--accent)] font-semibold">{localized(project.roleEn, project.roleBn)}</span>
+                    <span className="text-[var(--accent)] font-semibold">
+                      {localized(project.roleEn, project.roleBn)}
+                    </span>
                   </div>
                 </div>
               </motion.article>
@@ -149,7 +149,6 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
             {t('work.noProjectsFound')}
           </div>
         )}
-
       </div>
     </section>
   );

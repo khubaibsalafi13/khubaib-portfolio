@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { Palette, PenTool, Monitor, Layout } from 'lucide-react';
 import { Service } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -27,9 +26,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
   };
 
   return (
-    <section id="services" className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors">
+    <section
+      id="services"
+      className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Section Header */}
         <div className="max-w-2xl mb-14">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-3 font-semibold">
@@ -46,14 +47,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
         {/* 4 Clean Disciplines Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
           {services.map((service, index) => (
-            <motion.div
+            <div
               key={service.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="group relative rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] p-6 flex flex-col justify-between transition-colors duration-300 shadow-[var(--card-shadow)] hover:shadow-xl"
+              className="group relative rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] p-6 flex flex-col justify-between transition-colors duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1"
             >
               <div>
                 <div className="flex items-center justify-between mb-6">
@@ -78,10 +74,9 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
                 <span className="uppercase tracking-wider">Discipline</span>
                 <span className="w-2 h-2 rounded-full bg-[var(--accent)]/40 group-hover:bg-[var(--accent)] transition-colors" />
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
-
       </div>
     </section>
   );

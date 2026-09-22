@@ -15,9 +15,8 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
   const desc = localized(content.finalCtaDescEn, content.finalCtaDescBn);
 
   return (
-    <section className="py-20 sm:py-28 relative transition-colors">
+    <section id="final-cta" className="py-20 sm:py-28 relative transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         <div className="relative rounded-3xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-8 sm:p-14 lg:p-16 text-center shadow-[var(--card-shadow)] overflow-hidden transition-colors">
           {/* Radial soft emerald aura */}
           <div
@@ -44,22 +43,20 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
             </p>
 
             <a
+              id="final-cta-action-btn"
               href="#consultation-form"
               onClick={(e) => {
                 e.preventDefault();
                 smoothScrollTo('#consultation-form', true);
               }}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_24px_var(--accent-glow)] cursor-pointer"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_24px_var(--accent-glow)] cursor-pointer hover:-translate-y-0.5 active:scale-98"
             >
               <span>{localized('START A PROJECT', 'প্রজেক্ট শুরু করুন')}</span>
               <ArrowUpRight className="w-4 h-4" />
             </a>
           </div>
-
         </div>
-
       </div>
     </section>
   );
 };
-

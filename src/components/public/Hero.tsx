@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { ArrowUpRight, Sparkles, User, ArrowDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent, Project } from '../../types';
@@ -60,12 +59,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
           {/* LEFT: Dedicated Hero Personal Image Showcase Frame */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-6 order-2 lg:order-1 flex justify-center"
-          >
+          <div className="lg:col-span-6 order-2 lg:order-1 flex justify-center">
             <div
               id="hero-personal-visual-card"
               className="group relative w-full max-w-md sm:max-w-lg aspect-[4/4.6] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-3 shadow-2xl shadow-[var(--card-shadow)] transition-all duration-500 hover:border-[var(--accent)]"
@@ -122,7 +116,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                           href="#about"
                           onClick={(e) => {
                             e.preventDefault();
-                            document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                            smoothScrollTo('#about', true);
                           }}
                           className="p-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)] transition-colors shrink-0 cursor-pointer"
                           title="About Khubaib Salafi"
@@ -152,91 +146,63 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* RIGHT: Typography & Modern Action Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-6 order-1 lg:order-2 flex flex-col justify-center"
-          >
+          <div className="lg:col-span-6 order-1 lg:order-2 flex flex-col justify-center">
             {/* Eyebrow badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-5 font-semibold"
-            >
+            <div className="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-5 font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />
               <span>{eyebrow}</span>
-            </motion.div>
+            </div>
 
             {/* Headline */}
-            <motion.h1
+            <h1
               id="hero-headline"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-[var(--text-heading)] leading-[1.12] mb-5"
             >
               {headline}
-            </motion.h1>
+            </h1>
 
             {/* Supporting Description */}
-            <motion.p
+            <p
               id="hero-description"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
               className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl font-normal"
             >
               {description}
-            </motion.p>
+            </p>
 
-            {/* CTA Buttons with refined hover micro-interactions */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="flex flex-wrap items-center gap-3.5 mb-10"
-            >
-              <motion.a
+            {/* CTA Buttons */}
+            <div id="hero-cta-group" className="flex flex-wrap items-center gap-3.5 mb-10">
+              <a
                 id="hero-primary-cta"
                 href="#work"
-                whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.preventDefault();
                   smoothScrollTo('#work', true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] border border-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_20px_var(--accent-glow)] cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] border border-[var(--accent)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_20px_var(--accent-glow)] cursor-pointer hover:-translate-y-0.5 active:scale-98"
               >
                 <span>{primaryCta}</span>
                 <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </motion.a>
+              </a>
 
-              <motion.a
+              <a
                 id="hero-secondary-cta"
                 href="#consultation"
-                whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.preventDefault();
                   smoothScrollTo('#consultation', true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--bg-card)] text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 cursor-pointer shadow-sm"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--bg-card)] text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-98"
               >
                 <span>{secondaryCta}</span>
-              </motion.a>
-            </motion.div>
+              </a>
+            </div>
 
             {/* Compact Metadata Row */}
-            <motion.div
+            <div
               id="hero-meta-row"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.48 }}
               className="pt-6 border-t border-[var(--border-subtle)] grid grid-cols-2 sm:grid-cols-4 gap-3"
             >
               {disciplines.map((item, idx) => (
@@ -250,8 +216,8 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                   </span>
                 </div>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
         </div>
       </div>

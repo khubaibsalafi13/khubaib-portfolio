@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { Star, Quote, CheckCircle2 } from 'lucide-react';
 import { Testimonial } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -25,9 +24,11 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   const title = localized(titleEn, titleBn);
 
   return (
-    <section id="testimonials" className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors">
+    <section
+      id="testimonials"
+      className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-3 font-semibold">
@@ -45,14 +46,9 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             const ratingCount = Math.max(1, Math.min(5, test.rating ?? 5));
 
             return (
-              <motion.div
+              <div
                 key={test.id}
-                initial={{ opacity: 0, y: 24, scale: 0.98 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: index * 0.1 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl isolate"
+                className="group relative rounded-2xl p-[1.5px] overflow-hidden transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl hover:-translate-y-1 isolate"
               >
                 {/* 1. Outer Bloom Layer - soft halo following the moving segment */}
                 <div
@@ -83,23 +79,12 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                   {/* Top: Star rating & Quote icon */}
                   <div>
                     <div className="flex items-center justify-between mb-5">
-                      {/* Rating Stars with One-by-One Staggered Entrance Animation & Refined Gold Color */}
+                      {/* Rating Stars */}
                       <div className="flex items-center gap-1.5" aria-label={`${ratingCount} out of 5 stars`}>
                         {Array.from({ length: 5 }).map((_, starIdx) => {
                           const isFilled = starIdx < ratingCount;
                           return (
-                            <motion.span
-                              key={starIdx}
-                              initial={{ opacity: 0, scale: 0.3, y: 4 }}
-                              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                              viewport={{ once: true }}
-                              transition={{
-                                duration: 0.35,
-                                ease: [0.22, 1, 0.36, 1],
-                                delay: (index * 0.1) + (starIdx * 0.08) + 0.15,
-                              }}
-                              className="inline-flex"
-                            >
+                            <span key={starIdx} className="inline-flex">
                               <Star
                                 className={`w-4 h-4 sm:w-4.5 sm:h-4.5 transition-colors ${
                                   isFilled
@@ -107,7 +92,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                                     : 'fill-transparent text-[var(--border-medium)] opacity-35'
                                 }`}
                               />
-                            </motion.span>
+                            </span>
                           );
                         })}
                       </div>
@@ -148,19 +133,16 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-[var(--text-muted)] truncate mt-0.5">
-                        {[test.role, test.company].filter(Boolean).join(' • ')}
+                        {test.company}
                       </p>
                     </div>
                   </div>
                 </div>
-
-              </motion.div>
+              </div>
             );
           })}
         </div>
-
       </div>
     </section>
   );
 };
-

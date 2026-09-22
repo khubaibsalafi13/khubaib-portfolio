@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { ArrowUpRight, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent } from '../../types';
@@ -49,13 +48,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
           {/* Left Column: Editorial Information & Statement */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-7"
-          >
+          <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-4 font-semibold">
               <span>// ABOUT</span>
             </div>
@@ -85,7 +78,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
                   e.preventDefault();
                   smoothScrollTo('#consultation', true);
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm cursor-pointer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-colors shadow-sm cursor-pointer hover:-translate-y-0.5 active:scale-98"
               >
                 <span>{t('about.contactButton')}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -95,23 +88,17 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
                 href="https://www.behance.net/khubaibsalafi13"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] transition-all duration-200 shadow-sm cursor-pointer"
+                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-0.5"
               >
                 <BehanceIcon className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors shrink-0" />
                 <span>Behance Profile</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
               </a>
             </div>
-          </motion.div>
+          </div>
 
           {/* Right Column: Structured Experience & Tools Frame */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-60px' }}
-            transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-5"
-          >
+          <div className="lg:col-span-5">
             <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-6 sm:p-8 shadow-[var(--card-shadow)] relative overflow-hidden transition-colors">
               <div
                 className="absolute top-0 right-0 w-36 h-36 blur-3xl pointer-events-none rounded-full"
@@ -158,7 +145,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
               </div>
 
             </div>
-          </motion.div>
+          </div>
 
         </div>
 
