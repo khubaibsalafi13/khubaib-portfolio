@@ -96,7 +96,28 @@ export const testimonialService = {
         } as Testimonial;
         all[idx] = updated;
       } else {
-        throw new Error('Testimonial not found');
+        // When an ID is provided for a new testimonial or item not yet cached in localStorage
+        const id = testimonial.id;
+        updated = {
+          id,
+          clientName: testimonial.clientName,
+          company: testimonial.company || '',
+          role: testimonial.role || '',
+          reviewTextEn: testimonial.reviewTextEn,
+          reviewTextBn: testimonial.reviewTextBn || testimonial.reviewTextEn,
+          rating,
+          avatarImage: testimonial.avatarImage || '',
+          serviceOrCategory: testimonial.serviceOrCategory || '',
+          date: testimonial.date || new Date().toISOString().split('T')[0],
+          sortOrder: testimonial.sortOrder ?? all.length + 1,
+          published: testimonial.published ?? true,
+          featured: testimonial.featured ?? false,
+          source: testimonial.source || 'admin',
+          submissionId: testimonial.submissionId !== undefined ? testimonial.submissionId : null,
+          createdAt: testimonial.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        all.push(updated);
       }
     } else {
       const id = 'test-' + Date.now();
@@ -115,7 +136,7 @@ export const testimonialService = {
         published: testimonial.published ?? true,
         featured: testimonial.featured ?? false,
         source: testimonial.source || 'admin',
-        submissionId: testimonial.submissionId,
+        submissionId: testimonial.submissionId !== undefined ? testimonial.submissionId : null,
         createdAt: new Date().toISOString(),
       };
       all.push(updated);
@@ -127,10 +148,16 @@ export const testimonialService = {
     }
 
     if (isSupabaseConfigured()) {
-      try {
-        await supabase.from('testimonials').upsert(testimonialToDb(updated));
-      } catch (err) {
-        console.error('Supabase testimonial save error:', err);
+      const dbPayload = testimonialToDb(updated);
+      const { error } = await supabase.from('testimonials').upsert(dbPayload);
+      if (error) {
+        console.error('Supabase testimonial save error:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
       }
     }
 

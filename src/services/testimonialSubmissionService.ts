@@ -371,18 +371,26 @@ export const testimonialSubmissionService = {
   ): Promise<{ submission: TestimonialSubmission; testimonial: Testimonial }> {
     const submission = await this.getSubmissionById(id);
     if (!submission) {
-      throw new Error('Submission not found');
+      throw new Error('Testimonial submission not found');
     }
 
     // 1. Idempotency check: verify whether a public testimonial already exists with this submissionId
+    // Concepts: Check by submission_id = submission.id, NOT id = submission.id
     let existingPublic: Testimonial | null = null;
     if (isSupabaseConfigured()) {
-      const { data: existingRows } = await supabase
+      const { data: existingRows, error: lookupError } = await supabase
         .from('testimonials')
         .select('*')
         .eq('submission_id', id);
 
-      if (existingRows && existingRows.length > 0) {
+      if (lookupError) {
+        console.error('Supabase error checking existing public testimonial by submission_id:', {
+          code: lookupError.code,
+          message: lookupError.message,
+          details: lookupError.details,
+          hint: lookupError.hint,
+        });
+      } else if (existingRows && existingRows.length > 0) {
         existingPublic = testimonialFromDb(existingRows[0]);
       }
     } else {
@@ -394,7 +402,7 @@ export const testimonialSubmissionService = {
       return { submission, testimonial: existingPublic };
     }
 
-    // 2. Language mapping on approval (Part 10 specification)
+    // 2. Language mapping on approval
     // If submission was in Bangla and no English translation was provided by Admin,
     // use the submitted Bangla review as a safe fallback value for review_text_en
     // because testimonials.review_text_en is NOT NULL in the database.
@@ -410,8 +418,12 @@ export const testimonialSubmissionService = {
     }
 
     // 3. Prepare public-safe testimonial payload (NO email, NO consent, NO reviewed_by)
+    // Generate new testimonial ID matching existing testimonialService architecture ('test-' + timestamp)
+    // or reuse existing public testimonial's ID if updating
+    const testimonialId = existingPublic?.id || ('test-' + Date.now());
+
     const publicData: Partial<Testimonial> & { clientName: string; reviewTextEn: string } = {
-      id: existingPublic?.id || `test-vis-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: testimonialId,
       clientName: edits?.clientName?.trim() || submission.clientName,
       company: edits?.company !== undefined ? edits.company.trim() : (submission.company || ''),
       role: edits?.role !== undefined ? edits.role.trim() : (submission.role || ''),
@@ -424,13 +436,13 @@ export const testimonialSubmissionService = {
       published: true,
       featured: false, // Default featured = false
       source: 'visitor',
-      submissionId: id,
+      submissionId: id, // FOREIGN KEY -> public.testimonial_submissions.id
     };
 
     // 4. Save public testimonial first
     const savedTestimonial = await testimonialService.save(publicData);
 
-    // 5. Update submission status to 'approved' after testimonial creation succeeded
+    // 5. Update submission status to 'approved' ONLY AFTER public testimonial succeeded
     let adminUserId: string | null = null;
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -466,7 +478,13 @@ export const testimonialSubmissionService = {
         .single();
 
       if (subError) {
-        console.error('Error updating submission record after approval:', subError);
+        console.error('Error updating submission record after approval:', {
+          code: subError.code,
+          message: subError.message,
+          details: subError.details,
+          hint: subError.hint,
+        });
+        throw new Error(`Failed to update submission status: ${subError.message}`);
       }
 
       const updatedSubmission = updatedSubData
