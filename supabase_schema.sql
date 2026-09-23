@@ -102,7 +102,27 @@ CREATE TABLE IF NOT EXISTS public.client_logos (
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 2.7 TESTIMONIALS
+-- 2.7 TESTIMONIAL SUBMISSIONS (VISITOR REVIEWS FOR MODERATION)
+CREATE TABLE IF NOT EXISTS public.testimonial_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_name TEXT NOT NULL CHECK (char_length(trim(client_name)) > 0),
+    company TEXT,
+    role TEXT,
+    service_or_category TEXT,
+    rating INTEGER DEFAULT 5 NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    review_text TEXT NOT NULL CHECK (char_length(trim(review_text)) > 0),
+    submission_language TEXT DEFAULT 'en' NOT NULL CHECK (submission_language IN ('en', 'bn')),
+    client_image TEXT,
+    email TEXT NOT NULL CHECK (char_length(trim(email)) > 0),
+    consent BOOLEAN DEFAULT false NOT NULL CHECK (consent = true),
+    status TEXT DEFAULT 'pending' NOT NULL CHECK (status IN ('pending', 'approved', 'rejected')),
+    reviewed_at TIMESTAMPTZ,
+    reviewed_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+-- 2.8 TESTIMONIALS
 CREATE TABLE IF NOT EXISTS public.testimonials (
     id TEXT PRIMARY KEY,
     client_name TEXT NOT NULL,
@@ -117,11 +137,15 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
     sort_order INTEGER DEFAULT 0 NOT NULL,
     published BOOLEAN DEFAULT true NOT NULL,
     featured BOOLEAN DEFAULT false NOT NULL,
+    source TEXT DEFAULT 'admin' NOT NULL,
+    submission_id UUID,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    CONSTRAINT fk_testimonials_submission FOREIGN KEY (submission_id) REFERENCES public.testimonial_submissions(id) ON DELETE SET NULL,
+    CONSTRAINT uq_testimonials_submission_id UNIQUE (submission_id)
 );
 
--- 2.8 CONSULTATIONS (INQUIRIES / CONTACT MESSAGES)
+-- 2.9 CONSULTATIONS (INQUIRIES / CONTACT MESSAGES)
 CREATE TABLE IF NOT EXISTS public.consultations (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
@@ -135,7 +159,7 @@ CREATE TABLE IF NOT EXISTS public.consultations (
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 2.9 SITE CONTENT (BILINGUAL HOMEPAGE & EDITORIAL COPY)
+-- 2.10 SITE CONTENT (BILINGUAL HOMEPAGE & EDITORIAL COPY)
 CREATE TABLE IF NOT EXISTS public.site_content (
     id TEXT PRIMARY KEY DEFAULT 'default',
     announcement_en TEXT,
@@ -175,7 +199,7 @@ CREATE TABLE IF NOT EXISTS public.site_content (
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 2.10 SITE SETTINGS (BRAND COLOR, THEME, SEO, SOCIAL LINKS)
+-- 2.11 SITE SETTINGS (BRAND COLOR, THEME, SEO, SOCIAL LINKS)
 CREATE TABLE IF NOT EXISTS public.site_settings (
     id TEXT PRIMARY KEY DEFAULT 'default',
     site_name TEXT NOT NULL DEFAULT 'Khubaib Salafi',
@@ -215,6 +239,7 @@ ALTER TABLE public.experience ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.education ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.client_logos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.testimonial_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
@@ -241,7 +266,11 @@ BEGIN
     DROP POLICY IF EXISTS "Admin full access on client logos" ON public.client_logos;
     
     DROP POLICY IF EXISTS "Public can view testimonials" ON public.testimonials;
+    DROP POLICY IF EXISTS "Public can view published testimonials" ON public.testimonials;
     DROP POLICY IF EXISTS "Admin full access on testimonials" ON public.testimonials;
+    
+    DROP POLICY IF EXISTS "Public can submit testimonial review" ON public.testimonial_submissions;
+    DROP POLICY IF EXISTS "Admin full access on testimonial submissions" ON public.testimonial_submissions;
     
     DROP POLICY IF EXISTS "Public can submit consultations" ON public.consultations;
     DROP POLICY IF EXISTS "Admin full access on consultations" ON public.consultations;
@@ -320,9 +349,10 @@ CREATE POLICY "Admin full access on client logos"
     WITH CHECK (true);
 
 -- 3.7 TESTIMONIALS POLICIES
-CREATE POLICY "Public can view testimonials" 
+-- Public visitors can only view published testimonials:
+CREATE POLICY "Public can view published testimonials" 
     ON public.testimonials FOR SELECT 
-    USING (true);
+    USING (published = true);
 
 CREATE POLICY "Admin full access on testimonials" 
     ON public.testimonials FOR ALL 
@@ -330,7 +360,39 @@ CREATE POLICY "Admin full access on testimonials"
     USING (true) 
     WITH CHECK (true);
 
--- 3.8 CONSULTATIONS POLICIES (Contact Inquiries)
+-- 3.8 TESTIMONIAL SUBMISSIONS POLICIES & GRANTS (Visitor Review Moderation)
+-- Anonymous visitors can insert a new pending testimonial review:
+CREATE POLICY "Public can submit testimonial review" 
+    ON public.testimonial_submissions FOR INSERT 
+    WITH CHECK (status = 'pending');
+
+-- Authenticated Admin has full access to moderate, approve, edit, and delete submissions:
+CREATE POLICY "Admin full access on testimonial submissions" 
+    ON public.testimonial_submissions FOR ALL 
+    TO authenticated 
+    USING (true) 
+    WITH CHECK (true);
+
+-- API Column-Level Grants (Restricts anon to inserting public review fields only; no SELECT/UPDATE/DELETE; no INSERT on id, status, reviewed_at, reviewed_by, created_at, updated_at):
+REVOKE ALL ON public.testimonial_submissions FROM PUBLIC, anon;
+
+GRANT INSERT (
+    client_name,
+    company,
+    role,
+    service_or_category,
+    rating,
+    review_text,
+    submission_language,
+    client_image,
+    email,
+    consent
+) ON public.testimonial_submissions TO anon;
+
+GRANT ALL ON public.testimonial_submissions TO authenticated;
+GRANT ALL ON public.testimonial_submissions TO service_role;
+
+-- 3.9 CONSULTATIONS POLICIES (Contact Inquiries)
 -- Anyone can submit a consultation message:
 CREATE POLICY "Public can submit consultations" 
     ON public.consultations FOR INSERT 

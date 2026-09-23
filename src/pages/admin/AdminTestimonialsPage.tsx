@@ -66,6 +66,7 @@ export const AdminTestimonialsPage: React.FC = () => {
   } | null>(null);
 
   const [uploading, setUploading] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const refreshData = async () => {
@@ -75,17 +76,33 @@ export const AdminTestimonialsPage: React.FC = () => {
     } catch {
       setTestimonials(testimonialService.getAll());
     }
-    setSubmissions(testimonialSubmissionService.getAll());
+
+    try {
+      const liveSubs = await testimonialSubmissionService.getAllSubmissions();
+      setSubmissions(liveSubs);
+    } catch {
+      setSubmissions(testimonialSubmissionService.getAll());
+    }
   };
 
   useEffect(() => {
     refreshData();
 
-    const handleSubmissionsUpdated = () => {
-      setSubmissions(testimonialSubmissionService.getAll());
+    const handleSubmissionsUpdated = async () => {
+      try {
+        const liveSubs = await testimonialSubmissionService.getAllSubmissions();
+        setSubmissions(liveSubs);
+      } catch {
+        setSubmissions(testimonialSubmissionService.getAll());
+      }
     };
-    const handleTestimonialsUpdated = () => {
-      setTestimonials(testimonialService.getAll());
+    const handleTestimonialsUpdated = async () => {
+      try {
+        const live = await testimonialService.getAllAsync();
+        setTestimonials(live);
+      } catch {
+        setTestimonials(testimonialService.getAll());
+      }
     };
 
     window.addEventListener('testimonial-submissions-updated', handleSubmissionsUpdated);
@@ -157,7 +174,8 @@ export const AdminTestimonialsPage: React.FC = () => {
 
     await testimonialService.save({
       ...editingTestimonial,
-      source: 'admin',
+      source: editingTestimonial.source || 'admin',
+      submissionId: editingTestimonial.submissionId || null,
       reviewTextBn: editingTestimonial.reviewTextBn || editingTestimonial.reviewTextEn,
     });
     setEditingTestimonial(null);
@@ -223,6 +241,8 @@ export const AdminTestimonialsPage: React.FC = () => {
     submissionId: string,
     customEdits?: ApproveSubmissionEdits
   ) => {
+    if (approvingId) return;
+    setApprovingId(submissionId);
     try {
       await testimonialSubmissionService.approveSubmission(submissionId, customEdits);
       setEditingSubmission(null);
@@ -231,6 +251,8 @@ export const AdminTestimonialsPage: React.FC = () => {
       await refreshData();
     } catch (err: any) {
       alert(err.message || 'Approval failed');
+    } finally {
+      setApprovingId(null);
     }
   };
 
@@ -586,6 +608,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                 </button>
                 <button
                   type="button"
+                  disabled={approvingId === editingSubmission.submission.id}
                   onClick={() =>
                     handleApproveAndPublishSubmission(editingSubmission.submission.id, {
                       clientName: editingSubmission.clientName,
@@ -598,10 +621,10 @@ export const AdminTestimonialsPage: React.FC = () => {
                       avatarImage: editingSubmission.avatarImage,
                     })
                   }
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-transform active:scale-98"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#10b981] hover:bg-[#05df72] disabled:opacity-50 disabled:cursor-not-allowed text-[#022013] text-xs font-bold uppercase tracking-wider cursor-pointer shadow-sm transition-transform active:scale-98"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Approve & Publish</span>
+                  <span>{approvingId === editingSubmission.submission.id ? 'Publishing...' : 'Approve & Publish'}</span>
                 </button>
               </div>
             </div>
@@ -702,11 +725,12 @@ export const AdminTestimonialsPage: React.FC = () => {
                 {previewItem.isPending && previewItem.submissionId && (
                   <button
                     type="button"
+                    disabled={approvingId === previewItem.submissionId}
                     onClick={() => handleApproveAndPublishSubmission(previewItem.submissionId!)}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-bold uppercase tracking-wider"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#10b981] hover:bg-[#05df72] disabled:opacity-50 disabled:cursor-not-allowed text-[#022013] text-xs font-bold uppercase tracking-wider"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Approve & Publish</span>
+                    <span>{approvingId === previewItem.submissionId ? 'Publishing...' : 'Approve & Publish'}</span>
                   </button>
                 )}
               </div>
@@ -986,7 +1010,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#040e08] border border-[#122e1e] text-[11px] font-mono text-[#8ba394]">
                           <Mail className="w-3 h-3 text-[#10b981]" />
                           <span>{sub.email}</span>
-                          <span className="text-[9px] text-[#557060] font-sans">(Private verification email)</span>
+                          <span className="text-[9px] text-[#557060] font-sans">(Private contact email)</span>
                         </div>
 
                         {/* Review text */}
@@ -1025,11 +1049,12 @@ export const AdminTestimonialsPage: React.FC = () => {
 
                       <button
                         type="button"
+                        disabled={approvingId === sub.id}
                         onClick={() => handleApproveAndPublishSubmission(sub.id)}
-                        className="px-3.5 py-1.5 rounded-lg bg-[#10b981] hover:bg-[#05df72] text-[#022013] text-xs font-bold font-mono uppercase tracking-wider cursor-pointer transition-transform active:scale-98 shadow"
+                        className="px-3.5 py-1.5 rounded-lg bg-[#10b981] hover:bg-[#05df72] disabled:opacity-50 disabled:cursor-not-allowed text-[#022013] text-xs font-bold font-mono uppercase tracking-wider cursor-pointer transition-transform active:scale-98 shadow"
                         title="Approve and Publish on Public Website"
                       >
-                        Approve & Publish
+                        {approvingId === sub.id ? 'Publishing...' : 'Approve & Publish'}
                       </button>
 
                       <button

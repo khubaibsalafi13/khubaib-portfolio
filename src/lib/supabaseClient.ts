@@ -7,6 +7,7 @@ import {
   Education,
   ClientLogo,
   Testimonial,
+  TestimonialSubmission,
   Consultation,
   SiteContent,
   SiteSettings,
@@ -258,8 +259,8 @@ export const testimonialToDb = (t: Partial<Testimonial>): Record<string, any> =>
   if (t.sortOrder !== undefined) db.sort_order = t.sortOrder;
   if (t.published !== undefined) db.published = t.published;
   if (t.featured !== undefined) db.featured = t.featured;
-  if (t.source !== undefined) db.source = t.source;
-  if (t.submissionId !== undefined) db.submission_id = t.submissionId;
+  if (t.source !== undefined) db.source = t.source || 'admin';
+  if (t.submissionId !== undefined) db.submission_id = t.submissionId ? t.submissionId : null;
   return db;
 };
 
@@ -279,6 +280,49 @@ export const testimonialFromDb = (row: any): Testimonial => ({
   featured: Boolean(row.featured),
   source: row.source === 'visitor' ? 'visitor' : 'admin',
   submissionId: row.submission_id,
+  createdAt: row.created_at || new Date().toISOString(),
+  updatedAt: row.updated_at,
+});
+
+export const testimonialSubmissionToDb = (s: Partial<TestimonialSubmission>): Record<string, any> => {
+  const db: Record<string, any> = {};
+  if (s.id !== undefined) db.id = s.id;
+  if (s.clientName !== undefined) db.client_name = s.clientName;
+  if (s.company !== undefined) db.company = s.company;
+  if (s.role !== undefined) db.role = s.role;
+  if (s.serviceOrCategory !== undefined) db.service_or_category = s.serviceOrCategory;
+  else if (s.service !== undefined) db.service_or_category = s.service;
+  if (s.rating !== undefined) db.rating = s.rating;
+  if (s.reviewText !== undefined) db.review_text = s.reviewText;
+  if (s.submissionLanguage !== undefined) db.submission_language = s.submissionLanguage;
+  if (s.clientImage !== undefined) db.client_image = s.clientImage;
+  if (s.email !== undefined) db.email = s.email;
+  if (s.consent !== undefined) db.consent = s.consent;
+  if (s.status !== undefined) db.status = s.status;
+  if (s.reviewedAt !== undefined) db.reviewed_at = s.reviewedAt;
+  if (s.reviewedBy !== undefined) db.reviewed_by = s.reviewedBy ? s.reviewedBy : null;
+  if (s.createdAt !== undefined) db.created_at = s.createdAt;
+  if (s.updatedAt !== undefined) db.updated_at = s.updatedAt;
+  return db;
+};
+
+export const testimonialSubmissionFromDb = (row: any): TestimonialSubmission => ({
+  id: row.id,
+  clientName: row.client_name,
+  company: row.company || '',
+  role: row.role || '',
+  serviceOrCategory: row.service_or_category || '',
+  service: row.service_or_category || '',
+  rating: Number(row.rating ?? 5),
+  reviewText: row.review_text,
+  submissionLanguage: row.submission_language === 'bn' ? 'bn' : 'en',
+  clientImage: row.client_image || '',
+  email: row.email,
+  consent: Boolean(row.consent),
+  status: (row.status as any) || 'pending',
+  reviewedAt: row.reviewed_at,
+  reviewedBy: row.reviewed_by,
+  source: 'visitor',
   createdAt: row.created_at || new Date().toISOString(),
   updatedAt: row.updated_at,
 });

@@ -203,7 +203,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      errors.email = localized('Email address is required for verification.', 'যাচাইকরণের জন্য ইমেইল আবশ্যক।');
+      errors.email = localized('Email address is required.', 'ইমেইল আবশ্যক।');
     } else if (!emailRegex.test(email.trim())) {
       errors.email = localized('Please enter a valid email address.', 'একটি সঠিক ইমেইল ঠিকানা দিন।');
     }
@@ -655,7 +655,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-semibold text-[var(--text-heading)]">
-                    {localized('YOUR EMAIL', 'আপনার ইমেইল')} <span className="text-red-400">*</span>
+                    {localized('EMAIL', 'ইমেইল')} <span className="text-red-400">*</span>
                   </label>
                   <span className="inline-flex items-center gap-1 text-[10px] text-[var(--accent)] font-mono">
                     <ShieldCheck className="w-3 h-3" />

@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Briefcase,
@@ -23,7 +23,15 @@ export const AdminDashboardPage: React.FC = () => {
   const allLogos = useMemo(() => clientLogoService.getAll(), []);
   const allTestimonials = useMemo(() => testimonialService.getAll(), []);
   const allConsultations = useMemo(() => consultationService.getAll(), []);
-  const pendingSubmissionsCount = useMemo(() => testimonialSubmissionService.getPendingCount(), []);
+  const [pendingSubmissionsCount, setPendingSubmissionsCount] = useState<number>(() =>
+    testimonialSubmissionService.getPendingCount()
+  );
+
+  useEffect(() => {
+    testimonialSubmissionService.getPendingSubmissions().then((list) => {
+      setPendingSubmissionsCount(list.length);
+    }).catch(() => {});
+  }, []);
 
   // Calculated strictly from local data (no fake stats)
   const publishedProjectsCount = allProjects.filter((p) => p.published).length;

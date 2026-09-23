@@ -108,7 +108,7 @@ export interface Testimonial {
   published: boolean;
   featured: boolean;
   source?: TestimonialSource;
-  submissionId?: string;
+  submissionId?: string | null;
   createdAt: string;
   updatedAt?: string;
 }
@@ -121,15 +121,18 @@ export interface TestimonialSubmission {
   clientName: string;
   company?: string;
   role?: string;
-  service?: string;
+  serviceOrCategory?: string;
+  service?: string; // backwards compatibility alias
   rating: number; // 1 - 5
   reviewText: string;
   submissionLanguage: SubmissionLanguage;
   clientImage?: string;
-  email: string; // PRIVATE moderation/contact data - never exposed in public testimonials
+  email: string; // PRIVATE moderation data - never exposed in public testimonials
   consent: boolean;
-  source: 'visitor';
   status: SubmissionStatus;
+  reviewedAt?: string;
+  reviewedBy?: string | null;
+  source?: 'visitor';
   createdAt: string;
   updatedAt?: string;
 }

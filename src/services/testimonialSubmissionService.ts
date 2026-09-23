@@ -1,12 +1,13 @@
 import { TestimonialSubmission, Testimonial } from '../types';
-import { getItem, setItem } from './storage';
 import { testimonialService } from './testimonialService';
 import {
   supabase,
   isSupabaseConfigured,
+  testimonialSubmissionToDb,
+  testimonialSubmissionFromDb,
+  testimonialFromDb,
 } from '../lib/supabaseClient';
 
-const SUBMISSIONS_STORAGE_KEY = 'ks_portfolio_testimonial_submissions';
 const COOLDOWN_KEY = 'ks_review_submit_cooldown';
 
 // Helper to notify listeners across the application
@@ -20,6 +21,7 @@ export interface CreateSubmissionInput {
   clientName: string;
   company?: string;
   role?: string;
+  serviceOrCategory?: string;
   service?: string;
   rating: number;
   reviewText: string;
@@ -41,48 +43,153 @@ export interface ApproveSubmissionEdits {
   avatarImage?: string;
 }
 
+// In-memory cache for fast synchronous access by sidebar badges and initial UI renders
+let memoryCache: TestimonialSubmission[] = [];
+
+const updateCacheItem = (item: TestimonialSubmission) => {
+  const idx = memoryCache.findIndex((s) => s.id === item.id);
+  if (idx >= 0) {
+    memoryCache[idx] = item;
+  } else {
+    memoryCache.unshift(item);
+  }
+};
+
+const removeFromCache = (id: string) => {
+  memoryCache = memoryCache.filter((s) => s.id !== id);
+};
+
 export const testimonialSubmissionService = {
   /**
-   * Retrieves all visitor submissions (private moderation data).
+   * Synchronous cached list of all submissions.
    */
   getAll(): TestimonialSubmission[] {
-    const list = getItem<TestimonialSubmission[]>(SUBMISSIONS_STORAGE_KEY, []);
-    return list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return [...memoryCache];
   },
 
   /**
-   * Retrieves all pending submissions awaiting admin review.
+   * Synchronous cached pending submissions.
    */
   getPending(): TestimonialSubmission[] {
-    return this.getAll().filter((s) => s.status === 'pending');
+    return memoryCache.filter((s) => s.status === 'pending');
   },
 
   /**
-   * Quick count of pending submissions for the Admin badge.
+   * Quick count of pending submissions for Admin badge indicators.
    */
   getPendingCount(): number {
     return this.getPending().length;
   },
 
   /**
-   * Retrieves a single submission by ID.
+   * Synchronous cached lookup by ID.
    */
   getById(id: string): TestimonialSubmission | undefined {
-    return this.getAll().find((s) => s.id === id);
+    return memoryCache.find((s) => s.id === id);
   },
 
   /**
-   * Submits a new visitor review.
-   * Includes spam prevention (honeypot, cooldown, validation).
-   * Does NOT auto-publish!
+   * Asynchronously retrieves all visitor submissions directly from Supabase.
+   */
+  async getAllSubmissions(): Promise<TestimonialSubmission[]> {
+    if (!isSupabaseConfigured()) {
+      return [...memoryCache];
+    }
+    const { data, error } = await supabase
+      .from('testimonial_submissions')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Failed to load testimonial submissions from Supabase:', error);
+      return [...memoryCache];
+    }
+
+    const list = (data || []).map(testimonialSubmissionFromDb);
+    memoryCache = list;
+    return list;
+  },
+
+  /**
+   * Asynchronously retrieves pending submissions directly from Supabase.
+   */
+  async getPendingSubmissions(): Promise<TestimonialSubmission[]> {
+    if (!isSupabaseConfigured()) {
+      return this.getPending();
+    }
+    const { data, error } = await supabase
+      .from('testimonial_submissions')
+      .select('*')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Failed to load pending submissions from Supabase:', error);
+      return this.getPending();
+    }
+
+    return (data || []).map(testimonialSubmissionFromDb);
+  },
+
+  /**
+   * Asynchronously retrieves rejected submissions directly from Supabase.
+   */
+  async getRejectedSubmissions(): Promise<TestimonialSubmission[]> {
+    if (!isSupabaseConfigured()) {
+      return memoryCache.filter((s) => s.status === 'rejected');
+    }
+    const { data, error } = await supabase
+      .from('testimonial_submissions')
+      .select('*')
+      .eq('status', 'rejected')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Failed to load rejected submissions from Supabase:', error);
+      return memoryCache.filter((s) => s.status === 'rejected');
+    }
+
+    return (data || []).map(testimonialSubmissionFromDb);
+  },
+
+  /**
+   * Asynchronously retrieves a single submission by ID directly from Supabase.
+   */
+  async getSubmissionById(id: string): Promise<TestimonialSubmission | null> {
+    if (!isSupabaseConfigured()) {
+      return this.getById(id) || null;
+    }
+    const { data, error } = await supabase
+      .from('testimonial_submissions')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error) {
+      console.warn('Failed to load submission by ID from Supabase:', error);
+      return this.getById(id) || null;
+    }
+
+    return data ? testimonialSubmissionFromDb(data) : null;
+  },
+
+  /**
+   * Submits a new visitor review to public.testimonial_submissions.
+   *
+   * In accordance with requirements:
+   * - Sends ONLY visitor-allowed fields (no status, reviewed_at, reviewed_by).
+   * - Database uses default status = 'pending'.
+   * - Does NOT insert anything into public.testimonials.
+   * - Includes honeypot, cooldown, and input validation.
+   * - Catches raw database errors and surfaces a friendly message.
    */
   async createSubmission(input: CreateSubmissionInput): Promise<TestimonialSubmission> {
-    // 1. Anti-spam honeypot detection
+    // 1. Anti-spam honeypot detection (bots filling hidden fields)
     if (input.honeypot && input.honeypot.trim().length > 0) {
-      console.warn('[Anti-Spam] Honeypot triggered. Silently dropping bot submission.');
-      // Return a simulated success to confuse automated bots
+      console.warn('[Anti-Spam] Honeypot triggered. Silently dropping submission.');
+      // Return simulated success to avoid alerting automated scrapers
       return {
-        id: 'sub-bot-' + Date.now(),
+        id: `sub-bot-${Date.now()}`,
         clientName: input.clientName,
         rating: input.rating,
         reviewText: input.reviewText,
@@ -95,12 +202,12 @@ export const testimonialSubmissionService = {
       };
     }
 
-    // 2. Client-side cooldown (protects against repeated accidental clicks)
+    // 2. Client-side cooldown (prevents rapid double-clicks and repeated bursts)
     if (typeof window !== 'undefined') {
       const lastSubmit = localStorage.getItem(COOLDOWN_KEY);
       if (lastSubmit) {
         const diff = Date.now() - parseInt(lastSubmit, 10);
-        if (diff < 4000) {
+        if (diff < 3500) {
           throw new Error('Please wait a moment before submitting again.');
         }
       }
@@ -116,7 +223,7 @@ export const testimonialSubmissionService = {
     const email = (input.email || '').trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
-      throw new Error('Please provide a valid email address for verification.');
+      throw new Error('Please provide a valid email address.');
     }
 
     const review = (input.reviewText || '').trim();
@@ -131,139 +238,244 @@ export const testimonialSubmissionService = {
     }
 
     const submissionLanguage = input.submissionLanguage === 'bn' ? 'bn' : 'en';
+    const serviceVal = (input.serviceOrCategory || input.service || '').trim();
 
-    // 4. Create submission record
-    const id = `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    const newSubmission: TestimonialSubmission = {
-      id,
+    // 4. Send ONLY visitor-allowed fields (no status, reviewed_at, reviewed_by, or non-UUID id)
+    // Supabase will automatically generate a UUID primary key via DEFAULT gen_random_uuid()
+    const visitorPayload = {
+      client_name: name,
+      company: input.company ? input.company.trim() : null,
+      role: input.role ? input.role.trim() : null,
+      service_or_category: serviceVal || null,
+      rating,
+      review_text: review,
+      submission_language: submissionLanguage,
+      client_image: input.clientImage || null,
+      email,
+      consent: true,
+    };
+
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('testimonial_submissions')
+        .insert(visitorPayload)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase testimonial_submissions insert error:', error);
+        throw new Error('Unable to submit your review at this time. Please try again in a few moments.');
+      }
+
+      const created = testimonialSubmissionFromDb(data);
+      updateCacheItem(created);
+      notifySubmissionsChanged();
+      return created;
+    }
+
+    // Fallback in-memory representation if not configured
+    const simulatedId =
+      typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : '00000000-0000-4000-8000-' + Date.now().toString().slice(-12);
+
+    const simulated: TestimonialSubmission = {
+      id: simulatedId,
       clientName: name,
-      company: (input.company || '').trim(),
-      role: (input.role || '').trim(),
-      service: (input.service || '').trim(),
+      company: visitorPayload.company || '',
+      role: visitorPayload.role || '',
+      serviceOrCategory: serviceVal,
+      service: serviceVal,
       rating,
       reviewText: review,
       submissionLanguage,
       clientImage: input.clientImage || '',
-      email, // PRIVATE: Stored only in private moderation storage
+      email,
       consent: true,
-      source: 'visitor',
       status: 'pending',
+      source: 'visitor',
       createdAt: new Date().toISOString(),
     };
-
-    const all = this.getAll();
-    all.unshift(newSubmission);
-    setItem(SUBMISSIONS_STORAGE_KEY, all);
-
-    // Ready for future Supabase testimonial_submissions table
-    if (isSupabaseConfigured()) {
-      try {
-        await supabase.from('testimonial_submissions').insert({
-          id: newSubmission.id,
-          client_name: newSubmission.clientName,
-          company: newSubmission.company,
-          role: newSubmission.role,
-          service: newSubmission.service,
-          rating: newSubmission.rating,
-          review_text: newSubmission.reviewText,
-          submission_language: newSubmission.submissionLanguage,
-          client_image: newSubmission.clientImage,
-          email: newSubmission.email,
-          consent: newSubmission.consent,
-          status: newSubmission.status,
-          created_at: newSubmission.createdAt,
-        });
-      } catch (err) {
-        console.warn('Supabase testimonial_submissions insert error:', err);
-      }
-    }
-
+    updateCacheItem(simulated);
     notifySubmissionsChanged();
-    return newSubmission;
+    return simulated;
   },
 
   /**
    * Updates moderation data (e.g. edit before approval).
    */
   async updateSubmission(id: string, updates: Partial<TestimonialSubmission>): Promise<TestimonialSubmission> {
-    const all = this.getAll();
-    const idx = all.findIndex((s) => s.id === id);
-    if (idx === -1) {
-      throw new Error('Submission not found');
+    if (isSupabaseConfigured()) {
+      const dbUpdates = testimonialSubmissionToDb(updates);
+      dbUpdates.updated_at = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('testimonial_submissions')
+        .update(dbUpdates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase testimonial_submissions update error:', error);
+        throw new Error(error.message);
+      }
+
+      const updated = testimonialSubmissionFromDb(data);
+      updateCacheItem(updated);
+      notifySubmissionsChanged();
+      return updated;
     }
 
+    const existing = this.getById(id);
+    if (!existing) throw new Error('Submission not found.');
     const updated: TestimonialSubmission = {
-      ...all[idx],
+      ...existing,
       ...updates,
       updatedAt: new Date().toISOString(),
     };
-
-    all[idx] = updated;
-    setItem(SUBMISSIONS_STORAGE_KEY, all);
+    updateCacheItem(updated);
     notifySubmissionsChanged();
     return updated;
   },
 
   /**
-   * Approves a visitor review and publishes it into the public testimonials table.
-   * Maps only PUBLIC-SAFE fields! NEVER passes visitor email into public data.
+   * Approves a visitor review and creates a public testimonial.
+   *
+   * Enforces:
+   * 1. Idempotency against double-clicks and existing public testimonials.
+   * 2. Safe language fallback for review_text_en (NOT NULL in database).
+   * 3. Public-safe fields only (NEVER copies email, consent, or reviewed_by).
+   * 4. Updates submission status = 'approved', reviewed_at, reviewed_by ONLY after
+   *    the public testimonial has been successfully created.
    */
   async approveSubmission(
     id: string,
     edits?: ApproveSubmissionEdits
   ): Promise<{ submission: TestimonialSubmission; testimonial: Testimonial }> {
-    const submission = this.getById(id);
+    const submission = await this.getSubmissionById(id);
     if (!submission) {
       throw new Error('Submission not found');
     }
 
-    // Determine English and Bangla review text with fallback
+    // 1. Idempotency check: verify whether a public testimonial already exists with this submissionId
+    let existingPublic: Testimonial | null = null;
+    if (isSupabaseConfigured()) {
+      const { data: existingRows } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('submission_id', id);
+
+      if (existingRows && existingRows.length > 0) {
+        existingPublic = testimonialFromDb(existingRows[0]);
+      }
+    } else {
+      existingPublic = testimonialService.getAll().find((t) => t.submissionId === id) || null;
+    }
+
+    // If already approved and already has public testimonial, return it safely without duplicating
+    if (submission.status === 'approved' && existingPublic) {
+      return { submission, testimonial: existingPublic };
+    }
+
+    // 2. Language mapping on approval (Part 10 specification)
+    // If submission was in Bangla and no English translation was provided by Admin,
+    // use the submitted Bangla review as a safe fallback value for review_text_en
+    // because testimonials.review_text_en is NOT NULL in the database.
     let reviewEn = '';
     let reviewBn = '';
 
     if (submission.submissionLanguage === 'bn') {
       reviewBn = edits?.reviewTextBn?.trim() || submission.reviewText;
-      reviewEn = edits?.reviewTextEn?.trim() || submission.reviewText; // Fallback so English viewers also see content
+      reviewEn = edits?.reviewTextEn?.trim() || submission.reviewText; // Safe NOT NULL fallback
     } else {
       reviewEn = edits?.reviewTextEn?.trim() || submission.reviewText;
-      reviewBn = edits?.reviewTextBn?.trim() || submission.reviewText; // Fallback so Bangla viewers also see content
+      reviewBn = edits?.reviewTextBn?.trim() || '';
     }
 
-    // Check if a public testimonial already exists for this submission
-    const existingPublic = testimonialService.getAll().find((t) => t.submissionId === id);
-
-    // Prepare public-safe data
-    const publicData = {
-      id: existingPublic?.id, // Keep existing ID if re-approving
+    // 3. Prepare public-safe testimonial payload (NO email, NO consent, NO reviewed_by)
+    const publicData: Partial<Testimonial> & { clientName: string; reviewTextEn: string } = {
+      id: existingPublic?.id || `test-vis-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       clientName: edits?.clientName?.trim() || submission.clientName,
-      company: edits?.company !== undefined ? edits.company.trim() : submission.company || '',
-      role: edits?.role !== undefined ? edits.role.trim() : submission.role || '',
-      serviceOrCategory: edits?.service !== undefined ? edits.service.trim() : submission.service || '',
+      company: edits?.company !== undefined ? edits.company.trim() : (submission.company || ''),
+      role: edits?.role !== undefined ? edits.role.trim() : (submission.role || ''),
+      serviceOrCategory: edits?.service !== undefined ? edits.service.trim() : (submission.serviceOrCategory || submission.service || ''),
       rating: edits?.rating !== undefined ? edits.rating : submission.rating,
       reviewTextEn: reviewEn,
       reviewTextBn: reviewBn,
-      avatarImage: edits?.avatarImage !== undefined ? edits.avatarImage : submission.clientImage || '',
+      avatarImage: edits?.avatarImage !== undefined ? edits.avatarImage : (submission.clientImage || ''),
       date: new Date().toISOString().split('T')[0],
       published: true,
-      featured: false, // Per specification: default featured = false
-      source: 'visitor' as const,
+      featured: false, // Default featured = false
+      source: 'visitor',
       submissionId: id,
     };
 
-    // Save into public testimonials
+    // 4. Save public testimonial first
     const savedTestimonial = await testimonialService.save(publicData);
 
-    // Update submission status to approved
-    const updatedSubmission = await this.updateSubmission(id, {
-      status: 'approved',
-      clientName: publicData.clientName,
-      company: publicData.company,
-      role: publicData.role,
-      service: publicData.serviceOrCategory,
-      rating: publicData.rating,
-      clientImage: publicData.avatarImage,
-    });
+    // 5. Update submission status to 'approved' after testimonial creation succeeded
+    let adminUserId: string | null = null;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user?.id) {
+        adminUserId = sessionData.session.user.id;
+      } else {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user?.id) {
+          adminUserId = userData.user.id;
+        }
+      }
+    } catch {}
 
+    const now = new Date().toISOString();
+
+    if (isSupabaseConfigured()) {
+      const { data: updatedSubData, error: subError } = await supabase
+        .from('testimonial_submissions')
+        .update({
+          status: 'approved',
+          reviewed_at: now,
+          reviewed_by: adminUserId,
+          updated_at: now,
+          client_name: publicData.clientName,
+          company: publicData.company,
+          role: publicData.role,
+          service_or_category: publicData.serviceOrCategory,
+          rating: publicData.rating,
+          client_image: publicData.avatarImage,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (subError) {
+        console.error('Error updating submission record after approval:', subError);
+      }
+
+      const updatedSubmission = updatedSubData
+        ? testimonialSubmissionFromDb(updatedSubData)
+        : {
+            ...submission,
+            status: 'approved' as const,
+            reviewedAt: now,
+            reviewedBy: adminUserId,
+            updatedAt: now,
+          };
+
+      updateCacheItem(updatedSubmission);
+      notifySubmissionsChanged();
+      return { submission: updatedSubmission, testimonial: savedTestimonial };
+    }
+
+    const updatedSubmission: TestimonialSubmission = {
+      ...submission,
+      status: 'approved',
+      reviewedAt: now,
+      reviewedBy: adminUserId,
+      updatedAt: now,
+    };
+    updateCacheItem(updatedSubmission);
     notifySubmissionsChanged();
     return { submission: updatedSubmission, testimonial: savedTestimonial };
   },
@@ -272,45 +484,111 @@ export const testimonialSubmissionService = {
    * Rejects a submission. The review will NOT appear publicly.
    */
   async rejectSubmission(id: string): Promise<TestimonialSubmission> {
-    const submission = this.getById(id);
+    const submission = await this.getSubmissionById(id);
     if (!submission) {
       throw new Error('Submission not found');
     }
 
-    // If there was a previously published public testimonial for this submission, unpublish or remove it
-    const publicList = testimonialService.getAll();
-    const linked = publicList.find((t) => t.submissionId === id);
-    if (linked) {
-      await testimonialService.save({ ...linked, published: false });
+    let adminUserId: string | null = null;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user?.id) {
+        adminUserId = sessionData.session.user.id;
+      } else {
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData?.user?.id) {
+          adminUserId = userData.user.id;
+        }
+      }
+    } catch {}
+
+    const now = new Date().toISOString();
+
+    // If an associated public testimonial existed previously, unpublish it
+    if (isSupabaseConfigured()) {
+      const { data: linkedRows } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('submission_id', id);
+
+      if (linkedRows && linkedRows.length > 0) {
+        for (const row of linkedRows) {
+          const t = testimonialFromDb(row);
+          await testimonialService.save({
+            ...t,
+            clientName: t.clientName,
+            reviewTextEn: t.reviewTextEn,
+            published: false,
+          });
+        }
+      }
+
+      const { data, error } = await supabase
+        .from('testimonial_submissions')
+        .update({
+          status: 'rejected',
+          reviewed_at: now,
+          reviewed_by: adminUserId,
+          updated_at: now,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error rejecting submission:', error);
+        throw new Error(error.message);
+      }
+
+      const updated = testimonialSubmissionFromDb(data);
+      updateCacheItem(updated);
+      notifySubmissionsChanged();
+      return updated;
     }
 
-    const updated = await this.updateSubmission(id, { status: 'rejected' });
+    const linked = testimonialService.getAll().find((t) => t.submissionId === id);
+    if (linked) {
+      await testimonialService.save({
+        ...linked,
+        clientName: linked.clientName,
+        reviewTextEn: linked.reviewTextEn,
+        published: false,
+      });
+    }
+
+    const updated: TestimonialSubmission = {
+      ...submission,
+      status: 'rejected',
+      reviewedAt: now,
+      reviewedBy: adminUserId,
+      updatedAt: now,
+    };
+    updateCacheItem(updated);
     notifySubmissionsChanged();
     return updated;
   },
 
   /**
-   * Deletes a submission from the moderation queue.
+   * Deletes a submission from the private moderation table.
+   *
+   * In accordance with requirements:
+   * Removes only that private submission.
+   * Does not silently delete unrelated public testimonials.
    */
   async deleteSubmission(id: string): Promise<void> {
-    const all = this.getAll().filter((s) => s.id !== id);
-    setItem(SUBMISSIONS_STORAGE_KEY, all);
-
-    // If an associated public testimonial exists, clean it up or unpublish
-    const publicList = testimonialService.getAll();
-    const linked = publicList.find((t) => t.submissionId === id);
-    if (linked) {
-      await testimonialService.delete(linked.id);
-    }
-
     if (isSupabaseConfigured()) {
-      try {
-        await supabase.from('testimonial_submissions').delete().eq('id', id);
-      } catch (err) {
-        console.warn('Supabase testimonial_submissions delete error:', err);
+      const { error } = await supabase
+        .from('testimonial_submissions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting submission from Supabase:', error);
+        throw new Error(error.message);
       }
     }
 
+    removeFromCache(id);
     notifySubmissionsChanged();
   },
 };

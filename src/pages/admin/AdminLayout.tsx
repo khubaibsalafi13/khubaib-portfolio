@@ -35,6 +35,9 @@ export const AdminLayout: React.FC = () => {
   useEffect(() => {
     const updateCount = () => {
       setPendingReviewsCount(testimonialSubmissionService.getPendingCount());
+      testimonialSubmissionService.getPendingSubmissions().then((list) => {
+        setPendingReviewsCount(list.length);
+      }).catch(() => {});
     };
 
     updateCount();
