@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,13 +20,29 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { isSupabaseConfigured } from '../../lib/supabaseClient';
+import { testimonialSubmissionService } from '../../services/testimonialSubmissionService';
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pendingReviewsCount, setPendingReviewsCount] = useState<number>(() =>
+    testimonialSubmissionService.getPendingCount()
+  );
   const supabaseActive = isSupabaseConfigured();
+
+  useEffect(() => {
+    const updateCount = () => {
+      setPendingReviewsCount(testimonialSubmissionService.getPendingCount());
+    };
+
+    updateCount();
+    window.addEventListener('testimonial-submissions-updated', updateCount);
+    return () => {
+      window.removeEventListener('testimonial-submissions-updated', updateCount);
+    };
+  }, []);
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
@@ -125,14 +141,29 @@ export const AdminLayout: React.FC = () => {
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
                       ? 'bg-[#10b981] text-[#022013] font-semibold shadow-sm'
                       : 'text-[#8ba395] hover:text-[#d3e5db] hover:bg-[#092215]'
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </div>
+
+                  {item.path === '/admin/testimonials' && pendingReviewsCount > 0 && (
+                    <span
+                      title={`${pendingReviewsCount} pending review(s)`}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                        isActive
+                          ? 'bg-[#022013] text-[#10b981]'
+                          : 'bg-[#ca8a04]/25 text-[#fde047] border border-[#ca8a04]/40'
+                      }`}
+                    >
+                      {pendingReviewsCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}

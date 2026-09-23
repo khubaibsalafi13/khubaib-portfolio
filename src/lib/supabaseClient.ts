@@ -258,6 +258,8 @@ export const testimonialToDb = (t: Partial<Testimonial>): Record<string, any> =>
   if (t.sortOrder !== undefined) db.sort_order = t.sortOrder;
   if (t.published !== undefined) db.published = t.published;
   if (t.featured !== undefined) db.featured = t.featured;
+  if (t.source !== undefined) db.source = t.source;
+  if (t.submissionId !== undefined) db.submission_id = t.submissionId;
   return db;
 };
 
@@ -275,6 +277,8 @@ export const testimonialFromDb = (row: any): Testimonial => ({
   sortOrder: Number(row.sort_order ?? 0),
   published: Boolean(row.published),
   featured: Boolean(row.featured),
+  source: row.source === 'visitor' ? 'visitor' : 'admin',
+  submissionId: row.submission_id,
   createdAt: row.created_at || new Date().toISOString(),
   updatedAt: row.updated_at,
 });

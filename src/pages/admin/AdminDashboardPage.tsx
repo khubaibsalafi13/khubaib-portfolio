@@ -15,6 +15,7 @@ import {
 import { projectService } from '../../services/projectService';
 import { clientLogoService } from '../../services/clientLogoService';
 import { testimonialService } from '../../services/testimonialService';
+import { testimonialSubmissionService } from '../../services/testimonialSubmissionService';
 import { consultationService } from '../../services/consultationService';
 
 export const AdminDashboardPage: React.FC = () => {
@@ -22,6 +23,7 @@ export const AdminDashboardPage: React.FC = () => {
   const allLogos = useMemo(() => clientLogoService.getAll(), []);
   const allTestimonials = useMemo(() => testimonialService.getAll(), []);
   const allConsultations = useMemo(() => consultationService.getAll(), []);
+  const pendingSubmissionsCount = useMemo(() => testimonialSubmissionService.getPendingCount(), []);
 
   // Calculated strictly from local data (no fake stats)
   const publishedProjectsCount = allProjects.filter((p) => p.published).length;
@@ -92,13 +94,25 @@ export const AdminDashboardPage: React.FC = () => {
           <span className="text-[10px] text-[#557361] mt-1">Active in marquee</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#06140d] border border-[#143222] flex flex-col">
-          <span className="text-[11px] font-mono text-[#7ea08d] uppercase">Testimonials</span>
-          <span className="text-2xl sm:text-3xl font-extrabold text-[#f0f6f2] mt-2">
+        <Link
+          to="/admin/testimonials"
+          className="p-4 rounded-xl bg-[#06140d] border border-[#143222] hover:border-[#10b981]/50 transition-colors flex flex-col group cursor-pointer"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-[#7ea08d] uppercase group-hover:text-white transition-colors">
+              Testimonials
+            </span>
+            {pendingSubmissionsCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-[#ca8a04]/25 text-[#fde047] border border-[#ca8a04]/40">
+                {pendingSubmissionsCount} pending
+              </span>
+            )}
+          </div>
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#f0f6f2] mt-2 group-hover:text-[#10b981] transition-colors">
             {publishedTestimonialsCount}
           </span>
           <span className="text-[10px] text-[#557361] mt-1">Active reviews</span>
-        </div>
+        </Link>
 
         <div className="p-4 rounded-xl bg-[#06140d] border border-[#143222] flex flex-col">
           <span className="text-[11px] font-mono text-[#7ea08d] uppercase">New Requests</span>

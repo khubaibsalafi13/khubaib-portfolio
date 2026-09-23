@@ -90,6 +90,8 @@ export const testimonialService = {
           ...all[idx],
           ...testimonial,
           rating,
+          source: testimonial.source !== undefined ? testimonial.source : (all[idx].source || 'admin'),
+          submissionId: testimonial.submissionId !== undefined ? testimonial.submissionId : all[idx].submissionId,
           updatedAt: new Date().toISOString(),
         } as Testimonial;
         all[idx] = updated;
@@ -112,12 +114,17 @@ export const testimonialService = {
         sortOrder: testimonial.sortOrder ?? all.length + 1,
         published: testimonial.published ?? true,
         featured: testimonial.featured ?? false,
+        source: testimonial.source || 'admin',
+        submissionId: testimonial.submissionId,
         createdAt: new Date().toISOString(),
       };
       all.push(updated);
     }
 
     setItem(STORAGE_KEY, all);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testimonials-updated'));
+    }
 
     if (isSupabaseConfigured()) {
       try {
@@ -133,6 +140,9 @@ export const testimonialService = {
   async delete(id: string): Promise<void> {
     const all = this.getAll().filter((t) => t.id !== id);
     setItem(STORAGE_KEY, all);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testimonials-updated'));
+    }
 
     if (isSupabaseConfigured()) {
       try {
@@ -146,6 +156,9 @@ export const testimonialService = {
   async reorder(testimonials: Testimonial[]): Promise<void> {
     const updated = testimonials.map((t, i) => ({ ...t, sortOrder: i + 1 }));
     setItem(STORAGE_KEY, updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('testimonials-updated'));
+    }
 
     if (isSupabaseConfigured()) {
       try {

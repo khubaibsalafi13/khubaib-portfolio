@@ -99,8 +99,15 @@ export const HomePage: React.FC = () => {
 
     loadSupabaseData();
 
+    const handleTestimonialsUpdate = () => {
+      setTestimonials(testimonialService.getPublished());
+      refreshScroll();
+    };
+    window.addEventListener('testimonials-updated', handleTestimonialsUpdate);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('testimonials-updated', handleTestimonialsUpdate);
     };
   }, []);
 

@@ -91,6 +91,8 @@ export interface ClientLogo {
   updatedAt?: string;
 }
 
+export type TestimonialSource = 'admin' | 'visitor';
+
 export interface Testimonial {
   id: string;
   clientName: string;
@@ -105,6 +107,29 @@ export interface Testimonial {
   sortOrder: number;
   published: boolean;
   featured: boolean;
+  source?: TestimonialSource;
+  submissionId?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export type SubmissionLanguage = 'en' | 'bn';
+export type SubmissionStatus = 'pending' | 'approved' | 'rejected';
+
+export interface TestimonialSubmission {
+  id: string;
+  clientName: string;
+  company?: string;
+  role?: string;
+  service?: string;
+  rating: number; // 1 - 5
+  reviewText: string;
+  submissionLanguage: SubmissionLanguage;
+  clientImage?: string;
+  email: string; // PRIVATE moderation/contact data - never exposed in public testimonials
+  consent: boolean;
+  source: 'visitor';
+  status: SubmissionStatus;
   createdAt: string;
   updatedAt?: string;
 }
