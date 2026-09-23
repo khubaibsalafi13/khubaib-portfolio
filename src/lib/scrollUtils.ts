@@ -1,8 +1,9 @@
-import { gsap, ScrollSmoother, ScrollTrigger } from './gsap';
+import { ScrollSmoother, ScrollTrigger } from './gsap';
 
 /**
- * Smoothly scrolls to a selector, ID, or DOM element using ScrollSmoother if active,
- * or standard smooth scrolling as fallback.
+ * Smoothly scrolls to a selector, ID, or DOM element.
+ * Uses ScrollSmoother if active on desktop fine-pointer devices,
+ * or standard native window smooth scrolling on mobile/touch devices.
  */
 export function smoothScrollTo(target: string | HTMLElement, smooth: boolean = true) {
   if (typeof window === 'undefined') return;
@@ -13,7 +14,16 @@ export function smoothScrollTo(target: string | HTMLElement, smooth: boolean = t
   } else {
     const el = typeof target === 'string' ? document.querySelector(target) : target;
     if (el) {
-      el.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+      // Header offset compensation for fixed navigation bar (~72px)
+      const header = document.querySelector('header');
+      const headerHeight = header ? header.getBoundingClientRect().height : 72;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: smooth ? 'smooth' : 'auto',
+      });
     }
   }
 }

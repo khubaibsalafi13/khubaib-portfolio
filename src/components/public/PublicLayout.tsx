@@ -5,46 +5,109 @@ import { Header } from './Header';
 import { CursorGlow } from './CursorGlow';
 import { smoothScrollTo, refreshScroll } from '../../lib/scrollUtils';
 
+/**
+ * Removes any leftover inline styles applied by GSAP ScrollSmoother,
+ * guaranteeing clean, direct native browser scrolling on mobile/touch devices.
+ */
+function resetSmootherInlineStyles() {
+  const wrapper = document.getElementById('smooth-wrapper');
+  const content = document.getElementById('smooth-content');
+  if (wrapper) {
+    wrapper.style.removeProperty('position');
+    wrapper.style.removeProperty('height');
+    wrapper.style.removeProperty('width');
+    wrapper.style.removeProperty('top');
+    wrapper.style.removeProperty('left');
+    wrapper.style.removeProperty('overflow');
+    wrapper.style.removeProperty('box-sizing');
+  }
+  if (content) {
+    content.style.removeProperty('transform');
+    content.style.removeProperty('width');
+    content.style.removeProperty('will-change');
+    content.style.removeProperty('overflow');
+  }
+}
+
 export const PublicLayout: React.FC = () => {
   const location = useLocation();
 
   useLayoutEffect(() => {
-    // Check if user prefers reduced motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Destroy any stale instance first
+    // 1. Ensure no duplicate or stale ScrollSmoother instance exists
     const existing = ScrollSmoother.get();
     if (existing) {
       existing.kill();
     }
+    resetSmootherInlineStyles();
 
-    let smoother: any = null;
+    // 2. Setup responsive context via gsap.matchMedia
+    const mm = gsap.matchMedia();
 
-    if (!prefersReducedMotion) {
-      smoother = ScrollSmoother.create({
-        wrapper: '#smooth-wrapper',
-        content: '#smooth-content',
-        smooth: 0.9, // Restrained premium smoothing (0.8 - 1.0 range)
-        effects: true,
-        smoothTouch: 0.1, // Close to native touch on mobile devices
-        normalizeScroll: false,
-        ignoreMobileResize: true,
-      });
-    }
+    // DESKTOP / fine pointer devices:
+    // Active only when viewport >= 1024px AND using a fine pointer (mouse / trackpad)
+    mm.add(
+      {
+        isDesktop: '(min-width: 1024px) and (pointer: fine)',
+        prefersReduced: '(prefers-reduced-motion: reduce)',
+      },
+      (context) => {
+        const { isDesktop, prefersReduced } = context.conditions as {
+          isDesktop: boolean;
+          prefersReduced: boolean;
+        };
 
-    // Refresh triggers once smoother is initialized
+        // MOBILE / touch devices / reduced-motion:
+        // Completely disable ScrollSmoother and use native browser scrolling.
+        // Never use smoothTouch. Ensure no transformed catch-up or leftover styles.
+        if (!isDesktop || prefersReduced || ScrollTrigger.isTouch === 1) {
+          const active = ScrollSmoother.get();
+          if (active) {
+            active.kill();
+          }
+          resetSmootherInlineStyles();
+          ScrollTrigger.refresh();
+          return;
+        }
+
+        // Kill any duplicate before creating a fresh instance
+        const prev = ScrollSmoother.get();
+        if (prev) {
+          prev.kill();
+        }
+        resetSmootherInlineStyles();
+
+        // Create ScrollSmoother exclusively for Desktop / fine pointer devices
+        const smoother = ScrollSmoother.create({
+          wrapper: '#smooth-wrapper',
+          content: '#smooth-content',
+          smooth: 0.9, // Restrained premium smoothing (0.8 - 1.0 range)
+          effects: true,
+          smoothTouch: false, // Explicitly disabled: do NOT use smoothTouch
+          normalizeScroll: false,
+          ignoreMobileResize: true,
+        });
+
+        ScrollTrigger.refresh();
+
+        return () => {
+          if (smoother) {
+            smoother.kill();
+          }
+          resetSmootherInlineStyles();
+          ScrollTrigger.refresh();
+        };
+      }
+    );
+
     ScrollTrigger.refresh();
 
     return () => {
-      if (smoother) {
-        smoother.kill();
+      mm.revert();
+      const finalCheck = ScrollSmoother.get();
+      if (finalCheck) {
+        finalCheck.kill();
       }
-      ScrollTrigger.getAll().forEach((st) => {
-        // Only kill ScrollTriggers associated with public smoother
-        if (st.vars.id === 'public-smoother-trigger') {
-          st.kill();
-        }
-      });
+      resetSmootherInlineStyles();
     };
   }, []);
 
@@ -77,8 +140,11 @@ export const PublicLayout: React.FC = () => {
       {/* Stable fixed Header (outside smooth-wrapper so transforms do not affect it) */}
       <Header />
 
-      {/* Official GSAP ScrollSmoother Structure for Public Website */}
-      <div id="smooth-wrapper" className="w-full min-h-screen overflow-hidden">
+      {/* GSAP ScrollSmoother Structure:
+          - Desktop / fine pointer: ScrollSmoother automatically manages wrapper & content transforms.
+          - Mobile / touch devices: ScrollSmoother is completely disabled, wrapper is neutral
+            without overflow-hidden, delivering direct, unhindered native touch scrolling. */}
+      <div id="smooth-wrapper" className="w-full min-h-screen">
         <div id="smooth-content" className="w-full min-h-screen flex flex-col justify-between">
           <Outlet />
         </div>
