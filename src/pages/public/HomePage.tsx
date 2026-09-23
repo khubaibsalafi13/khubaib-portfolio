@@ -145,30 +145,30 @@ export const HomePage: React.FC = () => {
         {/* 07. All Projects with Category Filters */}
         <AllWork projects={projects} categories={categories} />
 
-        {/* 08. Services / Expertise */}
-        <ServicesSection services={services} />
-
-        {/* 09. Client Logo Marquee (Auto-hides if no published logos) */}
-        <ClientLogoMarquee
-          logos={clientLogos}
-          titleEn={content.clientLogosTitleEn}
-          titleBn={content.clientLogosTitleBn}
-        />
-
-        {/* 10. About Section */}
-        <AboutSection content={content} />
-
-        {/* 11 & 12. Experience & Education with stats-like credibility band */}
-        <ExperienceEducation experience={experience} education={education} />
-
-        {/* 13. Testimonials (Auto-hides if no published reviews) */}
+        {/* 08. Testimonials (Auto-hides if no published reviews) */}
         <TestimonialsSection
           testimonials={testimonials}
           titleEn={content.testimonialsTitleEn}
           titleBn={content.testimonialsTitleBn}
         />
 
-        {/* 14 & 15. Consultation CTA & Form */}
+        {/* 09. Services / Expertise */}
+        <ServicesSection services={services} />
+
+        {/* 10. Client Logo Marquee (Auto-hides if no published logos) */}
+        <ClientLogoMarquee
+          logos={clientLogos}
+          titleEn={content.clientLogosTitleEn}
+          titleBn={content.clientLogosTitleBn}
+        />
+
+        {/* 11. About Section */}
+        <AboutSection content={content} />
+
+        {/* 12. Experience & Education with stats-like credibility band */}
+        <ExperienceEducation experience={experience} education={education} />
+
+        {/* 13. Consultation CTA & Form */}
         <ConsultationSection content={content} />
 
         {/* 16. Large Final CTA */}

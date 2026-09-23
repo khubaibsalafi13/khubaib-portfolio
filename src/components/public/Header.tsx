@@ -20,8 +20,9 @@ export const Header: React.FC = () => {
   // Nav items with their target section anchors
   const navItems = [
     { id: 'work', label: t('nav.work'), href: '/#work' },
-    { id: 'about', label: t('nav.about'), href: '/#about' },
+    { id: 'testimonials', label: t('nav.testimonials'), href: '/#testimonials' },
     { id: 'services', label: t('nav.services'), href: '/#services' },
+    { id: 'about', label: t('nav.about'), href: '/#about' },
     { id: 'experience', label: t('nav.experience'), href: '/#experience' },
     { id: 'consultation', label: t('nav.consultation'), href: '/#consultation' },
   ];
@@ -33,7 +34,7 @@ export const Header: React.FC = () => {
 
       // Determine active section on scroll if on home page
       if (location.pathname === '/') {
-        const sections = ['work', 'services', 'about', 'experience', 'consultation'];
+        const sections = ['work', 'testimonials', 'services', 'about', 'experience', 'consultation'];
         for (const sec of sections) {
           const el = document.getElementById(sec);
           if (el) {
