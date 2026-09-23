@@ -146,6 +146,9 @@ CREATE TABLE IF NOT EXISTS public.testimonials (
 );
 
 -- 2.9 CONSULTATIONS (INQUIRIES / CONTACT MESSAGES)
+-- Note: An asynchronous Supabase Database Webhook triggers the 'send-consultation-notification'
+-- Edge Function on INSERT into this table to dispatch notification emails via Resend.
+-- Email delivery is non-blocking and independent from client-side row persistence.
 CREATE TABLE IF NOT EXISTS public.consultations (
     id TEXT PRIMARY KEY,
     full_name TEXT NOT NULL,
