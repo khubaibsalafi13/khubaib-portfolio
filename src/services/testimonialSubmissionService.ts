@@ -240,8 +240,8 @@ export const testimonialSubmissionService = {
     const submissionLanguage = input.submissionLanguage === 'bn' ? 'bn' : 'en';
     const serviceVal = (input.serviceOrCategory || input.service || '').trim();
 
-    // 4. Send ONLY visitor-allowed fields (no status, reviewed_at, reviewed_by, or non-UUID id)
-    // Supabase will automatically generate a UUID primary key via DEFAULT gen_random_uuid()
+    // 4. Send ONLY visitor-allowed fields (no id, status, reviewed_at, reviewed_by, created_at, updated_at)
+    // Database defaults handle those fields.
     const visitorPayload = {
       client_name: name,
       company: input.company ? input.company.trim() : null,
@@ -252,25 +252,41 @@ export const testimonialSubmissionService = {
       submission_language: submissionLanguage,
       client_image: input.clientImage || null,
       email,
-      consent: true,
+      consent: input.consent === true,
     };
 
     if (isSupabaseConfigured()) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('testimonial_submissions')
-        .insert(visitorPayload)
-        .select()
-        .single();
+        .insert(visitorPayload);
 
       if (error) {
-        console.error('Supabase testimonial_submissions insert error:', error);
+        console.error('Visitor testimonial submission failed:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
         throw new Error('Unable to submit your review at this time. Please try again in a few moments.');
       }
 
-      const created = testimonialSubmissionFromDb(data);
-      updateCacheItem(created);
       notifySubmissionsChanged();
-      return created;
+      return {
+        id: '',
+        clientName: name,
+        company: visitorPayload.company || '',
+        role: visitorPayload.role || '',
+        serviceOrCategory: serviceVal,
+        service: serviceVal,
+        rating,
+        reviewText: review,
+        submissionLanguage,
+        clientImage: input.clientImage || '',
+        email,
+        consent: true,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
     }
 
     // Fallback in-memory representation if not configured
