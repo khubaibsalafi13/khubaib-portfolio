@@ -42,13 +42,25 @@ export const AdminHomepageEditorPage: React.FC = () => {
     setImageError('');
     setUploadingImage(true);
     try {
-      if (!previousHeroImageUrl && content.heroPersonalImage) {
+      console.info('[Hero Upload] Starting upload for selected file:', file.name, 'size:', (file.size / 1024).toFixed(1) + 'KB');
+      
+      const url = await imageService.uploadHeroImage(file);
+      
+      // Strict verification: Reject any Base64 data URL
+      if (!url || !url.startsWith('http') || url.startsWith('data:')) {
+        throw new Error('Upload rejected: Result was not a valid Supabase Storage HTTPS URL.');
+      }
+
+      if (!previousHeroImageUrl && content.heroPersonalImage && content.heroPersonalImage.includes('/storage/v1/object/public/')) {
         setPreviousHeroImageUrl(content.heroPersonalImage);
       }
-      const url = await imageService.uploadHeroImage(file);
+
+      console.info('[Hero Upload] Hero public URL generated successfully:', url);
       handleChange('heroPersonalImage', url);
     } catch (err: any) {
-      setImageError(err.message || 'Failed to upload image. Please ensure size is under 10MB.');
+      console.error('[Hero Upload] Hero Storage upload failed:', err);
+      setImageError(err.message || 'Failed to upload image to Supabase Storage. Current image was kept unchanged.');
+      // Keep existing heroPersonalImage unchanged!
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -57,7 +69,7 @@ export const AdminHomepageEditorPage: React.FC = () => {
 
   const handleRemoveImage = () => {
     if (window.confirm('Remove Hero personal portrait? (The Hero will display an architectural placeholder fallback)')) {
-      if (!previousHeroImageUrl && content.heroPersonalImage) {
+      if (!previousHeroImageUrl && content.heroPersonalImage && content.heroPersonalImage.includes('/storage/v1/object/public/')) {
         setPreviousHeroImageUrl(content.heroPersonalImage);
       }
       handleChange('heroPersonalImage', '');
@@ -70,14 +82,23 @@ export const AdminHomepageEditorPage: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await contentService.updateContent(content);
-    // Only delete old Storage image after database update has succeeded
-    if (previousHeroImageUrl && previousHeroImageUrl !== content.heroPersonalImage) {
-      await imageService.deleteStorageFile(previousHeroImageUrl);
-      setPreviousHeroImageUrl('');
+    setImageError('');
+    try {
+      console.info('[Hero Save] Saving site content. heroPersonalImage:', content.heroPersonalImage);
+      await contentService.updateContent(content);
+      console.info('[Hero Save] Hero database save successful');
+
+      // Only delete old Storage image after database update has succeeded
+      if (previousHeroImageUrl && previousHeroImageUrl !== content.heroPersonalImage) {
+        await imageService.deleteStorageFile(previousHeroImageUrl);
+        setPreviousHeroImageUrl('');
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      console.error('[Hero Save] Hero database save failed:', err);
+      setImageError('Failed to save to Supabase database: ' + (err.message || String(err)));
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
   };
 
   const handleReset = async () => {

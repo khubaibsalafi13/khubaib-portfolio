@@ -42,12 +42,13 @@ export const contentService = {
     setItem(STORAGE_KEY, merged);
 
     if (isSupabaseConfigured()) {
-      try {
-        const dbPayload = siteContentToDb(merged);
-        await supabase.from('site_content').upsert(dbPayload);
-      } catch (err) {
-        console.error('Supabase updateContent error:', err);
+      const dbPayload = siteContentToDb(merged);
+      const { error } = await supabase.from('site_content').upsert(dbPayload);
+      if (error) {
+        console.error('[ContentService] Supabase updateContent error:', error);
+        throw new Error(`Database save failed: ${error.message} (${error.code || 'DB_ERROR'})`);
       }
+      console.info('[ContentService] Supabase site_content upsert succeeded.');
     }
 
     return merged;

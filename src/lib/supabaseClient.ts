@@ -26,31 +26,63 @@ const getEnvVar = (viteKey: string, nextKey: string, localKey: string): string =
   return (env[viteKey] || env[nextKey] || '').trim();
 };
 
-const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'ks_supabase_url');
-const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'ks_supabase_anon_key');
+export const getSupabaseUrl = (): string => {
+  return getEnvVar('VITE_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'ks_supabase_url');
+};
+
+export const getSupabaseAnonKey = (): string => {
+  return getEnvVar('VITE_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'ks_supabase_anon_key');
+};
 
 export const isSupabaseConfigured = (): boolean => {
+  const url = getSupabaseUrl();
+  const key = getSupabaseAnonKey();
   return Boolean(
-    supabaseUrl &&
-    supabaseAnonKey &&
-    supabaseUrl.startsWith('http') &&
-    !supabaseUrl.includes('your-project-id') &&
-    !supabaseAnonKey.includes('your-anon-key')
+    url &&
+    key &&
+    url.startsWith('http') &&
+    !url.includes('your-project-id') &&
+    !key.includes('your-anon-key')
   );
 };
 
-// Create Supabase client instance (with dummy fallback if not yet configured to prevent runtime crash)
-export const supabase: SupabaseClient = createClient(
-  isSupabaseConfigured() ? supabaseUrl : 'https://placeholder.supabase.co',
-  isSupabaseConfigured() ? supabaseAnonKey : 'placeholder-anon-key',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
+let activeClient: SupabaseClient | null = null;
+let lastUrl = '';
+let lastKey = '';
+
+export const getActiveSupabaseClient = (): SupabaseClient => {
+  const url = getSupabaseUrl();
+  const key = getSupabaseAnonKey();
+  const configured = isSupabaseConfigured();
+
+  const targetUrl = configured ? url : 'https://placeholder.supabase.co';
+  const targetKey = configured ? key : 'placeholder-anon-key';
+
+  if (!activeClient || lastUrl !== targetUrl || lastKey !== targetKey) {
+    activeClient = createClient(targetUrl, targetKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+    lastUrl = targetUrl;
+    lastKey = targetKey;
   }
-);
+  return activeClient;
+};
+
+// Proxy to guarantee all imports of 'supabase' transparently use the live client with active credentials
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getActiveSupabaseClient();
+    const value = (client as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
 
 // Helper to update custom runtime credentials from admin settings
 export const setRuntimeSupabaseConfig = (url: string, anonKey: string): void => {
@@ -61,12 +93,16 @@ export const setRuntimeSupabaseConfig = (url: string, anonKey: string): void => 
     localStorage.removeItem('ks_supabase_url');
     localStorage.removeItem('ks_supabase_anon_key');
   }
+  // Reset cached instance so next access initializes with updated credentials
+  activeClient = null;
+  lastUrl = '';
+  lastKey = '';
 };
 
 export const getSupabaseConfig = () => {
   return {
-    url: supabaseUrl,
-    anonKey: supabaseAnonKey,
+    url: getSupabaseUrl(),
+    anonKey: getSupabaseAnonKey(),
     isConfigured: isSupabaseConfigured(),
   };
 };

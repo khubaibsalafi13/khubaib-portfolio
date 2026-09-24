@@ -111,10 +111,13 @@ export const AdminPortfolioPage: React.FC = () => {
     if (!e.target.files?.[0] || !editingProject) return;
     setUploading(true);
     try {
-      if (!replacedCoverImageUrl && editingProject.coverImage) {
+      if (!replacedCoverImageUrl && editingProject.coverImage && editingProject.coverImage.includes('/storage/v1/object/public/')) {
         setReplacedCoverImageUrl(editingProject.coverImage);
       }
       const url = await imageService.uploadProjectCover(e.target.files[0]);
+      if (!url || !url.startsWith('http') || url.startsWith('data:')) {
+        throw new Error('Upload rejected: Result was not a valid Supabase Storage HTTPS URL.');
+      }
       setEditingProject((prev) => (prev ? { ...prev, coverImage: url } : null));
     } catch (err: any) {
       alert(err.message || 'Image upload failed');

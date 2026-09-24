@@ -227,12 +227,32 @@ export const imageService = {
   /**
    * General pipeline: Optimizes an image and uploads to Supabase Storage 'portfolio-images' bucket.
    * Returns a persistent CDN URL.
+   * IMPORTANT: Never falls back to Base64 data URLs. If Storage upload fails, it throws an error.
    */
   async optimizeAndUpload(file: File, profile: ImageOptimizationProfile): Promise<string> {
-    // 1. Optimize client-side
+    // 1. Verify Supabase configuration before processing
+    if (!isSupabaseConfigured()) {
+      const err = new Error(
+        'Supabase Storage is not configured. Please enter your Supabase URL and Anon Key in Admin Settings before uploading images.'
+      );
+      console.error('[ImageService] Supabase not configured:', err.message);
+      throw err;
+    }
+
+    // 2. Optimize client-side
     const { blob, mimeType, extension } = await this.optimizeFile(file, profile);
 
-    // 2. Build unique object key
+    if (profile.folder === 'hero') {
+      console.info(
+        `[Hero Upload] Hero optimization complete (${(blob.size / 1024).toFixed(1)}KB, ${mimeType})`
+      );
+    } else {
+      console.info(
+        `[ImageService] ${profile.folder} optimization complete (${(blob.size / 1024).toFixed(1)}KB, ${mimeType})`
+      );
+    }
+
+    // 3. Build unique object key
     const sanitizedBase = file.name
       .replace(/\.[^/.]+$/, '')
       .replace(/[^a-zA-Z0-9_-]/g, '_')
@@ -242,39 +262,55 @@ export const imageService = {
     const randomSuffix = Math.random().toString(36).substring(2, 7);
     const filePath = `${profile.folder}/${timestamp}_${sanitizedBase}_${randomSuffix}.${extension}`;
 
-    // 3. Upload to Supabase Storage if configured
-    if (isSupabaseConfigured()) {
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(filePath, blob, {
-          contentType: mimeType,
-          cacheControl: '31536000', // 1-year immutable cache
-          upsert: false,
-        });
-
-      if (error) {
-        console.error('[ImageService] Supabase Storage upload error:', error);
-        throw new Error(
-          `Supabase Storage upload failed: ${error.message}. Please ensure the '${BUCKET_NAME}' bucket exists with public read policy.`
-        );
-      }
-
-      const { data: publicUrlData } = supabase.storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(filePath);
-
-      console.info(`[ImageService] Uploaded optimized ${profile.folder} image:`, publicUrlData.publicUrl);
-      return publicUrlData.publicUrl;
+    if (profile.folder === 'hero') {
+      console.info(`[Hero Upload] Hero Storage upload started (${BUCKET_NAME}/${filePath})`);
+    } else {
+      console.info(`[ImageService] ${profile.folder} Storage upload started (${BUCKET_NAME}/${filePath})`);
     }
 
-    // 4. Fallback for offline dev / prototype environment without Supabase credentials
-    console.warn('[ImageService] Supabase not configured. Falling back to local WebP data URL.');
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read fallback data URL.'));
-      reader.readAsDataURL(blob);
-    });
+    // 4. Upload to Supabase Storage bucket
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, blob, {
+        contentType: mimeType,
+        cacheControl: '31536000', // 1-year immutable cache
+        upsert: false,
+      });
+
+    if (error) {
+      if (profile.folder === 'hero') {
+        console.error('[Hero Upload] Hero Supabase Storage error:', error);
+      } else {
+        console.error(`[ImageService] ${profile.folder} Supabase Storage error:`, error);
+      }
+      throw new Error(
+        `Supabase Storage upload failed: ${error.message}. Please verify the '${BUCKET_NAME}' bucket exists with public read policy.`
+      );
+    }
+
+    if (profile.folder === 'hero') {
+      console.info('[Hero Upload] Hero Storage upload successful');
+    } else {
+      console.info(`[ImageService] ${profile.folder} Storage upload successful`);
+    }
+
+    // 5. Retrieve public HTTPS URL
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicUrlData.publicUrl;
+    if (!publicUrl || !publicUrl.startsWith('http')) {
+      throw new Error(`Failed to generate public HTTPS Storage URL for ${filePath}`);
+    }
+
+    if (profile.folder === 'hero') {
+      console.info('[Hero Upload] Hero public URL generated:', publicUrl);
+    } else {
+      console.info(`[ImageService] ${profile.folder} public URL generated:`, publicUrl);
+    }
+
+    return publicUrl;
   },
 
   /**

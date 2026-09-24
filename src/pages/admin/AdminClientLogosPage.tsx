@@ -72,10 +72,13 @@ export const AdminClientLogosPage: React.FC = () => {
     if (!e.target.files?.[0] || !editing) return;
     setUploading(true);
     try {
-      if (!replacedLogoUrl && editing.logoImage) {
+      if (!replacedLogoUrl && editing.logoImage && editing.logoImage.includes('/storage/v1/object/public/')) {
         setReplacedLogoUrl(editing.logoImage);
       }
       const url = await imageService.uploadClientLogo(e.target.files[0]);
+      if (!url || !url.startsWith('http') || url.startsWith('data:')) {
+        throw new Error('Upload rejected: Result was not a valid Supabase Storage HTTPS URL.');
+      }
       setEditing((prev) => (prev ? { ...prev, logoImage: url } : null));
     } catch (err: any) {
       alert(err.message || 'Upload failed');
