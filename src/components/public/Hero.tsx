@@ -14,14 +14,23 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
+  const hasLiveImage = Boolean(
+    content.heroPersonalImage &&
+    content.heroPersonalImage.trim() !== '' &&
+    content.heroPersonalImage !== '/assets/khubaib_portrait.jpg'
+  );
+
   useEffect(() => {
-    console.info('[Public Hero] rendered hero src:', content.heroPersonalImage);
+    if (!hasLiveImage) {
+      setImageLoaded(false);
+      return;
+    }
     if (imageRef.current?.complete) {
       setImageLoaded(true);
     } else {
       setImageLoaded(false);
     }
-  }, [content.heroPersonalImage]);
+  }, [content.heroPersonalImage, hasLiveImage]);
 
   const eyebrow = localized(content.heroEyebrowEn, content.heroEyebrowBn);
   const headline = localized(content.heroTitleEn, content.heroTitleBn);
@@ -96,23 +105,23 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                   </span>
                 </div>
 
-                {/* Main Visual: Personal Photo or Architectural Fallback */}
-                {content.heroPersonalImage ? (
-                  <div className="relative flex-1 overflow-hidden bg-[var(--bg-card-subtle)]">
-                    {/* Lightweight branded placeholder while image decodes */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-none z-0 ${
-                        imageLoaded ? 'opacity-0' : 'opacity-100'
-                      }`}
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold animate-pulse mb-2">
-                        KS
-                      </div>
-                      <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
-                        Loading Visual...
-                      </span>
+                {/* Main Visual: Branded Placeholder Frame with Live Image Fade-in */}
+                <div className="relative flex-1 overflow-hidden bg-[var(--bg-card-subtle)]">
+                  {/* Lightweight branded placeholder while image decodes or loads */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-none z-0 ${
+                      imageLoaded ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold animate-pulse mb-2">
+                      KS
                     </div>
+                    <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                      {hasLiveImage ? 'Loading Visual...' : 'Designer Profile'}
+                    </span>
+                  </div>
 
+                  {hasLiveImage && (
                     <img
                       ref={imageRef}
                       src={content.heroPersonalImage}
@@ -126,57 +135,41 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                         imageLoaded ? 'opacity-100' : 'opacity-0'
                       }`}
                     />
-                    {/* Subtle gradient overlay for typographic legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card-subtle)] via-transparent to-transparent opacity-90 pointer-events-none z-10" />
+                  )}
+                  {/* Subtle gradient overlay for typographic legibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card-subtle)] via-transparent to-transparent opacity-90 pointer-events-none z-10" />
 
-                    {/* Floating role pill */}
-                    <div className="absolute top-3 left-3 bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] px-2.5 py-1 rounded-md text-[10px] font-mono tracking-wider text-[var(--accent)] uppercase font-semibold shadow-sm z-10">
-                      GRAPHIC & BRAND DESIGNER
-                    </div>
+                  {/* Floating role pill */}
+                  <div className="absolute top-3 left-3 bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] px-2.5 py-1 rounded-md text-[10px] font-mono tracking-wider text-[var(--accent)] uppercase font-semibold shadow-sm z-10">
+                    GRAPHIC & BRAND DESIGNER
+                  </div>
 
-                    {/* Bottom identity panel */}
-                    <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-[var(--bg-card)]/92 backdrop-blur-md border border-[var(--border-medium)] shadow-md z-10">
-                      <div className="flex items-center justify-between gap-2">
-                        <div>
-                          <h4 className="text-sm font-bold text-[var(--text-heading)] tracking-wide">
-                            {localized('Khubaib Salafi', 'খুবাইব সালাফী')}
-                          </h4>
-                          <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1 mt-0.5 font-medium">
-                            {personalTag}
-                          </p>
-                        </div>
-                        <a
-                          href="#about"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            smoothScrollTo('#about', true);
-                          }}
-                          className="p-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)] transition-colors shrink-0 cursor-pointer"
-                          title="About Khubaib Salafi"
-                          aria-label="View biography"
-                        >
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </a>
+                  {/* Bottom identity panel */}
+                  <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-[var(--bg-card)]/92 backdrop-blur-md border border-[var(--border-medium)] shadow-md z-10">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <h4 className="text-sm font-bold text-[var(--text-heading)] tracking-wide">
+                          {localized('Khubaib Salafi', 'খুবাইব সালাফী')}
+                        </h4>
+                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1 mt-0.5 font-medium">
+                          {personalTag}
+                        </p>
                       </div>
+                      <a
+                        href="#about"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          smoothScrollTo('#about', true);
+                        }}
+                        className="p-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)] transition-colors shrink-0 cursor-pointer"
+                        title="About Khubaib Salafi"
+                        aria-label="View biography"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </a>
                     </div>
                   </div>
-                ) : (
-                  /* Fallback Architectural Placeholder */
-                  <div className="relative flex-1 flex flex-col items-center justify-center p-6 text-center bg-subtle-grid">
-                    <div className="w-20 h-20 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-medium)] flex items-center justify-center text-[var(--accent)] shadow-inner mb-4">
-                      <User className="w-9 h-9 opacity-80" />
-                    </div>
-                    <h4 className="text-base font-bold text-[var(--text-heading)] mb-1">
-                      {localized('Khubaib Salafi', 'খুবাইব সালাফী')}
-                    </h4>
-                    <p className="text-xs text-[var(--text-secondary)] max-w-xs font-mono">
-                      {personalTag}
-                    </p>
-                    <span className="mt-4 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-[10px] font-mono uppercase tracking-wider">
-                      AVAILABLE FOR SELECTED WORK
-                    </span>
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           </div>

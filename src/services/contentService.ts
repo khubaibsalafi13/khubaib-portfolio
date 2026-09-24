@@ -12,13 +12,17 @@ const STORAGE_KEY = 'ks_portfolio_content';
 
 export const contentService = {
   getContent(): SiteContent {
-    return getItem<SiteContent>(STORAGE_KEY, initialSiteContent);
+    const content = getItem<SiteContent>(STORAGE_KEY, initialSiteContent);
+    // Prevent legacy hardcoded seed portrait path from acting as initial visual flash
+    if (content.heroPersonalImage === '/assets/khubaib_portrait.jpg') {
+      return { ...content, heroPersonalImage: '' };
+    }
+    return content;
   },
 
   async getContentAsync(): Promise<SiteContent> {
     if (isSupabaseConfigured()) {
       try {
-        console.info('[Public Hero] Supabase content request started');
         const { data, error } = await supabase
           .from('site_content')
           .select('*')
@@ -26,21 +30,19 @@ export const contentService = {
           .maybeSingle();
 
         if (error) {
-          console.warn('[Public Hero] Supabase site_content query error:', error.message);
+          console.warn('[Supabase] site_content query error:', error.message);
         }
 
         if (!error && data) {
-          console.info('[Public Hero] Supabase content received');
           const content = siteContentFromDb(data);
-          console.info('[Public Hero] database hero URL:', content.heroPersonalImage);
           setItem(STORAGE_KEY, content);
           return content;
         }
       } catch (err) {
-        console.warn('[Public Hero] Supabase getContentAsync network error:', err);
+        console.warn('[Supabase] getContentAsync network error:', err);
       }
     } else {
-      console.warn('[Public Hero] Supabase is not configured; serving fallback content.');
+      console.warn('[Supabase] Not configured; serving local content.');
     }
     return this.getContent();
   },

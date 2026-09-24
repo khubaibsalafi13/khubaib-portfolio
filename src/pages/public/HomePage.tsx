@@ -37,11 +37,7 @@ import {
 
 export const HomePage: React.FC = () => {
   // Initial state from cached data for fast paint
-  const [content, setContent] = useState<SiteContent>(() => {
-    const initial = contentService.getContent();
-    console.info('[Public Hero] initial source:', initial.heroPersonalImage);
-    return initial;
-  });
+  const [content, setContent] = useState<SiteContent>(() => contentService.getContent());
   const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
   const [projects, setProjects] = useState<Project[]>(() => projectService.getPublished());
   const [heroProject, setHeroProject] = useState<Project | undefined>(() => projectService.getHeroFeatured());

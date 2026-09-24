@@ -285,7 +285,7 @@ export const initialSiteContent: SiteContent = {
   heroTitleBn: 'অনন্য ও অর্থবহ ভিজ্যুয়াল অভিজ্ঞতা সৃষ্টি।',
   heroDescriptionEn: 'Creating thoughtful visual solutions across brand identity, graphic design, digital design and UI / Web Design.',
   heroDescriptionBn: 'ব্র্যান্ড আইডেন্টিটি, গ্রাফিক ডিজাইন, ডিজিটাল ডিজাইন এবং ইউআই/ওয়েব ডিজাইনের মাধ্যমে সুচিন্তিত ভিজ্যুয়াল সল্যুশন তৈরি করছি।',
-  heroPersonalImage: '/assets/khubaib_portrait.jpg',
+  heroPersonalImage: '',
   heroPersonalImageTagEn: 'Khubaib Salafi // Visual Designer',
   heroPersonalImageTagBn: 'খুবাইব সালাফী // ভিজ্যুয়াল ডিজাইনার',
   primaryCtaEn: 'VIEW MY WORK',
