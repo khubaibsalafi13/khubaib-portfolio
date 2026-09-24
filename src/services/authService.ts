@@ -26,9 +26,15 @@ export const authService = {
           };
           setItem(AUTH_KEY, user);
           return user;
+        } else {
+          // If Supabase has no active session or encountered error, clear cached user
+          removeItem(AUTH_KEY);
+          return null;
         }
       } catch (err) {
         console.warn('Supabase restoreSession error:', err);
+        removeItem(AUTH_KEY);
+        return null;
       }
     }
     return this.getCurrentUser();
@@ -54,13 +60,16 @@ export const authService = {
           };
           setItem(AUTH_KEY, user);
           return { success: true };
+        } else if (error) {
+          return { success: false, error: error.message };
         }
       } catch (err: any) {
-        console.warn('Supabase Auth attempt failed, checking fallback:', err?.message);
+        console.warn('Supabase Auth attempt failed:', err?.message);
+        return { success: false, error: err?.message || 'Authentication failed' };
       }
     }
 
-    // 2. Prototype fallback (for demo access and testing before Supabase Auth is provisioned)
+    // 2. Prototype fallback (ONLY when Supabase is not configured)
     if (
       (trimmedUser === 'admin' || trimmedUser === 'khubaib' || trimmedUser.includes('@')) &&
       pass.length >= 4
@@ -76,7 +85,7 @@ export const authService = {
 
     return {
       success: false,
-      error: 'Invalid credentials. Use username "admin" and password (min 4 chars), or your Supabase Auth credentials.',
+      error: 'Invalid credentials. Use your Supabase Auth credentials or check your connection.',
     };
   },
 

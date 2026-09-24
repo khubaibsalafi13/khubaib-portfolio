@@ -273,7 +273,7 @@ export const imageService = {
       .from(BUCKET_NAME)
       .upload(filePath, blob, {
         contentType: mimeType,
-        cacheControl: '31536000', // 1-year immutable cache
+        cacheControl: '31536000, immutable', // 1-year immutable cache for unique versioned assets
         upsert: false,
       });
 

@@ -65,9 +65,6 @@ export const consultationService = {
       createdAt: new Date().toISOString(),
     };
 
-    all.unshift(newConsultation);
-    setItem(STORAGE_KEY, all);
-
     // Insert directly into Supabase (allowed for public users via RLS policy)
     if (isSupabaseConfigured()) {
       try {
@@ -75,11 +72,16 @@ export const consultationService = {
         const { error } = await supabase.from('consultations').insert([dbPayload]);
         if (error) {
           console.error('Supabase consultation insert error:', error.message);
+          throw new Error('Unable to submit your request at this time. Please try again.');
         }
       } catch (err) {
         console.error('Supabase consultation submit exception:', err);
+        throw err instanceof Error ? err : new Error('Unable to submit consultation request.');
       }
     }
+
+    all.unshift(newConsultation);
+    setItem(STORAGE_KEY, all);
 
     return newConsultation;
   },
@@ -90,36 +92,35 @@ export const consultationService = {
     if (idx < 0) {
       throw new Error('Consultation request not found');
     }
-    all[idx].status = status;
-    setItem(STORAGE_KEY, all);
 
     if (isSupabaseConfigured()) {
-      try {
-        const { error } = await supabase
-          .from('consultations')
-          .update({ status })
-          .eq('id', id);
-        if (error) console.error('Supabase updateStatus error:', error.message);
-      } catch (err) {
-        console.error('Supabase updateStatus exception:', err);
+      const { error } = await supabase
+        .from('consultations')
+        .update({ status })
+        .eq('id', id);
+      if (error) {
+        console.error('Supabase updateStatus error:', error.message);
+        throw new Error('Failed to update status: ' + error.message);
       }
     }
+
+    all[idx].status = status;
+    setItem(STORAGE_KEY, all);
 
     return all[idx];
   },
 
   async delete(id: string): Promise<void> {
-    const all = this.getAll().filter((c) => c.id !== id);
-    setItem(STORAGE_KEY, all);
-
     if (isSupabaseConfigured()) {
-      try {
-        const { error } = await supabase.from('consultations').delete().eq('id', id);
-        if (error) console.error('Supabase delete consultation error:', error.message);
-      } catch (err) {
-        console.error('Supabase delete consultation exception:', err);
+      const { error } = await supabase.from('consultations').delete().eq('id', id);
+      if (error) {
+        console.error('Supabase delete consultation error:', error.message);
+        throw new Error('Failed to delete consultation: ' + error.message);
       }
     }
+
+    const all = this.getAll().filter((c) => c.id !== id);
+    setItem(STORAGE_KEY, all);
   },
 
   getStats() {

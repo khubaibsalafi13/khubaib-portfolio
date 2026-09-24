@@ -6,18 +6,30 @@ var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
 var app = express();
 var port = parseInt(process.env.PORT || "3000", 10);
-app.get("/healthz", (_req, res) => {
+app.get(["/healthz", "/health", "/livez", "/readyz"], (_req, res) => {
   res.status(200).send("OK");
 });
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(path.join(__dirname, "dist"), { maxAge: "1h" }));
 app.get("*", (_req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  const indexPath = path.join(__dirname, "dist", "index.html");
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(200).send('<!doctype html><html><head><title>Khubaib Salafi Portfolio</title></head><body><div id="root"></div></body></html>');
+    }
+  });
 });
 var server = app.listen(port, "0.0.0.0", () => {
   console.log(`Production server running on http://0.0.0.0:${port}`);
 });
 process.on("SIGTERM", () => {
   console.log("SIGTERM signal received: closing server");
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+});
+process.on("SIGINT", () => {
+  console.log("SIGINT signal received: closing server");
   server.close(() => {
     console.log("Server closed");
     process.exit(0);

@@ -10,6 +10,25 @@ import {
 
 const STORAGE_KEY = 'ks_portfolio_projects';
 
+/**
+ * Minimal columns required for Homepage rendering (Selected Work Carousel & AllWork Cards).
+ * Excludes heavy detail-page fields (gallery_images, overview_en/bn, concept_en/bn).
+ */
+export const HOMEPAGE_PROJECT_COLUMNS =
+  'id, slug, title_en, title_bn, short_description_en, short_description_bn, client, year, category, cover_image, featured, hero_featured, published, sort_order, role_en, role_bn';
+
+/**
+ * Safely strips heavy Base64 strings before storing in localStorage to prevent QuotaExceededError.
+ */
+function sanitizeForCache(projects: Project[]): Project[] {
+  return projects.map((p) => {
+    if (p.coverImage && p.coverImage.startsWith('data:image')) {
+      return { ...p, coverImage: '' };
+    }
+    return p;
+  });
+}
+
 export const projectService = {
   getAll(): Project[] {
     return getItem<Project[]>(STORAGE_KEY, initialProjects);
@@ -25,7 +44,7 @@ export const projectService = {
 
         if (!error && data) {
           const list = data.map(projectFromDb);
-          setItem(STORAGE_KEY, list);
+          setItem(STORAGE_KEY, sanitizeForCache(list));
           return list;
         } else if (error) {
           console.warn('Supabase fetch projects error:', error.message);
@@ -44,10 +63,13 @@ export const projectService = {
       .sort((a, b) => a.sortOrder - b.sortOrder);
   },
 
+  /**
+   * Full published projects query (used for project details and deep navigation).
+   */
   async getPublishedAsync(): Promise<Project[]> {
     if (isSupabaseConfigured()) {
       try {
-        console.info('[Projects] Supabase request started');
+        console.info('[Projects] Supabase full published request started');
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -62,8 +84,8 @@ export const projectService = {
             const preview = firstCover.length > 50 ? firstCover.substring(0, 50) + '...' : firstCover;
             console.info('[Projects] first live cover:', preview);
           }
-          // Overwrite local cache with authoritative live data
-          setItem(STORAGE_KEY, liveList);
+          // Overwrite local cache with authoritative live data (sanitized of huge Base64)
+          setItem(STORAGE_KEY, sanitizeForCache(liveList));
           return liveList;
         } else if (error) {
           console.warn('[Supabase] fetch published projects error:', error.message);
@@ -77,14 +99,103 @@ export const projectService = {
     return this.getPublished();
   },
 
+  /**
+   * Fast-path dedicated query for the Carousel's primary active featured project.
+   * Returns immediately with the single highest-priority featured/hero_featured project
+   * so the Carousel can mount its active visual and trigger early cover preloading.
+   */
+  async getFirstFeaturedForHomeAsync(): Promise<Project | null> {
+    if (isSupabaseConfigured()) {
+      try {
+        console.info('[Projects] Fast-path active featured project query started');
+        const { data, error } = await supabase
+          .from('projects')
+          .select(HOMEPAGE_PROJECT_COLUMNS)
+          .eq('published', true)
+          .or('featured.eq.true,hero_featured.eq.true')
+          .order('sort_order', { ascending: true })
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const first = projectFromDb(data[0]);
+          console.info('[Projects] active featured project received:', first.slug);
+          return first;
+        } else if (error) {
+          console.warn('[Supabase] fetch active featured error:', error.message);
+        }
+      } catch (err) {
+        console.warn('[Supabase] getFirstFeaturedForHomeAsync exception:', err);
+      }
+    }
+    const hero = this.getHeroFeatured();
+    return hero || null;
+  },
+
+  /**
+   * Dedicated lightweight query for the Selected Work Carousel.
+   * Filters specifically by featured / hero_featured and selects only minimal card fields.
+   */
+  async getFeaturedForHomeAsync(): Promise<Project[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        console.info('[Projects] Supabase featured carousel query started');
+        const { data, error } = await supabase
+          .from('projects')
+          .select(HOMEPAGE_PROJECT_COLUMNS)
+          .eq('published', true)
+          .or('featured.eq.true,hero_featured.eq.true')
+          .order('sort_order', { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          const liveList = data.map(projectFromDb);
+          console.info('[Projects] live featured carousel count:', liveList.length);
+          return liveList;
+        } else if (error) {
+          console.warn('[Supabase] fetch featured carousel error:', error.message);
+        }
+      } catch (err) {
+        console.warn('[Supabase] getFeaturedForHomeAsync exception:', err);
+      }
+    }
+    return this.getFeatured();
+  },
+
+  /**
+   * Dedicated lightweight query for the AllWork portfolio grid on the Homepage.
+   * Selects only minimal card fields and avoids downloading heavy detail columns.
+   */
+  async getPublishedForHomeAsync(): Promise<Project[]> {
+    if (isSupabaseConfigured()) {
+      try {
+        console.info('[Projects] Supabase lightweight AllWork query started');
+        const { data, error } = await supabase
+          .from('projects')
+          .select(HOMEPAGE_PROJECT_COLUMNS)
+          .eq('published', true)
+          .order('sort_order', { ascending: true });
+
+        if (!error && data) {
+          const liveList = data.map(projectFromDb);
+          console.info('[Projects] live AllWork count:', liveList.length);
+          setItem(STORAGE_KEY, sanitizeForCache(liveList));
+          return liveList;
+        } else if (error) {
+          console.warn('[Supabase] fetch lightweight published error:', error.message);
+        }
+      } catch (err) {
+        console.warn('[Supabase] getPublishedForHomeAsync exception:', err);
+      }
+    }
+    return this.getPublished();
+  },
+
   getFeatured(): Project[] {
     const published = this.getPublished();
     return published.filter((p) => p.featured);
   },
 
   async getFeaturedAsync(): Promise<Project[]> {
-    const published = await this.getPublishedAsync();
-    return published.filter((p) => p.featured);
+    return this.getFeaturedForHomeAsync();
   },
 
   getHeroFeatured(): Project | undefined {
@@ -95,10 +206,24 @@ export const projectService = {
   },
 
   async getHeroFeaturedAsync(): Promise<Project | undefined> {
-    const published = await this.getPublishedAsync();
-    const hero = published.find((p) => p.heroFeatured);
-    if (hero) return hero;
-    return published[0];
+    if (isSupabaseConfigured()) {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select(HOMEPAGE_PROJECT_COLUMNS)
+          .eq('published', true)
+          .eq('hero_featured', true)
+          .order('sort_order', { ascending: true })
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          return projectFromDb(data[0]);
+        }
+      } catch (err) {
+        console.warn('[Supabase] getHeroFeaturedAsync exception:', err);
+      }
+    }
+    return this.getHeroFeatured();
   },
 
   getBySlug(slug: string): Project | undefined {

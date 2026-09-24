@@ -193,7 +193,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       setActiveImageLoaded(false);
       return;
     }
-    if (activeImgRef.current?.complete) {
+    if (activeImgRef.current?.complete && (activeImgRef.current?.naturalWidth || 0) > 0) {
       setActiveImageLoaded(true);
     } else {
       setActiveImageLoaded(false);
@@ -316,7 +316,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               onClick={prevSlide}
               className="hidden lg:block absolute left-[-15%] xl:left-[-12%] w-[45%] h-[82%] rounded-2xl overflow-hidden bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] opacity-35 hover:opacity-60 scale-90 cursor-pointer transition-all duration-500 z-10 filter blur-[0.5px]"
             >
-              {prevProject?.coverImage && !prevProject.coverImage.includes('images.unsplash.com') && (
+              {prevProject?.coverImage && isHydrated && (
                 <img
                   src={prevProject.coverImage}
                   alt={localized(prevProject.titleEn, prevProject.titleBn)}
@@ -361,17 +361,17 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                     </div>
                   </div>
 
-                  {activeProject?.coverImage && !activeProject.coverImage.includes('images.unsplash.com') && (
+                  {activeProject?.coverImage && isHydrated && (
                     <img
                       ref={activeImgRef}
                       key={activeProject.id + activeProject.coverImage}
                       src={activeProject.coverImage}
                       alt={localized(activeProject.titleEn, activeProject.titleBn)}
                       loading="eager"
-                      // @ts-ignore fetchPriority is valid HTML attribute
                       fetchPriority="high"
                       decoding="async"
                       onLoad={() => setActiveImageLoaded(true)}
+                      onError={() => setActiveImageLoaded(true)}
                       className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-105 relative z-0 ${
                         activeImageLoaded ? 'opacity-100' : 'opacity-0'
                       }`}
@@ -430,7 +430,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               onClick={nextSlide}
               className="hidden lg:block absolute right-[-15%] xl:right-[-12%] w-[45%] h-[82%] rounded-2xl overflow-hidden bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] opacity-35 hover:opacity-60 scale-90 cursor-pointer transition-all duration-500 z-10 filter blur-[0.5px]"
             >
-              {nextProject?.coverImage && !nextProject.coverImage.includes('images.unsplash.com') && (
+              {nextProject?.coverImage && isHydrated && (
                 <img
                   src={nextProject.coverImage}
                   alt={localized(nextProject.titleEn, nextProject.titleBn)}

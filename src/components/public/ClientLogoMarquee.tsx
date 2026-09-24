@@ -7,12 +7,14 @@ interface ClientLogoMarqueeProps {
   logos: ClientLogo[];
   titleEn?: string;
   titleBn?: string;
+  speed?: number;
 }
 
 export const ClientLogoMarquee: React.FC<ClientLogoMarqueeProps> = ({
   logos,
   titleEn = 'BRANDS I HAVE WORKED WITH',
   titleBn = 'যাদের সাথে কাজ করেছি',
+  speed = 25,
 }) => {
   const { localized } = useLanguage();
   const { isDark } = useTheme();
@@ -41,7 +43,10 @@ export const ClientLogoMarquee: React.FC<ClientLogoMarqueeProps> = ({
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[var(--bg-card-subtle)] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[var(--bg-card-subtle)] to-transparent z-10 pointer-events-none" />
 
-        <div className="flex w-max items-center animate-marquee hover:[animation-play-state:paused]">
+        <div
+          className="flex w-max items-center animate-marquee hover:[animation-play-state:paused]"
+          style={{ animationDuration: `${speed || 25}s` }}
+        >
           {repeatedLogos.map((logo, idx) => (
             <div
               key={`${logo.id}-${idx}`}

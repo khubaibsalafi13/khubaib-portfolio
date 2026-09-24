@@ -40,12 +40,22 @@ export const HomePage: React.FC = () => {
   // Initial state from cached data for fast paint
   const [content, setContent] = useState<SiteContent>(() => contentService.getContent());
   const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
+  
+  // Dedicated hydration state for Carousel (Selected Work)
+  const [featuredHydrated, setFeaturedHydrated] = useState(false);
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>(() => {
+    const list = projectService.getFeatured();
+    return list;
+  });
+
+  // Dedicated hydration state for AllWork portfolio grid
   const [projectsHydrated, setProjectsHydrated] = useState(false);
   const [projects, setProjects] = useState<Project[]>(() => {
     const list = projectService.getPublished();
     console.info('[Projects] initial source:', isSupabaseConfigured() ? 'pending_live_hydration' : 'fallback');
     return list;
   });
+
   const [heroProject, setHeroProject] = useState<Project | undefined>(() => projectService.getHeroFeatured());
   const [categories, setCategories] = useState<Category[]>(() => categoryService.getAll());
   const [services, setServices] = useState<Service[]>(() => servicesService.getPublished());
@@ -54,9 +64,32 @@ export const HomePage: React.FC = () => {
   const [clientLogos, setClientLogos] = useState<ClientLogo[]>(() => clientLogoService.getPublished());
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => testimonialService.getPublished());
 
-  // Dynamic Supabase data hydration on mount (Fast-path priority for Hero Content)
+  // Dynamic Supabase data hydration on mount (Instant parallel prioritized pathways)
   useEffect(() => {
     let isMounted = true;
+
+    // Helper: Trigger immediate browser download & decode of the active cover image
+    const preloadCoverImage = (coverUrl?: string) => {
+      if (!coverUrl || coverUrl.includes('images.unsplash.com')) return;
+      try {
+        if (coverUrl.startsWith('http')) {
+          const existing = document.querySelector(`link[rel="preload"][href="${coverUrl}"]`);
+          if (!existing) {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = coverUrl;
+            link.setAttribute('fetchpriority', 'high');
+            document.head.appendChild(link);
+          }
+        }
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = coverUrl;
+      } catch (err) {
+        console.warn('Cover image preload exception:', err);
+      }
+    };
 
     // 1. FAST PATH: Hydrate Hero & Site Content immediately without waiting for secondary tables
     contentService
@@ -78,22 +111,58 @@ export const HomePage: React.FC = () => {
       })
       .catch((err) => console.warn('Error hydrating SiteSettings:', err));
 
-    // 3. Hydrate Projects & Hero Project for Spotlight and Showcase
+    // 3A. FAST-TRACK CAROUSEL: Fetch primary active featured project immediately
+    // Enables active slide mounting and early cover image preloading before any scroll
     projectService
-      .getPublishedAsync()
+      .getFirstFeaturedForHomeAsync()
+      .then((firstFeatured) => {
+        if (isMounted && firstFeatured) {
+          console.info('[Projects] early active featured available:', firstFeatured.slug);
+          setFeaturedProjects((prev) => {
+            if (prev.length <= 1 || !prev.some((p) => p.id === firstFeatured.id)) {
+              return [firstFeatured];
+            }
+            return prev;
+          });
+          setFeaturedHydrated(true);
+          setHeroProject(firstFeatured);
+          preloadCoverImage(firstFeatured.coverImage);
+        }
+      })
+      .catch((err) => console.warn('Error hydrating first featured project:', err));
+
+    // 3B. CAROUSEL DATASET: Fetch full featured projects list for carousel navigation
+    projectService
+      .getFeaturedForHomeAsync()
+      .then((latestFeatured) => {
+        if (isMounted) {
+          if (latestFeatured && latestFeatured.length > 0) {
+            setFeaturedProjects(latestFeatured);
+            setFeaturedHydrated(true);
+            const hero = latestFeatured.find((p) => p.heroFeatured) || latestFeatured[0];
+            setHeroProject(hero);
+            preloadCoverImage(latestFeatured[0]?.coverImage);
+          } else if (!isSupabaseConfigured()) {
+            setFeaturedHydrated(true);
+          }
+        }
+      })
+      .catch((err) => console.warn('Error hydrating Featured Projects:', err));
+
+    // 3C. ALL-WORK GRID: Hydrate published projects for the AllWork portfolio section
+    projectService
+      .getPublishedForHomeAsync()
       .then((latestProjects) => {
         if (isMounted) {
           if (latestProjects && latestProjects.length > 0) {
             setProjects(latestProjects);
             setProjectsHydrated(true);
-            const hero = latestProjects.find((p) => p.heroFeatured) || latestProjects[0];
-            setHeroProject(hero);
           } else if (!isSupabaseConfigured()) {
             setProjectsHydrated(true);
           }
         }
       })
-      .catch((err) => console.warn('Error hydrating Projects:', err));
+      .catch((err) => console.warn('Error hydrating AllWork Projects:', err));
 
     // 4. Hydrate remaining secondary datasets
     Promise.all([
@@ -162,8 +231,8 @@ export const HomePage: React.FC = () => {
             </h2>
           </div>
           <ProjectCarousel
-            projects={projects}
-            isHydrated={projectsHydrated}
+            projects={featuredProjects.length > 0 ? featuredProjects : projects}
+            isHydrated={featuredHydrated}
             autoplay={settings.carouselAutoplay}
             intervalSeconds={settings.carouselInterval}
           />
@@ -191,6 +260,7 @@ export const HomePage: React.FC = () => {
           logos={clientLogos}
           titleEn={content.clientLogosTitleEn}
           titleBn={content.clientLogosTitleBn}
+          speed={settings.logoMarqueeSpeed}
         />
 
         {/* 11. About Section */}

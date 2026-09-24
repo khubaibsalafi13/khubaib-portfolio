@@ -16,8 +16,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
 
   const hasLiveImage = Boolean(
     content.heroPersonalImage &&
-    content.heroPersonalImage.trim() !== '' &&
-    content.heroPersonalImage !== '/assets/khubaib_portrait.jpg'
+    content.heroPersonalImage.trim() !== ''
   );
 
   useEffect(() => {
@@ -127,7 +126,6 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                       src={content.heroPersonalImage}
                       alt="Khubaib Salafi - Graphic Designer Portrait"
                       loading="eager"
-                      // @ts-ignore fetchPriority is supported in modern browsers
                       fetchPriority="high"
                       decoding="async"
                       onLoad={() => setImageLoaded(true)}

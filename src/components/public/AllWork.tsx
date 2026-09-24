@@ -33,12 +33,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
     }
   }, [isHydrated, project.coverImage]);
 
-  // Ensure old Unsplash seed images never visually flash when loading or in production
+  // Gate cover display cleanly on hydration to avoid stale seed flashes
   const hasLiveCover = Boolean(
     isHydrated &&
     project.coverImage &&
-    project.coverImage.trim() !== '' &&
-    !project.coverImage.includes('images.unsplash.com')
+    project.coverImage.trim() !== ''
   );
 
   return (
