@@ -34,6 +34,7 @@ export const initialProjects: Project[] = [
     client: 'MailSonic',
     year: '2024',
     category: 'Brand Identity',
+    thumbnailAspectRatio: 'square',
     coverImage: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1400&q=80',
     galleryImages: [
       {
@@ -77,6 +78,7 @@ export const initialProjects: Project[] = [
     client: 'Community Publication',
     year: '2025',
     category: 'Graphic / Calendar Design',
+    thumbnailAspectRatio: 'portrait',
     coverImage: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1400&q=80',
     galleryImages: [
       {
@@ -111,6 +113,7 @@ export const initialProjects: Project[] = [
     client: 'Personal Creative Project',
     year: '2024',
     category: 'Digital Design',
+    thumbnailAspectRatio: 'landscape',
     coverImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=80',
     galleryImages: [
       {
@@ -145,6 +148,7 @@ export const initialProjects: Project[] = [
     client: 'Self-Initiated Concept',
     year: '2024',
     category: 'UI / Web Design',
+    thumbnailAspectRatio: 'square',
     coverImage: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1400&q=80',
     galleryImages: [
       {

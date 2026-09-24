@@ -7,7 +7,7 @@ import { useLanguage } from '../../context/LanguageContext';
 
 interface AllWorkProps {
   projects: Project[];
-  categories: Category[];
+  categories?: Category[];
   isHydrated?: boolean;
 }
 
@@ -76,14 +76,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className="break-inside-avoid mb-6 lg:mb-8"
     >
       <Link
         to={`/work/${project.slug}`}
-        aria-label={projectTitle || 'View project details'}
+        aria-label={`View project: ${projectTitle || 'Artwork'}`}
         style={ratioStyle}
-        className={`group relative block w-full ${ratioClass} overflow-hidden rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] cursor-pointer`}
+        className={`group relative block w-full ${ratioClass} overflow-hidden rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] cursor-pointer`}
       >
         {/* Subtle branded placeholder/skeleton surface */}
         <div
@@ -107,7 +107,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
-            className={`w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.03] ${
+            className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-[1.02] ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
@@ -117,21 +117,56 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
   );
 };
 
-export const AllWork: React.FC<AllWorkProps> = ({ projects, categories, isHydrated = false }) => {
+interface PublicCategoryFilter {
+  id: string;
+  labelEn: string;
+  labelBn: string;
+  backendValues: string[];
+}
+
+const PUBLIC_CATEGORY_FILTERS: PublicCategoryFilter[] = [
+  {
+    id: 'social-media',
+    labelEn: 'Social Media',
+    labelBn: 'সোশ্যাল মিডিয়া',
+    backendValues: ['Graphic Design', 'graphic-design', 'Social Media', 'social-media'],
+  },
+  {
+    id: 'brand-identity',
+    labelEn: 'Brand Identity',
+    labelBn: 'ব্র্যান্ড আইডেন্টিটি',
+    backendValues: ['Brand Identity', 'brand-identity'],
+  },
+  {
+    id: 'thumbnail',
+    labelEn: 'Thumbnail',
+    labelBn: 'থাম্বনেইল',
+    backendValues: ['Digital Design', 'digital-design', 'Thumbnail', 'thumbnail'],
+  },
+  {
+    id: 'others',
+    labelEn: 'Others',
+    labelBn: 'অন্যান্য',
+    backendValues: ['UI / Web Design', 'ui-web-design', 'UI/UX Design', 'Others', 'others'],
+  },
+];
+
+export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }) => {
   const { localized, t } = useLanguage();
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedFilterId, setSelectedFilterId] = useState<string>('all');
 
   const filteredProjects = useMemo(() => {
-    if (selectedCategory === 'all') return projects;
+    if (selectedFilterId === 'all') return projects;
+    const activeFilter = PUBLIC_CATEGORY_FILTERS.find((f) => f.id === selectedFilterId);
+    if (!activeFilter) return projects;
+
     return projects.filter((p) => {
-      return (
-        p.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        categories.some(
-          (c) => c.slug === selectedCategory && (p.category === c.nameEn || p.category === c.nameBn)
-        )
+      const cat = (p.category || '').trim().toLowerCase();
+      return activeFilter.backendValues.some(
+        (backendVal) => backendVal.toLowerCase() === cat
       );
     });
-  }, [projects, selectedCategory, categories]);
+  }, [projects, selectedFilterId]);
 
   return (
     <section id="work" className="py-20 sm:py-28 relative">
@@ -148,14 +183,14 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories, isHydrat
             </h2>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Pills in Requested Order: All | Social Media | Brand Identity | Thumbnail | Others */}
           <div className="flex flex-wrap items-center gap-2">
             <button
               id="filter-all-btn"
               type="button"
-              onClick={() => setSelectedCategory('all')}
+              onClick={() => setSelectedFilterId('all')}
               className={`px-4 py-1.5 rounded-full text-xs font-medium tracking-wider uppercase transition-all duration-200 cursor-pointer ${
-                selectedCategory === 'all'
+                selectedFilterId === 'all'
                   ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
                   : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-medium)] hover:border-[var(--accent)]'
               }`}
@@ -163,19 +198,19 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories, isHydrat
               {t('work.filterAll')}
             </button>
 
-            {categories.map((cat) => (
+            {PUBLIC_CATEGORY_FILTERS.map((filter) => (
               <button
-                key={cat.id}
-                id={`filter-${cat.slug}-btn`}
+                key={filter.id}
+                id={`filter-${filter.id}-btn`}
                 type="button"
-                onClick={() => setSelectedCategory(cat.slug)}
+                onClick={() => setSelectedFilterId(filter.id)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium tracking-wider transition-all duration-200 cursor-pointer ${
-                  selectedCategory === cat.slug
+                  selectedFilterId === filter.id
                     ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
                     : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-medium)] hover:border-[var(--accent)]'
                 }`}
               >
-                {localized(cat.nameEn, cat.nameBn)}
+                {localized(filter.labelEn, filter.labelBn)}
               </button>
             ))}
           </div>
