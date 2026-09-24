@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ArrowUpRight, Sparkles, User, ArrowDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { SiteContent, Project } from '../../types';
@@ -11,6 +11,14 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ content }) => {
   const { localized } = useLanguage();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (imageRef.current?.complete) {
+      setImageLoaded(true);
+    }
+  }, [content.heroPersonalImage]);
 
   const eyebrow = localized(content.heroEyebrowEn, content.heroEyebrowBn);
   const headline = localized(content.heroTitleEn, content.heroTitleBn);
@@ -87,22 +95,44 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
 
                 {/* Main Visual: Personal Photo or Architectural Fallback */}
                 {content.heroPersonalImage ? (
-                  <div className="relative flex-1 overflow-hidden">
+                  <div className="relative flex-1 overflow-hidden bg-[var(--bg-card-subtle)]">
+                    {/* Lightweight branded placeholder while image decodes */}
+                    <div
+                      className={`absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex flex-col items-center justify-center transition-opacity duration-300 pointer-events-none z-0 ${
+                        imageLoaded ? 'opacity-0' : 'opacity-100'
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold animate-pulse mb-2">
+                        KS
+                      </div>
+                      <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider">
+                        Loading Visual...
+                      </span>
+                    </div>
+
                     <img
+                      ref={imageRef}
                       src={content.heroPersonalImage}
                       alt="Khubaib Salafi - Graphic Designer Portrait"
-                      className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                      loading="eager"
+                      // @ts-ignore fetchPriority is supported in modern browsers
+                      fetchPriority="high"
+                      decoding="async"
+                      onLoad={() => setImageLoaded(true)}
+                      className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-105 ${
+                        imageLoaded ? 'opacity-100' : 'opacity-0'
+                      }`}
                     />
                     {/* Subtle gradient overlay for typographic legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card-subtle)] via-transparent to-transparent opacity-90" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card-subtle)] via-transparent to-transparent opacity-90 pointer-events-none z-10" />
 
                     {/* Floating role pill */}
-                    <div className="absolute top-3 left-3 bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] px-2.5 py-1 rounded-md text-[10px] font-mono tracking-wider text-[var(--accent)] uppercase font-semibold shadow-sm">
+                    <div className="absolute top-3 left-3 bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] px-2.5 py-1 rounded-md text-[10px] font-mono tracking-wider text-[var(--accent)] uppercase font-semibold shadow-sm z-10">
                       GRAPHIC & BRAND DESIGNER
                     </div>
 
                     {/* Bottom identity panel */}
-                    <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-[var(--bg-card)]/92 backdrop-blur-md border border-[var(--border-medium)] shadow-md">
+                    <div className="absolute bottom-3 left-3 right-3 p-3.5 rounded-lg bg-[var(--bg-card)]/92 backdrop-blur-md border border-[var(--border-medium)] shadow-md z-10">
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <h4 className="text-sm font-bold text-[var(--text-heading)] tracking-wide">

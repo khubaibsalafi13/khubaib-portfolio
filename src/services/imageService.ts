@@ -1,25 +1,67 @@
+import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+
 /**
- * Image storage service abstraction.
- * Currently supports local file reader (Base64 data URL) for zero-dependency prototyping.
- * Later will be connected to Supabase Storage bucket 'portfolio-images'
- * (folders: /projects, /client-logos, /testimonials).
+ * Image storage & optimization service.
+ * Supports automated client-side WebP compression, aspect-constrained resizing,
+ * and direct upload to Supabase Storage bucket 'portfolio-images'.
+ * 
+ * Target Folders:
+ *   - hero/
+ *   - projects/
+ *   - gallery/
+ *   - client-logos/
  */
+
+export interface ImageOptimizationProfile {
+  maxDimension: number;
+  quality: number;
+  format: 'image/webp' | 'image/png' | 'original';
+  folder: 'hero' | 'projects' | 'gallery' | 'client-logos';
+}
+
+export const IMAGE_PROFILES: Record<'hero' | 'projectCover' | 'projectGallery' | 'clientLogo', ImageOptimizationProfile> = {
+  hero: {
+    maxDimension: 1600,
+    quality: 0.86,
+    format: 'image/webp',
+    folder: 'hero',
+  },
+  projectCover: {
+    maxDimension: 1600,
+    quality: 0.85,
+    format: 'image/webp',
+    folder: 'projects',
+  },
+  projectGallery: {
+    maxDimension: 1800,
+    quality: 0.85,
+    format: 'image/webp',
+    folder: 'gallery',
+  },
+  clientLogo: {
+    maxDimension: 800,
+    quality: 0.90,
+    format: 'image/webp',
+    folder: 'client-logos',
+  },
+};
+
+const BUCKET_NAME = 'portfolio-images';
 
 export const imageService = {
   /**
-   * Resizes and compresses an image (especially for avatars) using HTML Canvas.
-   * Keeps storage lightweight (<40KB) and avoids localStorage quota limits.
+   * Resizes and compresses an avatar image using HTML Canvas.
+   * Preserved for Testimonials to keep them lightweight (<35KB).
    */
-  async compressAvatar(file: File, maxDim = 320, quality = 0.85): Promise<string> {
+  async compressAvatar(file: File, maxDim = 360, quality = 0.85): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!file.type.match(/^image\/(jpeg|jpg|png|webp)$/i)) {
         reject(new Error('Please upload a valid image file (JPG, PNG, or WebP).'));
         return;
       }
 
-      // Max input size: 3MB
-      if (file.size > 3 * 1024 * 1024) {
-        reject(new Error('Image size exceeds 3MB limit.'));
+      if (file.size > 5 * 1024 * 1024) {
+        reject(new Error('Avatar image size exceeds 5MB limit.'));
         return;
       }
 
@@ -34,10 +76,10 @@ export const imageService = {
       img.onload = () => {
         try {
           const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
 
-          // Scale down proportionally
+          // Proportional downscale
           if (width > height) {
             if (width > maxDim) {
               height = Math.round((height * maxDim) / width);
@@ -59,9 +101,10 @@ export const imageService = {
             return;
           }
 
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Attempt WebP or fallback to JPEG
           let outputType = 'image/webp';
           let dataUrl = canvas.toDataURL(outputType, quality);
           if (!dataUrl.startsWith('data:image/webp')) {
@@ -71,7 +114,6 @@ export const imageService = {
 
           resolve(dataUrl);
         } catch {
-          // If canvas fails, fallback to raw reader result
           resolve(img.src);
         }
       };
@@ -82,38 +124,243 @@ export const imageService = {
   },
 
   /**
-   * Uploads an image file and returns a usable URL.
+   * Optimizes a raster image file to WebP (preserving transparency or scaling down)
+   * or keeps SVG untouched.
    */
-  async uploadImage(file: File, folder: 'projects' | 'client-logos' | 'testimonials' | 'profile' = 'projects'): Promise<string> {
+  async optimizeFile(file: File, profile: ImageOptimizationProfile): Promise<{ blob: Blob; mimeType: string; extension: string }> {
+    // 1. Keep SVG vectors untouched for razor-sharp logos
+    if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+      return {
+        blob: file,
+        mimeType: 'image/svg+xml',
+        extension: 'svg',
+      };
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Selected file is not a valid image.');
+    }
+
+    // 2. Decode image using HTML5 Image
     return new Promise((resolve, reject) => {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        reject(new Error('Please upload a valid image file.'));
-        return;
-      }
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
 
-      // Max size: 4MB for localStorage safety
-      if (file.size > 4 * 1024 * 1024) {
-        reject(new Error('Image size exceeds 4MB limit.'));
-        return;
-      }
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(objectUrl);
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          console.info(`[ImageService] Uploaded to mock bucket ${folder}/:`, file.name);
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to read image data.'));
+          let width = img.naturalWidth || img.width;
+          let height = img.naturalHeight || img.height;
+          const maxDim = profile.maxDimension;
+
+          // Downscale only if larger than target profile
+          if (width > maxDim || height > maxDim) {
+            if (width >= height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Canvas 2D context unavailable.');
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Attempt WebP export
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve({
+                  blob,
+                  mimeType: 'image/webp',
+                  extension: 'webp',
+                });
+              } else {
+                // Fallback to JPEG if WebP export is unsupported
+                canvas.toBlob(
+                  (fallbackBlob) => {
+                    if (fallbackBlob) {
+                      resolve({
+                        blob: fallbackBlob,
+                        mimeType: 'image/jpeg',
+                        extension: 'jpg',
+                      });
+                    } else {
+                      reject(new Error('Failed to encode optimized image blob.'));
+                    }
+                  },
+                  'image/jpeg',
+                  profile.quality
+                );
+              }
+            },
+            'image/webp',
+            profile.quality
+          );
+        } catch (err) {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
         }
       };
-      reader.onerror = () => reject(new Error('Failed to read image file.'));
-      reader.readAsDataURL(file);
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Failed to load image for optimization.'));
+      };
+
+      img.src = objectUrl;
     });
   },
 
   /**
-   * Generates a curated dark-green themed placeholder image URL for testing.
+   * General pipeline: Optimizes an image and uploads to Supabase Storage 'portfolio-images' bucket.
+   * Returns a persistent CDN URL.
+   */
+  async optimizeAndUpload(file: File, profile: ImageOptimizationProfile): Promise<string> {
+    // 1. Optimize client-side
+    const { blob, mimeType, extension } = await this.optimizeFile(file, profile);
+
+    // 2. Build unique object key
+    const sanitizedBase = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toLowerCase()
+      .slice(0, 40);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    const filePath = `${profile.folder}/${timestamp}_${sanitizedBase}_${randomSuffix}.${extension}`;
+
+    // 3. Upload to Supabase Storage if configured
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filePath, blob, {
+          contentType: mimeType,
+          cacheControl: '31536000', // 1-year immutable cache
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('[ImageService] Supabase Storage upload error:', error);
+        throw new Error(
+          `Supabase Storage upload failed: ${error.message}. Please ensure the '${BUCKET_NAME}' bucket exists with public read policy.`
+        );
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(filePath);
+
+      console.info(`[ImageService] Uploaded optimized ${profile.folder} image:`, publicUrlData.publicUrl);
+      return publicUrlData.publicUrl;
+    }
+
+    // 4. Fallback for offline dev / prototype environment without Supabase credentials
+    console.warn('[ImageService] Supabase not configured. Falling back to local WebP data URL.');
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read fallback data URL.'));
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  /**
+   * Hero Image: 1600px max, WebP ~0.86
+   */
+  async uploadHeroImage(file: File): Promise<string> {
+    return this.optimizeAndUpload(file, IMAGE_PROFILES.hero);
+  },
+
+  /**
+   * Project Cover: 1600px max, WebP ~0.85
+   */
+  async uploadProjectCover(file: File): Promise<string> {
+    return this.optimizeAndUpload(file, IMAGE_PROFILES.projectCover);
+  },
+
+  /**
+   * Project Gallery: 1800px max, WebP ~0.85
+   */
+  async uploadProjectGalleryImage(file: File): Promise<string> {
+    return this.optimizeAndUpload(file, IMAGE_PROFILES.projectGallery);
+  },
+
+  /**
+   * Client Logo: 800px max, WebP or SVG with transparency
+   */
+  async uploadClientLogo(file: File): Promise<string> {
+    return this.optimizeAndUpload(file, IMAGE_PROFILES.clientLogo);
+  },
+
+  /**
+   * Safely deletes an old replaced object from Supabase Storage.
+   * Only deletes if the URL belongs to 'portfolio-images' and Supabase is active.
+   */
+  async deleteStorageFile(fileUrl?: string): Promise<boolean> {
+    if (!fileUrl || !isSupabaseConfigured() || !fileUrl.startsWith('http')) {
+      return false;
+    }
+
+    try {
+      const marker = `/storage/v1/object/public/${BUCKET_NAME}/`;
+      const index = fileUrl.indexOf(marker);
+      if (index === -1) return false;
+
+      const relativePath = fileUrl.substring(index + marker.length);
+      if (!relativePath) return false;
+
+      const { error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .remove([decodeURIComponent(relativePath)]);
+
+      if (error) {
+        console.warn('[ImageService] Failed to delete old storage file:', error.message);
+        return false;
+      }
+
+      console.info('[ImageService] Deleted old storage object:', relativePath);
+      return true;
+    } catch (err) {
+      console.warn('[ImageService] Storage cleanup skipped:', err);
+      return false;
+    }
+  },
+
+  /**
+   * Backwards-compatible generic uploader.
+   */
+  async uploadImage(
+    file: File,
+    folder: 'projects' | 'client-logos' | 'testimonials' | 'profile' = 'projects'
+  ): Promise<string> {
+    switch (folder) {
+      case 'profile':
+        return this.uploadHeroImage(file);
+      case 'client-logos':
+        return this.uploadClientLogo(file);
+      case 'testimonials':
+        return this.compressAvatar(file, 360, 0.85);
+      case 'projects':
+      default:
+        return this.uploadProjectCover(file);
+    }
+  },
+
+  /**
+   * Curated sample presets for project cards.
    */
   getPresetSample(category: string): string {
     const presets: Record<string, string> = {

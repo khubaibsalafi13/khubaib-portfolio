@@ -26,6 +26,7 @@ export const AdminPortfolioPage: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [replacedCoverImageUrl, setReplacedCoverImageUrl] = useState<string>('');
 
   const refresh = async () => {
     setLoading(true);
@@ -110,7 +111,10 @@ export const AdminPortfolioPage: React.FC = () => {
     if (!e.target.files?.[0] || !editingProject) return;
     setUploading(true);
     try {
-      const url = await imageService.uploadImage(e.target.files[0], 'projects');
+      if (!replacedCoverImageUrl && editingProject.coverImage) {
+        setReplacedCoverImageUrl(editingProject.coverImage);
+      }
+      const url = await imageService.uploadProjectCover(e.target.files[0]);
       setEditingProject((prev) => (prev ? { ...prev, coverImage: url } : null));
     } catch (err: any) {
       alert(err.message || 'Image upload failed');
@@ -131,6 +135,13 @@ export const AdminPortfolioPage: React.FC = () => {
     setSaving(true);
     try {
       await projectService.save(editingProject);
+
+      // Only delete old Storage object after database update succeeds
+      if (replacedCoverImageUrl && replacedCoverImageUrl !== editingProject.coverImage) {
+        await imageService.deleteStorageFile(replacedCoverImageUrl);
+        setReplacedCoverImageUrl('');
+      }
+
       setEditingProject(null);
       setIsCreating(false);
       await refresh();

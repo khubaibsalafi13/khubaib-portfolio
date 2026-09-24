@@ -152,6 +152,21 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   const prevProject = projects[(currentIndex - 1 + total) % total];
   const nextProject = projects[(currentIndex + 1) % total];
 
+  // Preload ONLY adjacent previous and next slide images upon index change (never preload all)
+  useEffect(() => {
+    if (total <= 1) return;
+
+    const preloadAdjacent = (url?: string) => {
+      if (!url || url.startsWith('data:')) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+    };
+
+    preloadAdjacent(prevProject?.coverImage);
+    preloadAdjacent(nextProject?.coverImage);
+  }, [currentIndex, total, prevProject?.coverImage, nextProject?.coverImage]);
+
   return (
     <div
       ref={carouselRef}
@@ -211,6 +226,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 alt={localized(prevProject.titleEn, prevProject.titleBn)}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6">
@@ -235,15 +251,27 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
                 className="group relative w-full h-full rounded-2xl bg-[var(--bg-card-subtle)] border border-[var(--border-medium)] hover:border-[var(--accent)] overflow-hidden shadow-xl transition-all duration-500 flex flex-col justify-between p-5 sm:p-8"
               >
-                {/* Background Cover Image with Hover Zoom */}
-                <div className="absolute inset-0 overflow-hidden z-0">
+                {/* Background Cover Image with Hover Zoom & Instant Prioritization */}
+                <div className="absolute inset-0 overflow-hidden z-0 bg-[var(--bg-card-subtle)]">
+                  {/* Lightweight branded placeholder while image is ready */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex items-center justify-center pointer-events-none z-0">
+                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold opacity-30">
+                      KS
+                    </div>
+                  </div>
+
                   <img
+                    key={activeProject.id + activeProject.coverImage}
                     src={activeProject.coverImage}
                     alt={localized(activeProject.titleEn, activeProject.titleBn)}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    loading="eager"
+                    // @ts-ignore fetchPriority is valid HTML attribute
+                    fetchPriority="high"
+                    decoding="async"
+                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 relative z-0"
                   />
                   {/* Backdrop Gradient for maximum contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none z-10" />
                 </div>
 
                 {/* Top Badges */}
@@ -300,6 +328,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 alt={localized(nextProject.titleEn, nextProject.titleBn)}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                decoding="async"
               />
               <div className="absolute inset-0 bg-gradient-to-l from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6 text-right">

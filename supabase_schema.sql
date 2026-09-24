@@ -810,3 +810,52 @@ ON CONFLICT (id) DO UPDATE SET
     carousel_autoplay = EXCLUDED.carousel_autoplay,
     carousel_interval = EXCLUDED.carousel_interval,
     testimonials_display_mode = EXCLUDED.testimonials_display_mode;
+
+-- ==============================================================================
+-- 5. SUPABASE STORAGE BUCKET & RLS POLICIES (portfolio-images)
+-- ==============================================================================
+-- Creates the dedicated storage bucket for high-performance portfolio images:
+-- Folders: hero/, projects/, gallery/, client-logos/
+-- ==============================================================================
+
+-- 5.1 Create or update the storage bucket
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'portfolio-images',
+    'portfolio-images',
+    true,
+    15728640, -- 15MB limit per file
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/avif']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 15728640,
+    allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/avif'];
+
+-- 5.2 Public Read Access Policy (Allows all visitors to view images on CDN)
+DROP POLICY IF EXISTS "Public can view portfolio-images" ON storage.objects;
+CREATE POLICY "Public can view portfolio-images"
+    ON storage.objects FOR SELECT
+    USING (bucket_id = 'portfolio-images');
+
+-- 5.3 Authenticated Insert Policy (Allows authenticated administrator to upload)
+DROP POLICY IF EXISTS "Admin can upload portfolio-images" ON storage.objects;
+CREATE POLICY "Admin can upload portfolio-images"
+    ON storage.objects FOR INSERT
+    TO authenticated
+    WITH CHECK (bucket_id = 'portfolio-images');
+
+-- 5.4 Authenticated Update Policy (Allows administrator to update objects)
+DROP POLICY IF EXISTS "Admin can update portfolio-images" ON storage.objects;
+CREATE POLICY "Admin can update portfolio-images"
+    ON storage.objects FOR UPDATE
+    TO authenticated
+    USING (bucket_id = 'portfolio-images');
+
+-- 5.5 Authenticated Delete Policy (Allows administrator to delete replaced objects)
+DROP POLICY IF EXISTS "Admin can delete portfolio-images" ON storage.objects;
+CREATE POLICY "Admin can delete portfolio-images"
+    ON storage.objects FOR DELETE
+    TO authenticated
+    USING (bucket_id = 'portfolio-images');
+

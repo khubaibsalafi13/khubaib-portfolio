@@ -9,6 +9,7 @@ export const AdminClientLogosPage: React.FC = () => {
   const [editing, setEditing] = useState<ClientLogo | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [replacedLogoUrl, setReplacedLogoUrl] = useState<string>('');
 
   const refresh = async () => {
     try {
@@ -42,6 +43,10 @@ export const AdminClientLogosPage: React.FC = () => {
     e.preventDefault();
     if (!editing || !editing.companyName.trim()) return;
     await clientLogoService.save(editing);
+    if (replacedLogoUrl && replacedLogoUrl !== editing.logoImage) {
+      await imageService.deleteStorageFile(replacedLogoUrl);
+      setReplacedLogoUrl('');
+    }
     setEditing(null);
     setIsNew(false);
     await refresh();
@@ -49,7 +54,11 @@ export const AdminClientLogosPage: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (window.confirm('Delete this client logo?')) {
+      const itemToDelete = logos.find((l) => l.id === id);
       await clientLogoService.delete(id);
+      if (itemToDelete?.logoImage) {
+        await imageService.deleteStorageFile(itemToDelete.logoImage);
+      }
       await refresh();
     }
   };
@@ -63,7 +72,10 @@ export const AdminClientLogosPage: React.FC = () => {
     if (!e.target.files?.[0] || !editing) return;
     setUploading(true);
     try {
-      const url = await imageService.uploadImage(e.target.files[0], 'client-logos');
+      if (!replacedLogoUrl && editing.logoImage) {
+        setReplacedLogoUrl(editing.logoImage);
+      }
+      const url = await imageService.uploadClientLogo(e.target.files[0]);
       setEditing((prev) => (prev ? { ...prev, logoImage: url } : null));
     } catch (err: any) {
       alert(err.message || 'Upload failed');

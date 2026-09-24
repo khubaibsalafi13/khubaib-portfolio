@@ -48,41 +48,61 @@ export const HomePage: React.FC = () => {
   const [clientLogos, setClientLogos] = useState<ClientLogo[]>(() => clientLogoService.getPublished());
   const [testimonials, setTestimonials] = useState<Testimonial[]>(() => testimonialService.getPublished());
 
-  // Dynamic Supabase data hydration on mount
+  // Dynamic Supabase data hydration on mount (Fast-path priority for Hero Content)
   useEffect(() => {
     let isMounted = true;
 
-    async function loadSupabaseData() {
-      try {
-        const [
-          latestContent,
-          latestSettings,
-          latestProjects,
-          latestHeroProject,
-          latestCategories,
-          latestServices,
-          latestExperience,
-          latestEducation,
-          latestLogos,
-          latestTestimonials,
-        ] = await Promise.all([
-          contentService.getContentAsync(),
-          settingsService.getSettingsAsync(),
-          projectService.getPublishedAsync(),
-          projectService.getHeroFeaturedAsync(),
-          categoryService.getAllAsync(),
-          servicesService.getPublishedAsync(),
-          experienceService.getAllAsync(),
-          educationService.getAllAsync(),
-          clientLogoService.getPublishedAsync(),
-          testimonialService.getPublishedAsync(),
-        ]);
+    // 1. FAST PATH: Hydrate Hero & Site Content immediately without waiting for secondary tables
+    contentService
+      .getContentAsync()
+      .then((latestContent) => {
+        if (isMounted && latestContent) {
+          setContent(latestContent);
+        }
+      })
+      .catch((err) => console.warn('Error hydrating SiteContent:', err));
 
+    // 2. Hydrate global site settings
+    settingsService
+      .getSettingsAsync()
+      .then((latestSettings) => {
+        if (isMounted && latestSettings) {
+          setSettings(latestSettings);
+        }
+      })
+      .catch((err) => console.warn('Error hydrating SiteSettings:', err));
+
+    // 3. Hydrate Projects & Hero Project for Spotlight and Showcase
+    Promise.all([
+      projectService.getPublishedAsync(),
+      projectService.getHeroFeaturedAsync(),
+    ])
+      .then(([latestProjects, latestHeroProject]) => {
         if (isMounted) {
-          if (latestContent) setContent(latestContent);
-          if (latestSettings) setSettings(latestSettings);
           if (latestProjects) setProjects(latestProjects);
           if (latestHeroProject) setHeroProject(latestHeroProject);
+        }
+      })
+      .catch((err) => console.warn('Error hydrating Projects:', err));
+
+    // 4. Hydrate remaining secondary datasets
+    Promise.all([
+      categoryService.getAllAsync(),
+      servicesService.getPublishedAsync(),
+      experienceService.getAllAsync(),
+      educationService.getAllAsync(),
+      clientLogoService.getPublishedAsync(),
+      testimonialService.getPublishedAsync(),
+    ])
+      .then(([
+        latestCategories,
+        latestServices,
+        latestExperience,
+        latestEducation,
+        latestLogos,
+        latestTestimonials,
+      ]) => {
+        if (isMounted) {
           if (latestCategories) setCategories(latestCategories);
           if (latestServices) setServices(latestServices);
           if (latestExperience) setExperience(latestExperience);
@@ -92,12 +112,8 @@ export const HomePage: React.FC = () => {
 
           refreshScroll();
         }
-      } catch (err) {
-        console.warn('Error loading dynamic Supabase data in HomePage:', err);
-      }
-    }
-
-    loadSupabaseData();
+      })
+      .catch((err) => console.warn('Error hydrating secondary datasets:', err));
 
     const handleTestimonialsUpdate = () => {
       setTestimonials(testimonialService.getPublished());

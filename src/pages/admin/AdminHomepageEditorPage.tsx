@@ -9,6 +9,7 @@ export const AdminHomepageEditorPage: React.FC = () => {
   const [saved, setSaved] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [imageError, setImageError] = useState('');
+  const [previousHeroImageUrl, setPreviousHeroImageUrl] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -41,10 +42,13 @@ export const AdminHomepageEditorPage: React.FC = () => {
     setImageError('');
     setUploadingImage(true);
     try {
-      const url = await imageService.uploadImage(file, 'profile');
+      if (!previousHeroImageUrl && content.heroPersonalImage) {
+        setPreviousHeroImageUrl(content.heroPersonalImage);
+      }
+      const url = await imageService.uploadHeroImage(file);
       handleChange('heroPersonalImage', url);
     } catch (err: any) {
-      setImageError(err.message || 'Failed to upload image. Please ensure size is under 4MB.');
+      setImageError(err.message || 'Failed to upload image. Please ensure size is under 10MB.');
     } finally {
       setUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -53,6 +57,9 @@ export const AdminHomepageEditorPage: React.FC = () => {
 
   const handleRemoveImage = () => {
     if (window.confirm('Remove Hero personal portrait? (The Hero will display an architectural placeholder fallback)')) {
+      if (!previousHeroImageUrl && content.heroPersonalImage) {
+        setPreviousHeroImageUrl(content.heroPersonalImage);
+      }
       handleChange('heroPersonalImage', '');
     }
   };
@@ -64,6 +71,11 @@ export const AdminHomepageEditorPage: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     await contentService.updateContent(content);
+    // Only delete old Storage image after database update has succeeded
+    if (previousHeroImageUrl && previousHeroImageUrl !== content.heroPersonalImage) {
+      await imageService.deleteStorageFile(previousHeroImageUrl);
+      setPreviousHeroImageUrl('');
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

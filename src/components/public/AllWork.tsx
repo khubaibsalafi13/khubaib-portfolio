@@ -95,6 +95,8 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories }) => {
                   <img
                     src={project.coverImage}
                     alt={localized(project.titleEn, project.titleBn)}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/80 via-transparent to-transparent opacity-80" />
