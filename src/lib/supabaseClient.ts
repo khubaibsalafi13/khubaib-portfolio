@@ -13,37 +13,97 @@ import {
   SiteSettings,
 } from '../types';
 
-// Read from Vite or Next.js environment variables, or local admin override
-const getEnvVar = (viteKey: string, nextKey: string, localKey: string): string => {
+export const getSupabaseUrl = (): string => {
+  // 1. Primary: Production environment variable (statically replaced by Vite/Vercel bundler)
+  const envUrl = (
+    import.meta.env.VITE_SUPABASE_URL ||
+    import.meta.env.NEXT_PUBLIC_SUPABASE_URL ||
+    ''
+  ).trim();
+
+  if (
+    envUrl &&
+    envUrl.startsWith('http') &&
+    !envUrl.includes('your-project-id') &&
+    !envUrl.includes('placeholder')
+  ) {
+    return envUrl;
+  }
+
+  // 2. Optional fallback: Admin Settings / dev override in localStorage
   try {
-    const local = localStorage.getItem(localKey);
-    if (local && local.trim().length > 0) return local.trim();
+    const local = localStorage.getItem('ks_supabase_url');
+    if (
+      local &&
+      local.trim().length > 0 &&
+      local.trim().startsWith('http') &&
+      !local.includes('your-project-id')
+    ) {
+      return local.trim();
+    }
   } catch {
     // ignore
   }
 
-  const env = (import.meta as any).env || {};
-  return (env[viteKey] || env[nextKey] || '').trim();
-};
-
-export const getSupabaseUrl = (): string => {
-  return getEnvVar('VITE_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'ks_supabase_url');
+  return '';
 };
 
 export const getSupabaseAnonKey = (): string => {
-  return getEnvVar('VITE_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'ks_supabase_anon_key');
+  // 1. Primary: Production environment variable (statically replaced by Vite/Vercel bundler)
+  const envKey = (
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    ''
+  ).trim();
+
+  if (
+    envKey &&
+    !envKey.includes('your-anon-key') &&
+    !envKey.includes('placeholder')
+  ) {
+    return envKey;
+  }
+
+  // 2. Optional fallback: Admin Settings / dev override in localStorage
+  try {
+    const local = localStorage.getItem('ks_supabase_anon_key');
+    if (
+      local &&
+      local.trim().length > 0 &&
+      !local.includes('your-anon-key')
+    ) {
+      return local.trim();
+    }
+  } catch {
+    // ignore
+  }
+
+  return '';
 };
+
+let hasWarnedMissingConfig = false;
 
 export const isSupabaseConfigured = (): boolean => {
   const url = getSupabaseUrl();
   const key = getSupabaseAnonKey();
-  return Boolean(
+  const configured = Boolean(
     url &&
     key &&
     url.startsWith('http') &&
     !url.includes('your-project-id') &&
-    !key.includes('your-anon-key')
+    !url.includes('placeholder') &&
+    !key.includes('your-anon-key') &&
+    !key.includes('placeholder')
   );
+
+  if (!configured && !hasWarnedMissingConfig) {
+    console.warn(
+      '[Supabase] Production Supabase environment variables are missing or unconfigured (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY). Public requests will serve local fallback content.'
+    );
+    hasWarnedMissingConfig = true;
+  }
+
+  return configured;
 };
 
 let activeClient: SupabaseClient | null = null;

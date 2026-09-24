@@ -15,8 +15,11 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
   const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    console.info('[Public Hero] rendered hero src:', content.heroPersonalImage);
     if (imageRef.current?.complete) {
       setImageLoaded(true);
+    } else {
+      setImageLoaded(false);
     }
   }, [content.heroPersonalImage]);
 

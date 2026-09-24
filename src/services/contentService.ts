@@ -18,20 +18,29 @@ export const contentService = {
   async getContentAsync(): Promise<SiteContent> {
     if (isSupabaseConfigured()) {
       try {
+        console.info('[Public Hero] Supabase content request started');
         const { data, error } = await supabase
           .from('site_content')
           .select('*')
           .eq('id', 'default')
           .maybeSingle();
 
+        if (error) {
+          console.warn('[Public Hero] Supabase site_content query error:', error.message);
+        }
+
         if (!error && data) {
+          console.info('[Public Hero] Supabase content received');
           const content = siteContentFromDb(data);
+          console.info('[Public Hero] database hero URL:', content.heroPersonalImage);
           setItem(STORAGE_KEY, content);
           return content;
         }
       } catch (err) {
-        console.warn('Supabase getContentAsync error:', err);
+        console.warn('[Public Hero] Supabase getContentAsync network error:', err);
       }
+    } else {
+      console.warn('[Public Hero] Supabase is not configured; serving fallback content.');
     }
     return this.getContent();
   },
