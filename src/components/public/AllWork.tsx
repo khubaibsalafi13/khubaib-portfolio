@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowUpRight, Sparkles } from 'lucide-react';
-import { Project, Category } from '../../types';
+import { Sparkles } from 'lucide-react';
+import { Project, Category, ThumbnailAspectRatio } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
 
 interface AllWorkProps {
@@ -16,6 +16,30 @@ interface ProjectCardProps {
   isHydrated: boolean;
   localized: (en: string, bn?: string) => string;
 }
+
+const getAspectRatioClass = (ratio?: ThumbnailAspectRatio | string): string => {
+  switch (ratio) {
+    case 'portrait':
+      return 'aspect-[4/5]';
+    case 'landscape':
+      return 'aspect-[16/9]';
+    case 'square':
+    default:
+      return 'aspect-square';
+  }
+};
+
+const getAspectRatioStyle = (ratio?: ThumbnailAspectRatio | string): React.CSSProperties => {
+  switch (ratio) {
+    case 'portrait':
+      return { aspectRatio: '4 / 5' };
+    case 'landscape':
+      return { aspectRatio: '16 / 9' };
+    case 'square':
+    default:
+      return { aspectRatio: '1 / 1' };
+  }
+};
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localized }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -40,20 +64,26 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
     project.coverImage.trim() !== ''
   );
 
+  const ratio = project.thumbnailAspectRatio || 'square';
+  const ratioClass = getAspectRatioClass(ratio);
+  const ratioStyle = getAspectRatioStyle(ratio);
+  const projectTitle = localized(project.titleEn, project.titleBn);
+
   return (
-    <motion.article
+    <motion.div
       layout
       key={project.id}
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.35, ease: 'easeOut' }}
-      className="group relative flex flex-col rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors duration-300 overflow-hidden shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1"
+      className="break-inside-avoid mb-6 lg:mb-8"
     >
-      {/* Project Cover Image with Aspect Ratio */}
       <Link
         to={`/work/${project.slug}`}
-        className="relative block w-full aspect-[16/10] overflow-hidden bg-[var(--bg-card-subtle)]"
+        aria-label={projectTitle || 'View project details'}
+        style={ratioStyle}
+        className={`group relative block w-full ${ratioClass} overflow-hidden rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-2xl hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] cursor-pointer`}
       >
         {/* Subtle branded placeholder/skeleton surface */}
         <div
@@ -73,58 +103,17 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
           <img
             ref={imgRef}
             src={project.coverImage}
-            alt={localized(project.titleEn, project.titleBn)}
+            alt={projectTitle}
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
-            className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-105 ${
+            className={`w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.03] ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)]/80 via-transparent to-transparent opacity-80 pointer-events-none" />
-
-        {/* Category Pill */}
-        <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-mono tracking-wider text-[var(--accent)] uppercase bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] font-semibold shadow-sm z-10">
-          {project.category}
-        </span>
-
-        {/* Year Tag */}
-        <span className="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-full text-[11px] font-mono text-[var(--text-muted)] bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-medium)] shadow-sm z-10">
-          {project.year}
-        </span>
       </Link>
-
-      {/* Project Info Block */}
-      <div className="p-6 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <h3 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
-            <Link to={`/work/${project.slug}`}>
-              {localized(project.titleEn, project.titleBn)}
-            </Link>
-          </h3>
-
-          <Link
-            to={`/work/${project.slug}`}
-            className="p-2 rounded-full bg-[var(--bg-surface)] text-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] group-hover:border-[var(--accent)] transition-all duration-200 shrink-0 shadow-sm"
-            aria-label="View project details"
-          >
-            <ArrowUpRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <p className="text-sm text-[var(--text-secondary)] line-clamp-2 leading-relaxed mb-5">
-          {localized(project.shortDescriptionEn, project.shortDescriptionBn)}
-        </p>
-
-        <div className="mt-auto pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs font-mono text-[var(--text-muted)]">
-          <span>{project.client ? `Client: ${project.client}` : 'Creative Work'}</span>
-          <span className="text-[var(--accent)] font-semibold">
-            {localized(project.roleEn, project.roleBn)}
-          </span>
-        </div>
-      </div>
-    </motion.article>
+    </motion.div>
   );
 };
 
@@ -192,9 +181,9 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories, isHydrat
           </div>
         </div>
 
-        {/* Editorial Project Grid */}
-        <motion.div layout className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-          <AnimatePresence>
+        {/* Visual-First Image Gallery */}
+        <div className="columns-1 md:columns-2 gap-6 lg:gap-8">
+          <AnimatePresence mode="popLayout">
             {filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
@@ -204,7 +193,7 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, categories, isHydrat
               />
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
         {filteredProjects.length === 0 && (
           <div className="text-center py-16 text-[var(--text-muted)] font-mono text-sm border border-dashed border-[var(--border-medium)] rounded-2xl">
