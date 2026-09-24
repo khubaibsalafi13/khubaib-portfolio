@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { ThumbnailAspectRatio } from '../types';
 
 /**
  * Image storage & optimization service.
@@ -18,6 +19,15 @@ export interface ImageOptimizationProfile {
   format: 'image/webp' | 'image/png' | 'original';
   folder: 'hero' | 'projects' | 'gallery' | 'client-logos';
 }
+
+export const THUMBNAIL_RATIO_CONFIGS: Record<
+  ThumbnailAspectRatio,
+  { ratio: number; maxWidth: number; maxHeight: number; label: string }
+> = {
+  square: { ratio: 1 / 1, maxWidth: 1200, maxHeight: 1200, label: '1:1 Square' },
+  portrait: { ratio: 4 / 5, maxWidth: 1200, maxHeight: 1500, label: '4:5 Portrait' },
+  landscape: { ratio: 16 / 9, maxWidth: 1600, maxHeight: 900, label: '16:9 Landscape' },
+};
 
 export const IMAGE_PROFILES: Record<'hero' | 'projectCover' | 'projectGallery' | 'clientLogo', ImageOptimizationProfile> = {
   hero: {
@@ -321,10 +331,192 @@ export const imageService = {
   },
 
   /**
-   * Project Cover: 1600px max, WebP ~0.85
+   * Optimizes a project thumbnail with ratio-aware center-crop and WebP compression.
+   * Target Profiles:
+   *   - square: 1:1 up to 1200x1200
+   *   - portrait: 4:5 up to 1200x1500
+   *   - landscape: 16:9 up to 1600x900
+   * Quality: ~0.85
    */
-  async uploadProjectCover(file: File): Promise<string> {
-    return this.optimizeAndUpload(file, IMAGE_PROFILES.projectCover);
+  async optimizeThumbnailFile(
+    file: File,
+    aspectRatio: ThumbnailAspectRatio = 'square'
+  ): Promise<{ blob: Blob; mimeType: string; extension: string }> {
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Selected file is not a valid image.');
+    }
+
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(objectUrl);
+
+          const srcW = img.naturalWidth || img.width;
+          const srcH = img.naturalHeight || img.height;
+
+          const config = THUMBNAIL_RATIO_CONFIGS[aspectRatio] || THUMBNAIL_RATIO_CONFIGS.square;
+          const targetRatio = config.ratio;
+
+          // 1. Calculate center-crop coordinates (object-fit: cover logic)
+          let cropW = srcW;
+          let cropH = srcH;
+          let srcX = 0;
+          let srcY = 0;
+
+          const currentRatio = srcW / srcH;
+
+          if (currentRatio > targetRatio) {
+            // Source is wider than target ratio -> crop horizontally
+            cropW = Math.round(srcH * targetRatio);
+            srcX = Math.round((srcW - cropW) / 2);
+          } else if (currentRatio < targetRatio) {
+            // Source is taller than target ratio -> crop vertically
+            cropH = Math.round(srcW / targetRatio);
+            srcY = Math.round((srcH - cropH) / 2);
+          }
+
+          // 2. Determine output dimensions (downscale if larger than target max, avoid upscaling)
+          let destW = cropW;
+          let destH = cropH;
+
+          if (destW > config.maxWidth || destH > config.maxHeight) {
+            const scale = Math.min(config.maxWidth / destW, config.maxHeight / destH);
+            destW = Math.round(destW * scale);
+            destH = Math.round(destH * scale);
+          }
+
+          destW = Math.max(1, destW);
+          destH = Math.max(1, destH);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = destW;
+          canvas.height = destH;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Canvas 2D context unavailable.');
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, srcX, srcY, cropW, cropH, 0, 0, destW, destH);
+
+          const quality = 0.85;
+
+          // Attempt WebP export
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                resolve({
+                  blob,
+                  mimeType: 'image/webp',
+                  extension: 'webp',
+                });
+              } else {
+                // Fallback to JPEG if WebP export is unsupported
+                canvas.toBlob(
+                  (fallbackBlob) => {
+                    if (fallbackBlob) {
+                      resolve({
+                        blob: fallbackBlob,
+                        mimeType: 'image/jpeg',
+                        extension: 'jpg',
+                      });
+                    } else {
+                      reject(new Error('Failed to encode optimized thumbnail blob.'));
+                    }
+                  },
+                  'image/jpeg',
+                  quality
+                );
+              }
+            },
+            'image/webp',
+            quality
+          );
+        } catch (err) {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
+        }
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Failed to load image for optimization.'));
+      };
+
+      img.src = objectUrl;
+    });
+  },
+
+  /**
+   * Upload project thumbnail with aspect-ratio optimization.
+   */
+  async uploadProjectThumbnail(
+    file: File,
+    aspectRatio: ThumbnailAspectRatio = 'square'
+  ): Promise<string> {
+    if (!isSupabaseConfigured()) {
+      const err = new Error(
+        'Supabase Storage is not configured. Please enter your Supabase URL and Anon Key in Admin Settings before uploading images.'
+      );
+      console.error('[ImageService] Supabase not configured:', err.message);
+      throw err;
+    }
+
+    const { blob, mimeType, extension } = await this.optimizeThumbnailFile(file, aspectRatio);
+
+    console.info(
+      `[ImageService] Project thumbnail (${aspectRatio}) optimized (${(blob.size / 1024).toFixed(1)}KB, ${mimeType})`
+    );
+
+    const sanitizedBase = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toLowerCase()
+      .slice(0, 40);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    const filePath = `projects/${timestamp}_${sanitizedBase}_${aspectRatio}_${randomSuffix}.${extension}`;
+
+    console.info(`[ImageService] Project thumbnail uploading (${BUCKET_NAME}/${filePath})`);
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, blob, {
+        contentType: mimeType,
+        cacheControl: '31536000, immutable',
+        upsert: false,
+      });
+
+    if (error) {
+      console.error('[ImageService] Project thumbnail upload error:', error);
+      throw new Error(
+        `Supabase Storage upload failed: ${error.message}. Please verify the '${BUCKET_NAME}' bucket exists with public read policy.`
+      );
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicUrlData.publicUrl;
+    if (!publicUrl || !publicUrl.startsWith('http')) {
+      throw new Error(`Failed to generate public HTTPS Storage URL for ${filePath}`);
+    }
+
+    console.info('[ImageService] Project thumbnail upload successful:', publicUrl);
+    return publicUrl;
+  },
+
+  /**
+   * Project Cover: aspect-ratio aware upload (default: square)
+   */
+  async uploadProjectCover(file: File, aspectRatio: ThumbnailAspectRatio = 'square'): Promise<string> {
+    return this.uploadProjectThumbnail(file, aspectRatio);
   },
 
   /**

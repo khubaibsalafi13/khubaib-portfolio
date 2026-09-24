@@ -15,7 +15,7 @@ const STORAGE_KEY = 'ks_portfolio_projects';
  * Excludes heavy detail-page fields (gallery_images, overview_en/bn, concept_en/bn).
  */
 export const HOMEPAGE_PROJECT_COLUMNS =
-  'id, slug, title_en, title_bn, short_description_en, short_description_bn, client, year, category, cover_image, featured, hero_featured, published, sort_order, role_en, role_bn';
+  'id, slug, title_en, title_bn, short_description_en, short_description_bn, client, year, category, cover_image, thumbnail_aspect_ratio, featured, hero_featured, published, sort_order, role_en, role_bn';
 
 /**
  * Safely strips heavy Base64 strings before storing in localStorage to prevent QuotaExceededError.
@@ -302,8 +302,9 @@ export const projectService = {
         roleBn: project.roleBn || 'গ্রাফিক ডিজাইনার',
         client: project.client || '',
         year: project.year || new Date().getFullYear().toString(),
-        category: project.category || 'Brand Identity',
+        category: project.category || 'Social Media',
         coverImage: project.coverImage || 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80',
+        thumbnailAspectRatio: project.thumbnailAspectRatio || 'square',
         galleryImages: project.galleryImages || [],
         featured: project.featured ?? true,
         heroFeatured: project.heroFeatured ?? false,

@@ -10,6 +10,8 @@ export interface ProjectImage {
   sortOrder: number;
 }
 
+export type ThumbnailAspectRatio = 'square' | 'portrait' | 'landscape';
+
 export interface Project {
   id: string;
   slug: string;
@@ -27,6 +29,7 @@ export interface Project {
   year: string;
   category: string; // or category slug/name
   coverImage: string;
+  thumbnailAspectRatio?: ThumbnailAspectRatio;
   galleryImages: ProjectImage[];
   featured: boolean;
   heroFeatured: boolean;

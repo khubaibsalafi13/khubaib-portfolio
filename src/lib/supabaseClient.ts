@@ -11,6 +11,7 @@ import {
   Consultation,
   SiteContent,
   SiteSettings,
+  ThumbnailAspectRatio,
 } from '../types';
 
 export const getSupabaseUrl = (): string => {
@@ -189,6 +190,7 @@ export const projectToDb = (project: Partial<Project>): Record<string, any> => {
   if (project.year !== undefined) dbRecord.year = project.year;
   if (project.category !== undefined) dbRecord.category = project.category;
   if (project.coverImage !== undefined) dbRecord.cover_image = project.coverImage;
+  if (project.thumbnailAspectRatio !== undefined) dbRecord.thumbnail_aspect_ratio = project.thumbnailAspectRatio;
   if (project.galleryImages !== undefined) dbRecord.gallery_images = project.galleryImages;
   if (project.featured !== undefined) dbRecord.featured = project.featured;
   if (project.heroFeatured !== undefined) dbRecord.hero_featured = project.heroFeatured;
@@ -216,6 +218,7 @@ export const projectFromDb = (row: any): Project => {
     year: row.year || '',
     category: row.category || '',
     coverImage: row.cover_image || '',
+    thumbnailAspectRatio: (row.thumbnail_aspect_ratio as ThumbnailAspectRatio) || 'square',
     galleryImages: Array.isArray(row.gallery_images) ? row.gallery_images : [],
     featured: Boolean(row.featured),
     heroFeatured: Boolean(row.hero_featured),
