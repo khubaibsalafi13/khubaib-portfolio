@@ -22,6 +22,7 @@ import { testimonialService } from '../../services/testimonialService';
 import { experienceService } from '../../services/experienceService';
 import { educationService } from '../../services/educationService';
 import { settingsService } from '../../services/settingsService';
+import { isSupabaseConfigured } from '../../lib/supabaseClient';
 import { refreshScroll } from '../../lib/scrollUtils';
 import {
   Project,
@@ -39,7 +40,12 @@ export const HomePage: React.FC = () => {
   // Initial state from cached data for fast paint
   const [content, setContent] = useState<SiteContent>(() => contentService.getContent());
   const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
-  const [projects, setProjects] = useState<Project[]>(() => projectService.getPublished());
+  const [projectsHydrated, setProjectsHydrated] = useState(false);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const list = projectService.getPublished();
+    console.info('[Projects] initial source:', isSupabaseConfigured() ? 'pending_live_hydration' : 'fallback');
+    return list;
+  });
   const [heroProject, setHeroProject] = useState<Project | undefined>(() => projectService.getHeroFeatured());
   const [categories, setCategories] = useState<Category[]>(() => categoryService.getAll());
   const [services, setServices] = useState<Service[]>(() => servicesService.getPublished());
@@ -73,14 +79,18 @@ export const HomePage: React.FC = () => {
       .catch((err) => console.warn('Error hydrating SiteSettings:', err));
 
     // 3. Hydrate Projects & Hero Project for Spotlight and Showcase
-    Promise.all([
-      projectService.getPublishedAsync(),
-      projectService.getHeroFeaturedAsync(),
-    ])
-      .then(([latestProjects, latestHeroProject]) => {
+    projectService
+      .getPublishedAsync()
+      .then((latestProjects) => {
         if (isMounted) {
-          if (latestProjects) setProjects(latestProjects);
-          if (latestHeroProject) setHeroProject(latestHeroProject);
+          if (latestProjects && latestProjects.length > 0) {
+            setProjects(latestProjects);
+            setProjectsHydrated(true);
+            const hero = latestProjects.find((p) => p.heroFeatured) || latestProjects[0];
+            setHeroProject(hero);
+          } else if (!isSupabaseConfigured()) {
+            setProjectsHydrated(true);
+          }
         }
       })
       .catch((err) => console.warn('Error hydrating Projects:', err));
@@ -153,13 +163,18 @@ export const HomePage: React.FC = () => {
           </div>
           <ProjectCarousel
             projects={projects}
+            isHydrated={projectsHydrated}
             autoplay={settings.carouselAutoplay}
             intervalSeconds={settings.carouselInterval}
           />
         </div>
 
         {/* 07. All Projects with Category Filters */}
-        <AllWork projects={projects} categories={categories} />
+        <AllWork
+          projects={projects}
+          categories={categories}
+          isHydrated={projectsHydrated}
+        />
 
         {/* 08. Testimonials (Auto-hides if no published reviews) */}
         <TestimonialsSection

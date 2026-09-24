@@ -8,24 +8,45 @@ import { Observer } from '../../lib/gsap';
 
 interface ProjectCarouselProps {
   projects: Project[];
+  isHydrated?: boolean;
   autoplay?: boolean;
   intervalSeconds?: number;
 }
 
 export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   projects,
+  isHydrated = false,
   autoplay = true,
   intervalSeconds = 6,
 }) => {
   const { localized, t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [activeImageLoaded, setActiveImageLoaded] = useState(false);
   
   const carouselRef = useRef<HTMLDivElement | null>(null);
+  const activeImgRef = useRef<HTMLImageElement | null>(null);
   const isTransitioningRef = useRef<boolean>(false);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isFirstHydrationRef = useRef(true);
 
   const total = projects.length;
+
+  // Validate or reset currentIndex upon receiving live Supabase projects
+  useEffect(() => {
+    if (isHydrated && total > 0) {
+      if (isFirstHydrationRef.current) {
+        isFirstHydrationRef.current = false;
+        setCurrentIndex(0);
+        console.info('[Carousel] live dataset ready, count:', total);
+        const activeCover = projects[0]?.coverImage || '';
+        const preview = activeCover.length > 50 ? activeCover.substring(0, 50) + '...' : activeCover;
+        console.info('[Carousel] active image:', preview);
+      } else if (currentIndex >= total) {
+        setCurrentIndex(0);
+      }
+    }
+  }, [isHydrated, total]);
 
   // Unified transition dispatcher with transition lock to prevent rapid skipped states
   const changeSlide = (direction: 'next' | 'prev' | number) => {
@@ -62,9 +83,9 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }
   };
 
-  // Autoplay management
+  // Autoplay management (only active after live hydration)
   useEffect(() => {
-    if (!autoplay || isHovered || total <= 1) {
+    if (!isHydrated || !autoplay || isHovered || total <= 1) {
       resetAutoplayTimer();
       return;
     }
@@ -76,11 +97,11 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }, intervalSeconds * 1000);
 
     return () => resetAutoplayTimer();
-  }, [autoplay, intervalSeconds, isHovered, total]);
+  }, [isHydrated, autoplay, intervalSeconds, isHovered, total]);
 
   // GSAP Observer Integration for deliberate horizontal gestures without scroll-trapping
   useEffect(() => {
-    if (!carouselRef.current || total <= 1) return;
+    if (!isHydrated || !carouselRef.current || total <= 1) return;
 
     let accumulatedDeltaX = 0;
     let gestureCooldown = false;
@@ -144,20 +165,19 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     return () => {
       observer.kill();
     };
-  }, [total]);
+  }, [isHydrated, total]);
 
-  if (total === 0) return null;
-
+  // Preload ONLY adjacent previous and next slide images upon index change (never preload all)
+  // CRITICAL: MUST ONLY RUN AFTER LIVE SUPABASE PROJECT DATA IS HYDRATED
   const activeProject = projects[currentIndex];
   const prevProject = projects[(currentIndex - 1 + total) % total];
   const nextProject = projects[(currentIndex + 1) % total];
 
-  // Preload ONLY adjacent previous and next slide images upon index change (never preload all)
   useEffect(() => {
-    if (total <= 1) return;
+    if (!isHydrated || total <= 1) return;
 
     const preloadAdjacent = (url?: string) => {
-      if (!url || url.startsWith('data:')) return;
+      if (!url || url.startsWith('data:') || url.includes('images.unsplash.com')) return;
       const img = new Image();
       img.decoding = 'async';
       img.src = url;
@@ -165,7 +185,82 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
     preloadAdjacent(prevProject?.coverImage);
     preloadAdjacent(nextProject?.coverImage);
-  }, [currentIndex, total, prevProject?.coverImage, nextProject?.coverImage]);
+  }, [isHydrated, currentIndex, total, prevProject?.coverImage, nextProject?.coverImage]);
+
+  // Synchronize image loaded state for active slide
+  useEffect(() => {
+    if (!isHydrated || !activeProject?.coverImage) {
+      setActiveImageLoaded(false);
+      return;
+    }
+    if (activeImgRef.current?.complete) {
+      setActiveImageLoaded(true);
+    } else {
+      setActiveImageLoaded(false);
+    }
+  }, [isHydrated, currentIndex, activeProject?.coverImage]);
+
+  // Render branded matching enclosure placeholder before live Supabase data arrives
+  if (!isHydrated || total === 0) {
+    return (
+      <div
+        id="featured-project-carousel"
+        className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 select-none"
+      >
+        <div className="relative rounded-3xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-4 sm:p-7 md:p-9 shadow-[var(--card-shadow)] overflow-hidden transition-colors">
+          <div className="absolute inset-0 bg-subtle-grid pointer-events-none" />
+
+          {/* Header Bar */}
+          <div className="relative z-10 flex items-center justify-between pb-5 sm:pb-6 border-b border-[var(--border-subtle)] mb-6">
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent)] animate-pulse" />
+              <span className="text-xs font-mono tracking-widest text-[var(--text-muted)] uppercase">
+                PROJECT SPOTLIGHT // LOADING FEATURED WORKS
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="p-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] opacity-40">
+                <ChevronLeft className="w-4 h-4" />
+              </div>
+              <div className="p-2.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] opacity-40">
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          {/* 3-Slide Carousel Viewport with Identical Frame Dimensions */}
+          <div className="relative w-full h-[460px] sm:h-[500px] md:h-[540px] flex items-center justify-center overflow-hidden">
+            <div className="relative w-full lg:w-[72%] xl:w-[70%] h-full z-20 rounded-2xl bg-[var(--bg-card-subtle)] border border-[var(--border-medium)] overflow-hidden shadow-xl flex flex-col items-center justify-center p-8">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-base font-bold animate-pulse mb-3 shadow-inner">
+                KS
+              </div>
+              <span className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-widest">
+                Loading Featured Showcase...
+              </span>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 mt-4 border-t border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2 order-2 sm:order-1">
+              <div className="w-7 h-2 bg-[var(--accent)]/40 rounded-full animate-pulse" />
+              <div className="w-2 h-2 bg-[var(--border-medium)] rounded-full" />
+              <div className="w-2 h-2 bg-[var(--border-medium)] rounded-full" />
+            </div>
+
+            <div className="order-1 sm:order-2 inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold tracking-wider uppercase bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)]">
+              <span>EXPLORE SPOTLIGHT</span>
+            </div>
+
+            <div className="order-3 hidden md:flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
+              <span>Selected Portfolio</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -221,13 +316,15 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               onClick={prevSlide}
               className="hidden lg:block absolute left-[-15%] xl:left-[-12%] w-[45%] h-[82%] rounded-2xl overflow-hidden bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] opacity-35 hover:opacity-60 scale-90 cursor-pointer transition-all duration-500 z-10 filter blur-[0.5px]"
             >
-              <img
-                src={prevProject.coverImage}
-                alt={localized(prevProject.titleEn, prevProject.titleBn)}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+              {prevProject?.coverImage && !prevProject.coverImage.includes('images.unsplash.com') && (
+                <img
+                  src={prevProject.coverImage}
+                  alt={localized(prevProject.titleEn, prevProject.titleBn)}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6">
                 <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block mb-1">
@@ -254,22 +351,32 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 {/* Background Cover Image with Hover Zoom & Instant Prioritization */}
                 <div className="absolute inset-0 overflow-hidden z-0 bg-[var(--bg-card-subtle)]">
                   {/* Lightweight branded placeholder while image is ready */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex items-center justify-center pointer-events-none z-0">
-                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold opacity-30">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex items-center justify-center pointer-events-none z-0 transition-opacity duration-300 ${
+                      activeImageLoaded ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-xs font-bold animate-pulse">
                       KS
                     </div>
                   </div>
 
-                  <img
-                    key={activeProject.id + activeProject.coverImage}
-                    src={activeProject.coverImage}
-                    alt={localized(activeProject.titleEn, activeProject.titleBn)}
-                    loading="eager"
-                    // @ts-ignore fetchPriority is valid HTML attribute
-                    fetchPriority="high"
-                    decoding="async"
-                    className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 relative z-0"
-                  />
+                  {activeProject?.coverImage && !activeProject.coverImage.includes('images.unsplash.com') && (
+                    <img
+                      ref={activeImgRef}
+                      key={activeProject.id + activeProject.coverImage}
+                      src={activeProject.coverImage}
+                      alt={localized(activeProject.titleEn, activeProject.titleBn)}
+                      loading="eager"
+                      // @ts-ignore fetchPriority is valid HTML attribute
+                      fetchPriority="high"
+                      decoding="async"
+                      onLoad={() => setActiveImageLoaded(true)}
+                      className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-105 relative z-0 ${
+                        activeImageLoaded ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  )}
                   {/* Backdrop Gradient for maximum contrast */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none z-10" />
                 </div>
@@ -323,13 +430,15 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               onClick={nextSlide}
               className="hidden lg:block absolute right-[-15%] xl:right-[-12%] w-[45%] h-[82%] rounded-2xl overflow-hidden bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] opacity-35 hover:opacity-60 scale-90 cursor-pointer transition-all duration-500 z-10 filter blur-[0.5px]"
             >
-              <img
-                src={nextProject.coverImage}
-                alt={localized(nextProject.titleEn, nextProject.titleBn)}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
+              {nextProject?.coverImage && !nextProject.coverImage.includes('images.unsplash.com') && (
+                <img
+                  src={nextProject.coverImage}
+                  alt={localized(nextProject.titleEn, nextProject.titleBn)}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-l from-[var(--bg-card)]/90 via-[var(--bg-card)]/50 to-transparent" />
               <div className="absolute bottom-4 left-6 right-6 text-right">
                 <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block mb-1">

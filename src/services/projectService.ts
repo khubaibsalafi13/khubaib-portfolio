@@ -47,6 +47,7 @@ export const projectService = {
   async getPublishedAsync(): Promise<Project[]> {
     if (isSupabaseConfigured()) {
       try {
+        console.info('[Projects] Supabase request started');
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -54,11 +55,24 @@ export const projectService = {
           .order('sort_order', { ascending: true });
 
         if (!error && data) {
-          return data.map(projectFromDb);
+          const liveList = data.map(projectFromDb);
+          console.info('[Projects] live projects received:', liveList.length);
+          if (liveList.length > 0) {
+            const firstCover = liveList[0]?.coverImage || '';
+            const preview = firstCover.length > 50 ? firstCover.substring(0, 50) + '...' : firstCover;
+            console.info('[Projects] first live cover:', preview);
+          }
+          // Overwrite local cache with authoritative live data
+          setItem(STORAGE_KEY, liveList);
+          return liveList;
+        } else if (error) {
+          console.warn('[Supabase] fetch published projects error:', error.message);
         }
       } catch (err) {
-        console.warn('Supabase getPublishedAsync exception:', err);
+        console.warn('[Supabase] getPublishedAsync exception:', err);
       }
+    } else {
+      console.warn('[Supabase] Not configured; serving fallback projects.');
     }
     return this.getPublished();
   },
