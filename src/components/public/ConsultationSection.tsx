@@ -101,12 +101,12 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
           </p>
         </div>
 
-        {/* Airy Form Presentation - Unboxed & Minimalist */}
+        {/* Form Presentation - Contained panel in dark mode, open/unboxed in light mode */}
         <div
           id="consultation-form"
           className="relative z-10 w-full"
         >
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10">
             {errorMessage && (
               <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs sm:text-sm flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 shrink-0" />
@@ -156,7 +156,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder={t('consultation.fullNamePlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -175,7 +175,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t('consultation.emailPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
@@ -195,7 +195,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                         placeholder={t('consultation.companyPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -211,7 +211,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         id="service"
                         value={service}
                         onChange={(e) => setService(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
                       >
                         {servicesList.map((srv) => (
                           <option key={srv} value={srv} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
@@ -235,7 +235,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
                         placeholder={t('consultation.budgetPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                       value={timeline}
                       onChange={(e) => setTimeline(e.target.value)}
                       placeholder={t('consultation.timelinePlaceholder')}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                     />
                   </div>
 
@@ -273,7 +273,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={t('consultation.messagePlaceholder')}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
                     />
                   </div>
 

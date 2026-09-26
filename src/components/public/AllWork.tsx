@@ -191,12 +191,12 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
           </div>
 
           {/* Filter Segmented Control in Requested Order: All | Social Media | Brand Identity | Thumbnail | Others */}
-          <div className="flex flex-wrap items-center gap-1 p-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full">
+          <div className="flex items-center gap-1.5 p-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl sm:rounded-full max-w-full overflow-x-auto no-scrollbar sm:flex-wrap">
             <button
               id="filter-all-btn"
               type="button"
               onClick={() => setSelectedFilterId('all')}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+              className={`px-4 py-2 min-h-[38px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer shrink-0 ${
                 selectedFilterId === 'all'
                   ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
                   : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
@@ -211,7 +211,7 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
                 id={`filter-${filter.id}-btn`}
                 type="button"
                 onClick={() => setSelectedFilterId(filter.id)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer ${
+                className={`px-4 py-2 min-h-[38px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer shrink-0 ${
                   selectedFilterId === filter.id
                     ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'

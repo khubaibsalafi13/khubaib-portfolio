@@ -133,7 +133,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
             {/* Headline */}
             <h1
               id="hero-headline"
-              className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[var(--text-heading)] leading-[1.12] mb-6"
+              className="text-3xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[var(--text-heading)] leading-[1.12] mb-6"
             >
               {headline}
             </h1>

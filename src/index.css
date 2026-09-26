@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --primary-accent: #10b981;
   --primary-accent-hover: #05df72;
@@ -33,10 +35,20 @@
     --text-muted: #567363;
     --text-heading: #f0f6f2;
 
-    --border-subtle: #0f2619;
-    --border-medium: #17462b;
-    --border-hover: #24623e;
-    --border-focus: var(--primary-accent, #10b981);
+    /* Consistent dark-theme border tokens */
+    --border-subtle: rgba(52, 211, 153, 0.14);
+    --border-medium: rgba(52, 211, 153, 0.22);
+    --border-hover: rgba(52, 211, 153, 0.40);
+    --border-focus: rgba(52, 211, 153, 0.65);
+
+    /* Panel and container surfaces & borders for dark theme */
+    --panel-border: rgba(52, 211, 153, 0.26);
+    --panel-bg: #071910;
+    --panel-bg-subtle: #05140d;
+
+    /* Input borders and surface for dark theme */
+    --input-border: rgba(52, 211, 153, 0.24);
+    --input-border-focus: rgba(52, 211, 153, 0.65);
 
     --accent: var(--primary-accent, #10b981);
     --accent-glow: var(--primary-accent-glow, rgba(16, 185, 129, 0.28));
@@ -50,12 +62,12 @@
     --grid-line: rgba(16, 185, 129, 0.06);
 
     --pill-bg: #0a2416;
-    --pill-border: #17462b;
+    --pill-border: rgba(52, 211, 153, 0.20);
     --pill-text: #8ba394;
 
     --code-tag-bg: #082014;
     --code-tag-text: #10b981;
-    --code-tag-border: #17442a;
+    --code-tag-border: rgba(52, 211, 153, 0.18);
 
     --selection-bg: rgba(16, 185, 129, 0.3);
     --selection-text: #e6fcf0;
@@ -88,6 +100,13 @@
     --border-medium: #e0e7e2;
     --border-hover: #c4d3c7;
     --border-focus: var(--primary-accent, #16a34a);
+
+    --panel-border: transparent;
+    --panel-bg: transparent;
+    --panel-bg-subtle: transparent;
+
+    --input-border: #e0e7e2;
+    --input-border-focus: var(--primary-accent, #16a34a);
 
     --accent: var(--primary-accent, #16a34a);
     --accent-glow: var(--primary-accent-glow, rgba(22, 163, 74, 0.1));
@@ -125,6 +144,21 @@
     font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif;
     line-height: 1.65;
   }
+}
+
+/* Public Section Panels (Work Experience, Education, Consultation Form, Final CTA)
+   Guarantees visible boundaries in Dark Theme without relying on OS media queries,
+   while preserving the unboxed editorial layout in Light Theme */
+.public-panel {
+  border: 1px solid var(--panel-border);
+  background-color: var(--panel-bg);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+[data-theme="light"] .public-panel,
+.light .public-panel {
+  border-color: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Global Dynamic Primary Accent Utilities & Overrides */

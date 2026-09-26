@@ -286,7 +286,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               type="button"
               onClick={prevSlide}
               aria-label="Previous project"
-              className="w-10 h-10 rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -295,7 +295,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
               type="button"
               onClick={nextSlide}
               aria-label="Next project"
-              className="w-10 h-10 rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -303,7 +303,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         </div>
 
         {/* 3-Slide Carousel Viewport */}
-        <div className="relative w-full h-[460px] sm:h-[500px] md:h-[540px] flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-[430px] sm:h-[490px] md:h-[540px] flex items-center justify-center overflow-hidden">
           
           {/* LEFT SLIDE: Partially visible previous project */}
           {total > 1 && (
@@ -341,7 +341,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative w-full h-full rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] dark:border-[#17462b] dark:hover:border-[#10b981] overflow-hidden shadow-[var(--card-shadow)] dark:shadow-[0_0_35px_rgba(16,185,129,0.12)] transition-all duration-500 flex flex-col justify-between p-6 sm:p-10"
+                className="group relative w-full h-full rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] dark:border-[#17462b] dark:hover:border-[#10b981] overflow-hidden shadow-[var(--card-shadow)] dark:shadow-[0_0_35px_rgba(16,185,129,0.12)] transition-all duration-500 flex flex-col justify-between p-5 sm:p-8 md:p-10"
               >
                 {/* Background Cover Image with Hover Zoom & Instant Prioritization */}
                 <div className="absolute inset-0 overflow-hidden z-0 bg-[var(--bg-card-subtle)]">

@@ -90,25 +90,25 @@ export const Header: React.FC = () => {
         <Link
           to="/"
           id="brand-logo-link"
-          className="group flex items-center gap-2.5 text-decoration-none focus:outline-none"
+          className="group flex items-center gap-2.5 text-decoration-none focus:outline-none shrink-0"
         >
-          <div className="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] flex items-center justify-center text-[var(--accent)] font-bold text-sm tracking-widest group-hover:border-[var(--accent)] transition-colors shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-medium)] flex items-center justify-center text-[var(--accent)] font-bold text-sm tracking-widest group-hover:border-[var(--accent)] transition-colors shadow-sm shrink-0">
             KS
           </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold tracking-wider text-base sm:text-lg text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
+          <div className="flex flex-col justify-center">
+            <span className="font-extrabold tracking-wider text-base sm:text-lg text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors leading-tight">
               KHUBAIB
             </span>
-            <span className="text-[10px] tracking-widest text-[var(--text-muted)] uppercase font-mono -mt-1">
+            <span className="text-[10px] tracking-widest text-[var(--text-muted)] uppercase font-mono leading-none mt-0.5">
               PORTFOLIO
             </span>
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - 32px additional breathing room from brand logo */}
         <nav
           id="desktop-nav"
-          className="hidden md:flex items-center gap-6 lg:gap-8"
+          className="hidden md:flex items-center gap-6 lg:gap-8 md:ml-8"
           onMouseLeave={() => setHoveredNav(null)}
         >
           {navItems.map((item) => {
@@ -202,7 +202,7 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Mobile Menu Button & Mobile Toggles */}
-        <div className="flex sm:hidden items-center gap-2">
+        <div className="flex sm:hidden items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Mobile Theme Toggle */}
           <ThemeToggle variant="button" />
 

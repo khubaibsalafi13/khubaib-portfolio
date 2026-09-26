@@ -113,29 +113,29 @@ const ExperienceAccordionItem: React.FC<AccordionItemProps> = ({
         type="button"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="w-full py-2 text-left flex items-start justify-between gap-4 cursor-pointer focus:outline-none group"
+        className="w-full py-2.5 min-h-[44px] text-left flex items-start justify-between gap-3 sm:gap-4 cursor-pointer focus:outline-none group"
       >
-        <div>
-          <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-            <span className="text-base sm:text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
+        <div className="flex-1 min-w-0 pr-1 sm:pr-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 mb-1.5">
+            <span className="text-base sm:text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors break-words">
               {exp.company}
             </span>
             {role && (
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] font-medium">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] font-medium self-start sm:self-auto inline-block">
                 {role}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            <Calendar className="w-3.5 h-3.5 text-[var(--accent)]" />
+            <Calendar className="w-3.5 h-3.5 text-[var(--accent)] shrink-0" />
             <span>{exp.period}</span>
           </div>
         </div>
 
         <div
           ref={chevronRef}
-          className="w-8 h-8 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 mt-1 transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)]"
+          className="w-8 h-8 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 mt-0.5 transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)]"
         >
           <ChevronDown className="w-3.5 h-3.5" />
         </div>
@@ -187,23 +187,23 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
   return (
     <section
       id="experience"
-      className="py-24 sm:py-36 relative transition-colors"
+      className="py-20 sm:py-32 relative transition-colors"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Open Editorial Credibility Pillars Row */}
-        <div className="mb-20 py-8 border-y border-[var(--border-subtle)] grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="mb-14 sm:mb-20 py-6 sm:py-8 border-y border-[var(--border-subtle)] grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {credibilityPillars.map((pillar, i) => (
             <div
               key={i}
-              className="flex flex-col border-l border-[var(--border-subtle)] pl-5 first:border-l-0 first:pl-0"
+              className="flex flex-col border-l border-[var(--border-subtle)] pl-4 sm:pl-5 first:border-l-0 first:pl-0 [&:nth-child(3)]:sm:first:border-l-0"
             >
               <span className="text-xs font-semibold text-[var(--accent)] tracking-wider mb-1 uppercase">
                 Focus 0{i + 1}
               </span>
-              <span className="text-base font-bold text-[var(--text-heading)]">
+              <span className="text-sm sm:text-base font-bold text-[var(--text-heading)]">
                 {pillar.label}
               </span>
-              <span className="text-xs text-[var(--text-muted)] mt-0.5">
+              <span className="text-[11px] sm:text-xs text-[var(--text-muted)] mt-0.5">
                 {pillar.sub}
               </span>
             </div>
@@ -211,11 +211,11 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
         </div>
 
         {/* Two Columns: Experience & Education */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-20">
-          {/* Work Experience */}
-          <div className="lg:col-span-7">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Work Experience Panel */}
+          <div className="lg:col-span-7 public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8">
             <div className="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--border-subtle)]">
-              <Briefcase className="w-5 h-5 text-[var(--accent)]" />
+              <Briefcase className="w-5 h-5 text-[var(--accent)] shrink-0" />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight">
                 {t('experience.sectionTitle')}
               </h2>
@@ -235,10 +235,10 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
             </div>
           </div>
 
-          {/* Education */}
-          <div className="lg:col-span-5">
+          {/* Education Panel */}
+          <div className="lg:col-span-5 public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8">
             <div className="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--border-subtle)]">
-              <GraduationCap className="w-5 h-5 text-[var(--accent)]" />
+              <GraduationCap className="w-5 h-5 text-[var(--accent)] shrink-0" />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight">
                 {t('education.sectionTitle')}
               </h2>
@@ -261,7 +261,7 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
                   </h3>
 
                   <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                    <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                    <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                     <span>{localized(edu.institutionEn, edu.institutionBn)}</span>
                   </div>
                 </div>
