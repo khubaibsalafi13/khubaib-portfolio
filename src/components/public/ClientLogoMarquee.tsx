@@ -32,9 +32,12 @@ export const ClientLogoMarquee: React.FC<ClientLogoMarqueeProps> = ({
   return (
     <section id="clients" className="py-16 sm:py-20 relative overflow-hidden bg-[var(--bg-card-subtle)] border-y border-[var(--border-subtle)] transition-colors">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center">
-        <span className="text-xs font-mono tracking-[0.2em] text-[var(--text-muted)] uppercase">
-          // {title}
-        </span>
+        <div className="inline-flex items-center justify-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+          <span className="text-xs font-semibold tracking-[0.2em] text-[var(--text-muted)] uppercase">
+            {title}
+          </span>
+        </div>
       </div>
 
       {/* Infinite right-to-left scrolling logo rail */}

@@ -28,15 +28,18 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
   return (
     <section
       id="services"
-      className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors"
+      className="py-24 sm:py-36 relative transition-colors"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-2xl mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-3 font-semibold">
-            <span>// SERVICES</span>
+        <div className="max-w-2xl mb-16 sm:mb-20">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+              {t('services.sectionTitle')}
+            </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--text-heading)] tracking-tight mb-4">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight mb-4">
             {t('services.sectionTitle')}
           </h2>
           <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed">
@@ -44,35 +47,35 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
           </p>
         </div>
 
-        {/* 4 Clean Disciplines Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+        {/* Airy Editorial Disciplines Grid - Unboxed & Minimalist */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
           {services.map((service, index) => (
             <div
               key={service.id}
-              className="group relative rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] p-6 flex flex-col justify-between transition-colors duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1"
+              className="group flex flex-col justify-between pt-6 border-t border-[var(--border-subtle)] hover:border-[var(--accent)] transition-all duration-300"
             >
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-medium)] group-hover:border-[var(--accent)] transition-colors shadow-sm">
-                    {getServiceIcon(service.slug)}
-                  </div>
-                  <span className="font-mono text-xs text-[var(--text-muted)]">
+                <div className="flex items-center justify-between mb-8">
+                  <span className="text-sm font-semibold tracking-wider text-[var(--accent)]">
                     0{index + 1}
                   </span>
+                  <div className="w-9 h-9 rounded-full bg-[var(--bg-surface)] text-[var(--accent)] flex items-center justify-center transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)] shadow-sm">
+                    {getServiceIcon(service.slug)}
+                  </div>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors mb-3">
+                <h3 className="text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors mb-3">
                   {localized(service.titleEn, service.titleBn)}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                   {localized(service.descriptionEn, service.descriptionBn)}
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] font-mono text-[var(--text-muted)]">
-                <span className="uppercase tracking-wider">Discipline</span>
-                <span className="w-2 h-2 rounded-full bg-[var(--accent)]/40 group-hover:bg-[var(--accent)] transition-colors" />
+              <div className="pt-8 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                <span className="w-1 h-1 rounded-full bg-[var(--accent)] opacity-50 group-hover:opacity-100 transition-opacity" />
+                <span className="tracking-wider uppercase font-medium">Discipline</span>
               </div>
             </div>
           ))}

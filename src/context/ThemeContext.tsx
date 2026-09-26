@@ -69,19 +69,19 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (adminDefault === 'dark' || adminDefault === 'light') {
         return adminDefault;
       }
-      return 'dark';
+      return 'light';
     } catch {
-      return 'dark';
+      return 'light';
     }
   });
 
   const [accentColor, setAccentColorState] = useState<string>(() => {
     try {
-      const initial = settingsService.getSettings().accentColor || '#10b981';
+      const initial = settingsService.getSettings().accentColor || '#16a34a';
       applyAccentColorToDOM(initial);
       return initial;
     } catch {
-      return '#10b981';
+      return '#16a34a';
     }
   });
 

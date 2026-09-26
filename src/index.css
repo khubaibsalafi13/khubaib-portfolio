@@ -1,109 +1,109 @@
 @import "tailwindcss";
 
 :root {
-  --primary-accent: #10b981;
-  --primary-accent-hover: #05df72;
-  --primary-accent-glow: rgba(16, 185, 129, 0.25);
-  --primary-accent-muted: rgba(16, 185, 129, 0.15);
-  --primary-accent-contrast: #022013;
+  --primary-accent: #16a34a;
+  --primary-accent-hover: #15803d;
+  --primary-accent-glow: rgba(22, 163, 74, 0.1);
+  --primary-accent-muted: rgba(22, 163, 74, 0.08);
+  --primary-accent-contrast: #ffffff;
 }
 
 @layer base {
-  /* DARK MODE (Default & [data-theme="dark"]) */
+  /* CLEAN EDITORIAL WHITE / OFF-WHITE (Default & [data-theme="light"], .light) */
   :root,
-  [data-theme="dark"],
-  .dark {
-    --bg-page: #040c07;
-    --bg-page-rgb: 4, 12, 7;
-    --bg-card: #06140d;
-    --bg-card-subtle: #08180f;
-    --bg-card-elevated: #0a2014;
-    --bg-surface: #0a1f14;
-    --bg-surface-hover: #0f2c1c;
-    --bg-input: #030a06;
-    --bg-badge: #082014;
-    --bg-header: rgba(4, 12, 7, 0.88);
-    --bg-footer: #030805;
-
-    --text-primary: #eaf3ed;
-    --text-secondary: #90a89a;
-    --text-muted: #5e7a69;
-    --text-heading: #f3f9f5;
-
-    --border-subtle: #0f2418;
-    --border-medium: #132a1d;
-    --border-hover: #1e452e;
-    --border-focus: var(--primary-accent, #10b981);
-
-    --accent: var(--primary-accent, #10b981);
-    --accent-glow: var(--primary-accent-glow, rgba(16, 185, 129, 0.25));
-    --accent-hover: var(--primary-accent-hover, #05df72);
-    --accent-contrast: var(--primary-accent-contrast, #022013);
-
-    --card-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55);
-
-    --blur-opacity: 0.16;
-    --cursor-glow-opacity: 0.22;
-    --grid-line: rgba(19, 42, 29, 0.35);
-
-    --pill-bg: #091f14;
-    --pill-border: #153823;
-    --pill-text: #8ea899;
-
-    --code-tag-bg: #0b1e14;
-    --code-tag-text: #10b981;
-    --code-tag-border: #163d27;
-
-    --selection-bg: rgba(16, 185, 129, 0.25);
-    --selection-text: #a7f3d0;
-  }
-
-  /* LIGHT MODE ([data-theme="light"], .light) */
   [data-theme="light"],
   .light {
-    --bg-page: #f8faf8;
-    --bg-page-rgb: 248, 250, 248;
+    --bg-page: #fbfdfc;
+    --bg-page-rgb: 251, 253, 252;
     --bg-card: #ffffff;
-    --bg-card-subtle: #f1f5f2;
+    --bg-card-subtle: #f6f8f6;
     --bg-card-elevated: #ffffff;
-    --bg-surface: #edf3ee;
-    --bg-surface-hover: #e2ece4;
+    --bg-surface: #eff4f0;
+    --bg-surface-hover: #e5ece6;
     --bg-input: #ffffff;
-    --bg-badge: #e8f5ed;
-    --bg-header: rgba(248, 250, 248, 0.88);
-    --bg-footer: #edf3ef;
+    --bg-badge: #edf5ef;
+    --bg-header: rgba(251, 253, 252, 0.9);
+    --bg-footer: #f7faf8;
 
-    --text-primary: #121c15;
-    --text-secondary: #485c4f;
-    --text-muted: #6b8274;
-    --text-heading: #09120b;
+    --text-primary: #121b14;
+    --text-secondary: #48594e;
+    --text-muted: #728478;
+    --text-heading: #0a130c;
 
-    --border-subtle: #e2ebe4;
-    --border-medium: #cfded3;
-    --border-hover: #b4cbbd;
-    --border-focus: var(--primary-accent, #10b981);
+    --border-subtle: #edf2ee;
+    --border-medium: #e0e7e2;
+    --border-hover: #c4d3c7;
+    --border-focus: var(--primary-accent, #16a34a);
 
-    --accent: var(--primary-accent, #10b981);
-    --accent-glow: var(--primary-accent-glow, rgba(16, 185, 129, 0.12));
-    --accent-hover: var(--primary-accent-hover, #059669);
-    --accent-contrast: #ffffff;
+    --accent: var(--primary-accent, #16a34a);
+    --accent-glow: var(--primary-accent-glow, rgba(22, 163, 74, 0.1));
+    --accent-hover: var(--primary-accent-hover, #15803d);
+    --accent-contrast: var(--primary-accent-contrast, #ffffff);
 
-    --card-shadow: 0 12px 32px -8px rgba(18, 40, 26, 0.08), 0 2px 6px rgba(18, 40, 26, 0.04);
+    --card-shadow: 0 10px 30px -10px rgba(18, 32, 22, 0.04), 0 2px 6px rgba(18, 32, 22, 0.02);
 
-    --blur-opacity: 0.07;
-    --cursor-glow-opacity: 0.09;
-    --grid-line: rgba(20, 48, 30, 0.045);
+    --blur-opacity: 0.06;
+    --cursor-glow-opacity: 0.07;
+    --grid-line: transparent;
 
-    --pill-bg: #edf4ef;
-    --pill-border: #d4e2d8;
-    --pill-text: #3c5445;
+    --pill-bg: #edf4f0;
+    --pill-border: #dbe4dd;
+    --pill-text: #374a3e;
 
-    --code-tag-bg: #e6f5ec;
-    --code-tag-text: var(--primary-accent, #047857);
-    --code-tag-border: #b7e4ca;
+    --code-tag-bg: #edf6f0;
+    --code-tag-text: var(--primary-accent, #16a34a);
+    --code-tag-border: #d2e6d8;
 
-    --selection-bg: var(--primary-accent-muted, rgba(16, 185, 129, 0.2));
-    --selection-text: #064e3b;
+    --selection-bg: rgba(22, 163, 74, 0.15);
+    --selection-text: #052e16;
+  }
+
+  /* DARK MODE ([data-theme="dark"], .dark) - Minimalist & Airy */
+  [data-theme="dark"],
+  .dark {
+    --bg-page: #08110b;
+    --bg-page-rgb: 8, 17, 11;
+    --bg-card: #0d1a12;
+    --bg-card-subtle: #112017;
+    --bg-card-elevated: #14261c;
+    --bg-surface: #122218;
+    --bg-surface-hover: #193022;
+    --bg-input: #0b160f;
+    --bg-badge: #11261b;
+    --bg-header: rgba(8, 17, 11, 0.9);
+    --bg-footer: #060e09;
+
+    --text-primary: #ecf3ee;
+    --text-secondary: #94a79b;
+    --text-muted: #64786c;
+    --text-heading: #f4faf6;
+
+    --border-subtle: #13241a;
+    --border-medium: #193023;
+    --border-hover: #264734;
+    --border-focus: var(--primary-accent, #16a34a);
+
+    --accent: var(--primary-accent, #16a34a);
+    --accent-glow: var(--primary-accent-glow, rgba(22, 163, 74, 0.18));
+    --accent-hover: var(--primary-accent-hover, #22c55e);
+    --accent-contrast: var(--primary-accent-contrast, #ffffff);
+
+    --card-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.4);
+
+    --blur-opacity: 0.12;
+    --cursor-glow-opacity: 0.16;
+    --grid-line: transparent;
+
+    --pill-bg: #0f2217;
+    --pill-border: #1c3928;
+    --pill-text: #96aca0;
+
+    --code-tag-bg: #102619;
+    --code-tag-text: #22c55e;
+    --code-tag-border: #1c452c;
+
+    --selection-bg: rgba(22, 163, 74, 0.25);
+    --selection-text: #bbf7d0;
   }
 
   body {
@@ -210,12 +210,10 @@
 
 .shadow-theme-card { box-shadow: var(--card-shadow); }
 
-/* Subtle grid texture overlay */
+/* Subtle background overlay - removed grid lines for clean airy editorial aesthetic */
 .bg-subtle-grid {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  display: none !important;
+  background-image: none !important;
 }
 
 .bg-radial-gradient {

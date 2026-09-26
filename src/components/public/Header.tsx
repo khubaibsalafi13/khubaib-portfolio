@@ -108,7 +108,7 @@ export const Header: React.FC = () => {
         {/* Desktop Navigation */}
         <nav
           id="desktop-nav"
-          className="hidden md:flex items-center gap-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-full px-3 py-1.5 backdrop-blur-sm shadow-sm"
+          className="hidden md:flex items-center gap-6 lg:gap-8"
           onMouseLeave={() => setHoveredNav(null)}
         >
           {navItems.map((item) => {
@@ -127,9 +127,9 @@ export const Header: React.FC = () => {
                   }
                 }}
                 onMouseEnter={() => setHoveredNav(item.id)}
-                className={`relative px-4 py-1.5 text-xs font-medium tracking-wider uppercase transition-colors duration-200 ${
+                className={`relative py-1 text-xs font-semibold tracking-wider uppercase transition-colors duration-200 ${
                   isActive || isHovered
-                    ? 'text-[var(--accent)] font-semibold'
+                    ? 'text-[var(--accent)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                 }`}
               >
@@ -140,7 +140,7 @@ export const Header: React.FC = () => {
                   <motion.div
                     layoutId="header-nav-indicator"
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    className="absolute bottom-0 left-3 right-3 h-[2px] bg-[var(--accent)] rounded-full shadow-[0_0_8px_var(--accent-glow)]"
+                    className="absolute -bottom-1 left-0 right-0 h-[1.5px] bg-[var(--accent)] rounded-full"
                   />
                 )}
               </a>
@@ -156,7 +156,7 @@ export const Header: React.FC = () => {
           {/* Language Switcher */}
           <div
             id="language-switcher"
-            className="flex items-center bg-[var(--bg-surface)] border border-[var(--border-medium)] rounded-full p-0.5 text-xs font-medium shadow-sm"
+            className="flex items-center bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full p-0.5 text-xs font-medium"
           >
             <button
               id="lang-btn-en"
@@ -194,10 +194,10 @@ export const Header: React.FC = () => {
                 scrollToSection('/#consultation');
               }
             }}
-            className="group relative inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold tracking-wider uppercase rounded-full bg-[var(--bg-surface)] hover:bg-[var(--accent)] text-[var(--text-primary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 shadow-sm"
+            className="group relative inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold tracking-wider uppercase rounded-full bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm"
           >
             <span>{t('nav.letsTalk')}</span>
-            <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 text-[var(--accent)] group-hover:text-[var(--accent-contrast)]" />
+            <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
         </div>
 

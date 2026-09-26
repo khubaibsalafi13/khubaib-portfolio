@@ -76,69 +76,33 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
   };
 
   return (
-    <section id="consultation" className="py-20 sm:py-28 relative transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Horizontal Announcement Banner Strip */}
-        <div className="mb-14 p-6 sm:p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] shadow-[var(--card-shadow)] flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden transition-colors">
-          <div
-            className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none"
-            style={{
-              backgroundColor: 'var(--accent)',
-              opacity: 'var(--blur-opacity)',
-            }}
-          />
-
-          <div className="text-center sm:text-left">
-            <span className="text-xs font-mono text-[var(--accent)] tracking-widest uppercase block mb-1 font-semibold">
-              // DESIGN INQUIRIES
+    <section id="consultation" className="py-24 sm:py-36 relative transition-colors">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Open Editorial Header */}
+        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+          <div className="inline-flex items-center justify-center gap-2 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+              {localized('INQUIRIES', 'পরামর্শ')}
             </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)]">
-              {bannerTitle}
-            </h3>
-            <p className="text-sm sm:text-base text-[var(--text-secondary)] mt-1">
-              {bannerDesc}
-            </p>
           </div>
-
-          <a
-            href="#consultation-form"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('consultation-form')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all shadow-[0_0_20px_var(--accent-glow)] shrink-0 cursor-pointer hover:-translate-y-0.5 active:scale-98"
-          >
-            <span>{t('hero.secondaryCta')}</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </a>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight mb-4">
+            {bannerTitle}
+          </h2>
+          <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed font-normal">
+            {bannerDesc}
+          </p>
         </div>
 
-        {/* Form Container */}
+        {/* Airy Form Presentation - Unboxed & Minimalist */}
         <div
           id="consultation-form"
-          className="w-full rounded-3xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-6 sm:p-10 lg:p-12 shadow-[var(--card-shadow)] relative overflow-hidden transition-colors"
+          className="relative z-10 w-full"
         >
-          {/* Ambient blur gradient matching CTA section */}
-          <div
-            className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none"
-            style={{
-              backgroundColor: 'var(--accent)',
-              opacity: 'var(--blur-opacity)',
-            }}
-          />
-
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <div className="text-center max-w-lg mx-auto mb-10">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight mb-2">
-                {t('consultation.formTitle')}
-              </h2>
-              <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                {t('consultation.formDesc')}
-              </p>
-            </div>
-
+          <div className="max-w-3xl mx-auto">
             {errorMessage && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs sm:text-sm flex items-center gap-3">
+              <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs sm:text-sm flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>{errorMessage}</span>
               </div>
@@ -149,9 +113,9 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12 px-4"
+                  className="text-center py-16 px-4 border border-[var(--border-subtle)] rounded-3xl bg-[var(--bg-card)]"
                 >
-                  <div className="w-16 h-16 rounded-full bg-[var(--bg-surface)] border border-[var(--border-medium)] text-[var(--accent)] flex items-center justify-center mx-auto mb-5 shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--accent)] flex items-center justify-center mx-auto mb-5 shadow-sm">
                     <CheckCircle className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-bold text-[var(--text-heading)] mb-2">
@@ -163,19 +127,19 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-6 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--bg-surface)] text-[var(--accent)] border border-[var(--border-medium)] hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)] transition-colors cursor-pointer shadow-sm"
+                    className="px-7 py-3 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all cursor-pointer shadow-sm hover:-translate-y-0.5"
                   >
                     {t('consultation.anotherRequest')}
                   </button>
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {/* Full Name */}
                     <div>
                       <label
                         htmlFor="fullName"
-                        className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                        className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                       >
                         {t('consultation.fullName')} *
                       </label>
@@ -186,7 +150,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder={t('consultation.fullNamePlaceholder')}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -194,7 +158,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                     <div>
                       <label
                         htmlFor="email"
-                        className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                        className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                       >
                         {t('consultation.email')} *
                       </label>
@@ -205,17 +169,17 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t('consultation.emailPlaceholder')}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {/* Organization/Company */}
                     <div>
                       <label
                         htmlFor="company"
-                        className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                        className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                       >
                         {t('consultation.company')}
                       </label>
@@ -225,7 +189,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                         placeholder={t('consultation.companyPlaceholder')}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -233,7 +197,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                     <div>
                       <label
                         htmlFor="service"
-                        className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                        className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                       >
                         {t('consultation.serviceRequired')} *
                       </label>
@@ -241,7 +205,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         id="service"
                         value={service}
                         onChange={(e) => setService(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
                       >
                         {servicesList.map((srv) => (
                           <option key={srv} value={srv} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
@@ -255,7 +219,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                     <div>
                       <label
                         htmlFor="budget"
-                        className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                        className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                       >
                         {t('consultation.budget')}
                       </label>
@@ -265,7 +229,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
                         placeholder={t('consultation.budgetPlaceholder')}
-                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
@@ -274,7 +238,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                   <div>
                     <label
                       htmlFor="timeline"
-                      className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                      className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                     >
                       {t('consultation.timeline')}
                     </label>
@@ -284,7 +248,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                       value={timeline}
                       onChange={(e) => setTimeline(e.target.value)}
                       placeholder={t('consultation.timelinePlaceholder')}
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                     />
                   </div>
 
@@ -292,27 +256,27 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                   <div>
                     <label
                       htmlFor="message"
-                      className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2 font-semibold"
+                      className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2"
                     >
                       {t('consultation.message')} *
                     </label>
                     <textarea
                       id="message"
                       required
-                      rows={4}
+                      rows={5}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={t('consultation.messagePlaceholder')}
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] focus:border-[var(--accent)] focus:ring-1 focus:ring-[var(--accent)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
                     />
                   </div>
 
                   {/* Submit Button */}
-                  <div className="pt-2 text-center">
+                  <div className="pt-4 text-center">
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-[0_0_24px_var(--accent-glow)] disabled:opacity-50 cursor-pointer w-full sm:w-auto hover:-translate-y-0.5 active:scale-98"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 cursor-pointer w-full sm:w-auto hover:-translate-y-0.5 active:scale-98"
                     >
                       {submitting ? (
                         <span>{t('consultation.sending')}</span>

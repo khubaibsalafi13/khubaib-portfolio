@@ -108,26 +108,26 @@ const ExperienceAccordionItem: React.FC<AccordionItemProps> = ({
   }, [isExpanded]);
 
   return (
-    <div className="rounded-xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all overflow-hidden shadow-[var(--card-shadow)]">
+    <div className="border-b border-[var(--border-subtle)] pb-6 transition-all">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="w-full p-5 sm:p-6 text-left flex items-start justify-between gap-4 cursor-pointer focus:outline-none"
+        className="w-full py-2 text-left flex items-start justify-between gap-4 cursor-pointer focus:outline-none group"
       >
         <div>
           <div className="flex flex-wrap items-center gap-2.5 mb-1.5">
-            <span className="text-base sm:text-lg font-bold text-[var(--text-heading)]">
+            <span className="text-base sm:text-lg font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
               {exp.company}
             </span>
             {role && (
-              <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-[var(--code-tag-bg)] text-[var(--code-tag-text)] border border-[var(--code-tag-border)] font-semibold">
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] font-medium">
                 {role}
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
             <Calendar className="w-3.5 h-3.5 text-[var(--accent)]" />
             <span>{exp.period}</span>
           </div>
@@ -135,27 +135,27 @@ const ExperienceAccordionItem: React.FC<AccordionItemProps> = ({
 
         <div
           ref={chevronRef}
-          className="p-1.5 rounded-lg bg-[var(--bg-surface)] text-[var(--text-secondary)] shrink-0 mt-1 shadow-sm transition-colors"
+          className="w-8 h-8 rounded-full bg-[var(--bg-surface)] text-[var(--text-secondary)] flex items-center justify-center shrink-0 mt-1 transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)]"
         >
-          <ChevronDown className="w-4 h-4" />
+          <ChevronDown className="w-3.5 h-3.5" />
         </div>
       </button>
 
       {/* GSAP Animated Expandable Responsibilities Content */}
       <div ref={contentRef} style={{ overflow: 'hidden' }}>
         {responsibilities.length > 0 && (
-          <div className="px-5 sm:px-6 pb-6 pt-2 border-t border-[var(--border-subtle)]">
-            <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block mb-3 font-semibold">
+          <div className="pt-4 pb-2">
+            <span className="text-xs uppercase tracking-wider text-[var(--accent)] block mb-3 font-semibold">
               {t('experience.keyResponsibilities')}
             </span>
             <ul className="space-y-2.5">
               {responsibilities.map((resp, i) => (
                 <li
                   key={i}
-                  className="text-xs sm:text-sm text-[var(--text-secondary)] flex items-start gap-2.5"
+                  className="text-sm text-[var(--text-secondary)] flex items-start gap-2.5 leading-relaxed"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0 mt-2" />
-                  <span className="leading-relaxed">{resp}</span>
+                  <span>{resp}</span>
                 </li>
               ))}
             </ul>
@@ -187,23 +187,23 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
   return (
     <section
       id="experience"
-      className="py-20 sm:py-28 relative bg-[var(--bg-card-subtle)]/40 border-t border-[var(--border-subtle)] transition-colors"
+      className="py-24 sm:py-36 relative transition-colors"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Compact Credibility Band */}
-        <div className="mb-16 p-5 sm:p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] shadow-[var(--card-shadow)] grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Open Editorial Credibility Pillars Row */}
+        <div className="mb-20 py-8 border-y border-[var(--border-subtle)] grid grid-cols-2 md:grid-cols-4 gap-6">
           {credibilityPillars.map((pillar, i) => (
             <div
               key={i}
-              className="flex flex-col border-l border-[var(--border-subtle)] pl-4 first:border-l-0 first:pl-0"
+              className="flex flex-col border-l border-[var(--border-subtle)] pl-5 first:border-l-0 first:pl-0"
             >
-              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider mb-1 font-semibold">
-                // Focus {i + 1}
+              <span className="text-xs font-semibold text-[var(--accent)] tracking-wider mb-1 uppercase">
+                Focus 0{i + 1}
               </span>
-              <span className="text-sm sm:text-base font-bold text-[var(--text-heading)]">
+              <span className="text-base font-bold text-[var(--text-heading)]">
                 {pillar.label}
               </span>
-              <span className="text-xs text-[var(--text-secondary)] mt-0.5">
+              <span className="text-xs text-[var(--text-muted)] mt-0.5">
                 {pillar.sub}
               </span>
             </div>
@@ -211,13 +211,11 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
         </div>
 
         {/* Two Columns: Experience & Education */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-14 lg:gap-20">
           {/* Work Experience */}
           <div className="lg:col-span-7">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] text-[var(--accent)] border border-[var(--border-medium)] shadow-sm">
-                <Briefcase className="w-5 h-5" />
-              </div>
+            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--border-subtle)]">
+              <Briefcase className="w-5 h-5 text-[var(--accent)]" />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight">
                 {t('experience.sectionTitle')}
               </h2>
@@ -239,23 +237,21 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
 
           {/* Education */}
           <div className="lg:col-span-5">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="p-2.5 rounded-xl bg-[var(--bg-surface)] text-[var(--accent)] border border-[var(--border-medium)] shadow-sm">
-                <GraduationCap className="w-5 h-5" />
-              </div>
+            <div className="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--border-subtle)]">
+              <GraduationCap className="w-5 h-5 text-[var(--accent)]" />
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight">
                 {t('education.sectionTitle')}
               </h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {education.map((edu) => (
                 <div
                   key={edu.id}
-                  className="rounded-xl bg-[var(--bg-card)] border border-[var(--border-medium)] p-5 sm:p-6 shadow-[var(--card-shadow)]"
+                  className="border-b border-[var(--border-subtle)] pb-6 last:border-b-0"
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono text-[var(--code-tag-text)] px-2.5 py-0.5 rounded bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] font-semibold">
+                    <span className="text-xs font-semibold text-[var(--accent)]">
                       {edu.period}
                     </span>
                   </div>
@@ -265,7 +261,7 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
                   </h3>
 
                   <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-                    <Building2 className="w-3.5 h-3.5 text-[var(--accent)]" />
+                    <Building2 className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                     <span>{localized(edu.institutionEn, edu.institutionBn)}</span>
                   </div>
                 </div>

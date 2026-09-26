@@ -94,19 +94,21 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
 
           {/* Project Header & Metadata */}
-          <div className="mb-10 sm:mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-4 font-semibold">
-              <Sparkles className="w-3 h-3 text-[var(--accent)]" />
-              <span>{project.category}</span>
+          <div className="mb-12 sm:mb-16">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                {project.category}
+              </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-heading)] tracking-tight leading-[1.12] mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[var(--text-heading)] tracking-tight leading-[1.12] mb-8">
               {title}
             </h1>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 sm:p-6 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] shadow-[var(--card-shadow)]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 py-6 border-y border-[var(--border-subtle)]">
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] block mb-1 font-medium">
                   {t('work.client')}
                 </span>
                 <span className="text-sm font-semibold text-[var(--text-primary)]">
@@ -114,7 +116,7 @@ export const ProjectDetailPage: React.FC = () => {
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] block mb-1 font-medium">
                   {t('work.year')}
                 </span>
                 <span className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
@@ -123,7 +125,7 @@ export const ProjectDetailPage: React.FC = () => {
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] block mb-1 font-medium">
                   {t('work.category')}
                 </span>
                 <span className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
@@ -132,7 +134,7 @@ export const ProjectDetailPage: React.FC = () => {
                 </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)] block mb-1">
+                <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] block mb-1 font-medium">
                   {t('work.role')}
                 </span>
                 <span className="text-sm font-semibold text-[var(--text-primary)]">
@@ -143,7 +145,7 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
 
           {/* Hero Cover Image */}
-          <div className="w-full h-[360px] sm:h-[480px] md:h-[560px] rounded-3xl overflow-hidden border border-[var(--border-medium)] mb-12 shadow-2xl bg-[var(--bg-card)]">
+          <div className="w-full h-[360px] sm:h-[480px] md:h-[560px] rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-14 shadow-[var(--card-shadow)] bg-[var(--bg-card)]">
             <img
               src={project.coverImage}
               alt={title}
@@ -154,22 +156,25 @@ export const ProjectDetailPage: React.FC = () => {
 
           {/* Project Summary / Short Desc */}
           {shortDesc && (
-            <div className="mb-14 p-6 sm:p-8 rounded-2xl bg-[var(--bg-card-subtle)] border-l-4 border-[var(--accent)] text-base sm:text-lg text-[var(--text-primary)] leading-relaxed italic">
+            <div className="mb-16 pl-6 sm:pl-8 border-l-2 border-[var(--accent)] text-lg sm:text-xl text-[var(--text-secondary)] leading-relaxed italic">
               "{shortDesc}"
             </div>
           )}
 
           {/* Editorial Grid: Overview & Concept */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-14 mb-20">
             {overview && (
               <div className="md:col-span-6 space-y-3">
-                <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block font-semibold">
-                  // {t('work.overview')}
-                </span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+                  <span className="text-xs uppercase tracking-wider text-[var(--accent)] block font-semibold">
+                    {t('work.overview')}
+                  </span>
+                </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)]">
                   The Brief & Scope
                 </h2>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line font-normal">
                   {overview}
                 </p>
               </div>
@@ -177,13 +182,16 @@ export const ProjectDetailPage: React.FC = () => {
 
             {concept && (
               <div className="md:col-span-6 space-y-3">
-                <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block font-semibold">
-                  // {t('work.concept')}
-                </span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-1 h-1 rounded-full bg-[var(--accent)]" />
+                  <span className="text-xs uppercase tracking-wider text-[var(--accent)] block font-semibold">
+                    {t('work.concept')}
+                  </span>
+                </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[var(--text-heading)]">
                   Creative Direction
                 </h2>
-                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+                <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line font-normal">
                   {concept}
                 </p>
               </div>
@@ -192,11 +200,14 @@ export const ProjectDetailPage: React.FC = () => {
 
           {/* Gallery Showcase */}
           {project.galleryImages && project.galleryImages.length > 0 && (
-            <div className="mb-20">
-              <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-wider block mb-6 font-semibold">
-                // {t('work.gallery')} ({project.galleryImages.length} Artifacts)
-              </span>
-              <div className="space-y-8">
+            <div className="mb-24">
+              <div className="flex items-center gap-2 mb-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                  {t('work.gallery')} ({project.galleryImages.length} Artifacts)
+                </span>
+              </div>
+              <div className="space-y-10">
                 {project.galleryImages.map((img, i) => {
                   const src = typeof img === 'string' ? img : img.url;
                   const caption = typeof img === 'object' ? localized(img.captionEn, img.captionBn) : undefined;
@@ -205,7 +216,7 @@ export const ProjectDetailPage: React.FC = () => {
                   return (
                     <div
                       key={typeof img === 'object' ? img.id : i}
-                      className="w-full rounded-2xl overflow-hidden border border-[var(--border-medium)] bg-[var(--bg-card)] shadow-lg"
+                      className="w-full rounded-2xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-card)] shadow-[var(--card-shadow)]"
                     >
                       <img
                         src={src}
@@ -215,7 +226,7 @@ export const ProjectDetailPage: React.FC = () => {
                         className="w-full h-auto object-cover"
                       />
                       {caption && (
-                        <div className="p-3 bg-[var(--bg-card-subtle)] text-xs font-mono text-[var(--text-muted)] border-t border-[var(--border-subtle)]">
+                        <div className="p-4 bg-[var(--bg-card)] text-xs text-[var(--text-muted)] border-t border-[var(--border-subtle)] font-medium">
                           {caption}
                         </div>
                       )}
@@ -227,18 +238,18 @@ export const ProjectDetailPage: React.FC = () => {
           )}
 
           {/* Prev / Next Project Navigation Bar */}
-          <div className="pt-10 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-12 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-6">
             {prevProject ? (
               <Link
                 to={`/work/${prevProject.slug}`}
-                className="group flex items-center gap-3 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors w-full sm:w-auto shadow-[var(--card-shadow)]"
+                className="group flex items-center gap-3.5 py-3 px-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent)] transition-all duration-200 w-full sm:w-auto shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5"
               >
                 <ArrowLeft className="w-4 h-4 text-[var(--accent)] transition-transform group-hover:-translate-x-1" />
                 <div className="text-left">
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase block">
+                  <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block font-medium">
                     {t('work.prevProject')}
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)]">
+                  <span className="text-xs sm:text-sm font-semibold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
                     {localized(prevProject.titleEn, prevProject.titleBn)}
                   </span>
                 </div>
@@ -250,13 +261,13 @@ export const ProjectDetailPage: React.FC = () => {
             {nextProject ? (
               <Link
                 to={`/work/${nextProject.slug}`}
-                className="group flex items-center justify-end gap-3 p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-colors w-full sm:w-auto text-right shadow-[var(--card-shadow)]"
+                className="group flex items-center justify-end gap-3.5 py-3 px-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent)] transition-all duration-200 w-full sm:w-auto text-right shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5"
               >
                 <div>
-                  <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase block">
+                  <span className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider block font-medium">
                     {t('work.nextProject')}
                   </span>
-                  <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)]">
+                  <span className="text-xs sm:text-sm font-semibold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors">
                     {localized(nextProject.titleEn, nextProject.titleBn)}
                   </span>
                 </div>

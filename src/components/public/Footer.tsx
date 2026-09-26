@@ -37,10 +37,10 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
 
           {/* Quick Navigation */}
           <div className="md:col-span-3">
-            <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest block mb-4 font-semibold">
-              // NAVIGATION
+            <span className="text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] block mb-4">
+              {t('nav.work') ? 'Navigation' : 'Navigation'}
             </span>
-            <ul className="space-y-2 text-xs font-mono text-[var(--text-secondary)]">
+            <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
               <li>
                 <a href="/#work" className="hover:text-[var(--accent)] transition-colors">
                   {t('nav.work')}
@@ -71,15 +71,15 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
 
           {/* Connect & Theme/Language controls */}
           <div className="md:col-span-3">
-            <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest block mb-4 font-semibold">
-              // CONNECT
+            <span className="text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] block mb-4">
+              Connect
             </span>
             <div className="flex flex-col gap-2.5">
               <a
                 href={settings.behanceUrl || 'https://www.behance.net/khubaibsalafi13'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-[var(--text-primary)] hover:text-[var(--accent)] font-mono transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
               >
                 <span>Behance</span>
                 <ArrowUpRight className="w-3.5 h-3.5 text-[var(--accent)]" />
@@ -88,7 +88,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
               {settings.email && (
                 <a
                   href={`mailto:${settings.email}`}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] font-mono transition-colors"
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
                 >
                   {settings.email}
                 </a>

@@ -35,8 +35,10 @@ import {
   SiteContent,
   SiteSettings,
 } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const HomePage: React.FC = () => {
+  const { localized, t } = useLanguage();
   // Initial state from cached data for fast paint
   const [content, setContent] = useState<SiteContent>(() => contentService.getContent());
   const [settings, setSettings] = useState<SiteSettings>(() => settingsService.getSettings());
@@ -221,12 +223,15 @@ export const HomePage: React.FC = () => {
         <ExpertiseMarquee />
 
         {/* 05 & 06. Featured Project Carousel (Center dominant, left/right partial) */}
-        <div className="pt-16 sm:pt-24 pb-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-6">
-            <span className="text-xs font-mono text-[var(--accent)] uppercase tracking-[0.25em] block mb-2 font-semibold">
-              // SPOTLIGHT
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--text-heading)] tracking-tight">
+        <div className="pt-20 sm:pt-32 pb-12">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
+            <div className="inline-flex items-center justify-center gap-2 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                {t('work.sectionTitle')}
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight">
               {content.selectedWorkTitleEn || 'SELECTED WORK'}
             </h2>
           </div>

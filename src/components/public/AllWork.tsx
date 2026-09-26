@@ -83,7 +83,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
         to={`/work/${project.slug}`}
         aria-label={`View project: ${projectTitle || 'Artwork'}`}
         style={ratioStyle}
-        className={`group relative block w-full ${ratioClass} overflow-hidden rounded-2xl bg-[var(--bg-card)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] cursor-pointer`}
+        className={`group relative block w-full ${ratioClass} overflow-hidden rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] transition-all duration-500 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] cursor-pointer`}
       >
         {/* Subtle branded placeholder/skeleton surface */}
         <div
@@ -107,7 +107,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
-            className={`w-full h-full object-cover object-center transition-all duration-300 ease-out group-hover:scale-[1.02] ${
+            className={`w-full h-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-[1.02] ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
@@ -169,30 +169,32 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
   }, [projects, selectedFilterId]);
 
   return (
-    <section id="work" className="py-20 sm:py-28 relative">
+    <section id="work" className="py-24 sm:py-32 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading & Category Filter Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--border-subtle)] mb-12">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--code-tag-bg)] border border-[var(--code-tag-border)] text-[var(--code-tag-text)] text-xs font-mono tracking-widest uppercase mb-3 font-semibold">
-              <Sparkles className="w-3 h-3" />
-              <span>{t('work.sectionTitle')}</span>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                {t('work.sectionTitle')}
+              </span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[var(--text-heading)] tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight">
               {t('work.allProjects')}
             </h2>
           </div>
 
-          {/* Filter Pills in Requested Order: All | Social Media | Brand Identity | Thumbnail | Others */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Filter Segmented Control in Requested Order: All | Social Media | Brand Identity | Thumbnail | Others */}
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full">
             <button
               id="filter-all-btn"
               type="button"
               onClick={() => setSelectedFilterId('all')}
-              className={`px-4 py-1.5 rounded-full text-xs font-medium tracking-wider uppercase transition-all duration-200 cursor-pointer ${
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer ${
                 selectedFilterId === 'all'
-                  ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
-                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-medium)] hover:border-[var(--accent)]'
+                  ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
               }`}
             >
               {t('work.filterAll')}
@@ -204,10 +206,10 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
                 id={`filter-${filter.id}-btn`}
                 type="button"
                 onClick={() => setSelectedFilterId(filter.id)}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium tracking-wider transition-all duration-200 cursor-pointer ${
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer ${
                   selectedFilterId === filter.id
-                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
-                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-medium)] hover:border-[var(--accent)]'
+                    ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
                 }`}
               >
                 {localized(filter.labelEn, filter.labelBn)}
