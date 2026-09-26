@@ -34,27 +34,50 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 // Helper to apply dynamic accent variables to root DOM element
-export function applyAccentColorToDOM(color: string) {
+export function applyAccentColorToDOM(color: string, targetTheme?: Theme) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
-  const { r, g, b } = hexToRgb(color);
 
-  // Calculate contrast text (dark vs light)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  const contrastText = luminance > 0.55 ? '#022013' : '#ffffff';
+  const currentTheme: Theme =
+    targetTheme ||
+    (root.getAttribute('data-theme') === 'light' || root.classList.contains('light') ? 'light' : 'dark');
 
-  // Hover color: lightened version
-  const hoverR = Math.min(255, Math.round(r * 1.15));
-  const hoverG = Math.min(255, Math.round(g * 1.15));
-  const hoverB = Math.min(255, Math.round(b * 1.15));
-  const hoverHex = `#${hoverR.toString(16).padStart(2, '0')}${hoverG.toString(16).padStart(2, '0')}${hoverB.toString(16).padStart(2, '0')}`;
+  // When theme is dark, use default emerald #10b981 unless a custom non-default accent was configured
+  // When theme is light, use soft green #16a34a unless a custom non-default accent was configured
+  let effectiveColor = color;
+  if (!effectiveColor || effectiveColor === '#16a34a' || effectiveColor === '#10b981') {
+    effectiveColor = currentTheme === 'light' ? '#16a34a' : '#10b981';
+  }
 
-  root.style.setProperty('--primary-accent', color);
-  root.style.setProperty('--accent', color);
-  root.style.setProperty('--border-focus', color);
+  const { r, g, b } = hexToRgb(effectiveColor);
+
+  // In dark theme with emerald accent, contrast text is deep forest-green #022013
+  // In light theme with soft green accent, contrast text is clean white #ffffff
+  let contrastText: string;
+  if (currentTheme === 'dark') {
+    contrastText = effectiveColor === '#10b981' ? '#022013' : ((0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#022013' : '#ffffff');
+  } else {
+    contrastText = effectiveColor === '#16a34a' ? '#ffffff' : ((0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55 ? '#022013' : '#ffffff');
+  }
+
+  // Hover color: vibrant emerald #05df72 for dark mode, subtle deep #15803d for light mode
+  let hoverHex: string;
+  if (currentTheme === 'dark') {
+    hoverHex = effectiveColor === '#10b981'
+      ? '#05df72'
+      : `#${Math.min(255, Math.round(r * 1.15)).toString(16).padStart(2, '0')}${Math.min(255, Math.round(g * 1.15)).toString(16).padStart(2, '0')}${Math.min(255, Math.round(b * 1.15)).toString(16).padStart(2, '0')}`;
+  } else {
+    hoverHex = effectiveColor === '#16a34a'
+      ? '#15803d'
+      : `#${Math.max(0, Math.round(r * 0.88)).toString(16).padStart(2, '0')}${Math.max(0, Math.round(g * 0.88)).toString(16).padStart(2, '0')}${Math.max(0, Math.round(b * 0.88)).toString(16).padStart(2, '0')}`;
+  }
+
+  root.style.setProperty('--primary-accent', effectiveColor);
+  root.style.setProperty('--accent', effectiveColor);
+  root.style.setProperty('--border-focus', effectiveColor);
   root.style.setProperty('--primary-accent-hover', hoverHex);
-  root.style.setProperty('--primary-accent-glow', `rgba(${r}, ${g}, ${b}, 0.28)`);
-  root.style.setProperty('--primary-accent-muted', `rgba(${r}, ${g}, ${b}, 0.15)`);
+  root.style.setProperty('--primary-accent-glow', currentTheme === 'dark' ? `rgba(${r}, ${g}, ${b}, 0.28)` : `rgba(${r}, ${g}, ${b}, 0.12)`);
+  root.style.setProperty('--primary-accent-muted', currentTheme === 'dark' ? `rgba(${r}, ${g}, ${b}, 0.15)` : `rgba(${r}, ${g}, ${b}, 0.08)`);
   root.style.setProperty('--primary-accent-contrast', contrastText);
 }
 
@@ -69,19 +92,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (adminDefault === 'dark' || adminDefault === 'light') {
         return adminDefault;
       }
-      return 'light';
+      return 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   });
 
   const [accentColor, setAccentColorState] = useState<string>(() => {
     try {
-      const initial = settingsService.getSettings().accentColor || '#16a34a';
-      applyAccentColorToDOM(initial);
+      const initial = settingsService.getSettings().accentColor || '#10b981';
       return initial;
     } catch {
-      return '#16a34a';
+      return '#10b981';
     }
   });
 
@@ -105,13 +127,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       body.classList.remove('dark');
     }
 
-    applyAccentColorToDOM(currentAccent);
+    applyAccentColorToDOM(currentAccent, currentTheme);
   }, []);
 
   const setAccentColor = useCallback((newColor: string) => {
     setAccentColorState(newColor);
-    applyAccentColorToDOM(newColor);
-  }, []);
+    applyAccentColorToDOM(newColor, theme);
+  }, [theme]);
 
   useEffect(() => {
     applyTheme(theme, accentColor);

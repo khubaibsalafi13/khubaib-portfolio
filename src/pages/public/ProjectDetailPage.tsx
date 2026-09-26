@@ -95,7 +95,13 @@ export const ProjectDetailPage: React.FC = () => {
 
           {/* Project Header & Metadata */}
           <div className="mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 mb-4">
+            {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
+            <div className="dark:inline-flex hidden items-center gap-2 mb-4">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+                // {project.category}
+              </span>
+            </div>
+            <div className="dark:hidden inline-flex items-center gap-2 mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 {project.category}

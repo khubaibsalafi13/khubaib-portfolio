@@ -79,9 +79,15 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
     <section id="consultation" className="py-24 sm:py-36 relative transition-colors">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Open Editorial Header */}
+        {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
-          <div className="inline-flex items-center justify-center gap-2 mb-3">
+          {/* Dark theme: original tech comment kicker; Light theme: editorial kicker */}
+          <div className="dark:inline-flex hidden items-center justify-center gap-2 mb-3">
+            <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+              // DESIGN INQUIRIES
+            </span>
+          </div>
+          <div className="dark:hidden inline-flex items-center justify-center gap-2 mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
               {localized('INQUIRIES', 'পরামর্শ')}

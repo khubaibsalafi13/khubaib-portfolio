@@ -174,7 +174,12 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
         {/* Section Heading & Category Filter Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-[var(--border-subtle)] mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <div className="dark:flex hidden items-center gap-2 mb-3">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+                // {t('work.sectionTitle')}
+              </span>
+            </div>
+            <div className="dark:hidden flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 {t('work.sectionTitle')}

@@ -49,7 +49,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
           
           {/* Left Column: Editorial Information & Statement */}
           <div className="lg:col-span-7">
-            <div className="flex items-center gap-2 mb-3">
+            {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
+            <div className="dark:flex hidden items-center gap-2 mb-3">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+                // ABOUT
+              </span>
+            </div>
+            <div className="dark:hidden flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 ABOUT

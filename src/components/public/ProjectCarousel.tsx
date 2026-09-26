@@ -341,7 +341,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                className="group relative w-full h-full rounded-3xl bg-[var(--bg-card-subtle)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] overflow-hidden shadow-[var(--card-shadow)] transition-all duration-500 flex flex-col justify-between p-6 sm:p-10"
+                className="group relative w-full h-full rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] dark:border-[#17462b] dark:hover:border-[#10b981] overflow-hidden shadow-[var(--card-shadow)] dark:shadow-[0_0_35px_rgba(16,185,129,0.12)] transition-all duration-500 flex flex-col justify-between p-6 sm:p-10"
               >
                 {/* Background Cover Image with Hover Zoom & Instant Prioritization */}
                 <div className="absolute inset-0 overflow-hidden z-0 bg-[var(--bg-card-subtle)]">
@@ -376,14 +376,16 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20 pointer-events-none z-10" />
                 </div>
 
-                {/* Top Editorial Meta */}
+                {/* Top Editorial Meta: Dark theme restores original pill badges with Tag & Calendar; Light theme uses minimal dot kicker */}
                 <div className="relative z-10 flex items-center justify-between gap-3 mb-auto">
-                  <div className="inline-flex items-center gap-2 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-white/90 tracking-wider uppercase font-medium border border-white/10">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                  <div className="inline-flex items-center gap-2 dark:bg-[#082014]/90 dark:border-[#17462b] dark:text-[#a7f3d0] dark:shadow-[0_0_12px_rgba(16,185,129,0.2)] bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs text-white/90 tracking-wider uppercase font-medium border border-white/10">
+                    <Tag className="w-3.5 h-3.5 text-[var(--accent)] dark:inline hidden" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] dark:hidden inline" />
                     <span>{activeProject.category}</span>
                   </div>
 
-                  <div className="inline-flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-xs text-white/80 border border-white/10">
+                  <div className="inline-flex items-center gap-1.5 dark:bg-[#082014]/90 dark:border-[#17462b] dark:text-[#8ba394] bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-xs text-white/80 border border-white/10">
+                    <Calendar className="w-3.5 h-3.5 text-[var(--accent)] dark:inline hidden" />
                     <span>{activeProject.year}</span>
                   </div>
                 </div>

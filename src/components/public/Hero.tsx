@@ -117,8 +117,13 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
 
           {/* RIGHT: Typography & Editorial Actions */}
           <div className="lg:col-span-7 order-1 lg:order-2 flex flex-col justify-center">
-            {/* Clean unboxed text kicker */}
-            <div className="flex items-center gap-2 mb-4">
+            {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
+            <div className="dark:flex hidden items-center gap-2 mb-4">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+                // {eyebrow}
+              </span>
+            </div>
+            <div className="dark:hidden flex items-center gap-2 mb-4">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 {eyebrow}

@@ -51,7 +51,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', varian
         title="Dark Mode"
         className={`flex items-center justify-center p-1.5 sm:px-2.5 sm:py-1 rounded-full transition-all duration-200 cursor-pointer ${
           isDark
-            ? 'bg-[#10b981] text-[#022013] font-semibold shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+            ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-[0_0_10px_rgba(16,185,129,0.3)]'
             : 'text-[#6b8274] hover:text-[#121c15]'
         }`}
       >
@@ -71,7 +71,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = '', varian
         title="Light Mode"
         className={`flex items-center justify-center p-1.5 sm:px-2.5 sm:py-1 rounded-full transition-all duration-200 cursor-pointer ${
           !isDark
-            ? 'bg-[#10b981] text-[#ffffff] font-semibold shadow-sm'
+            ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
             : 'text-[#7d9987] hover:text-[#c4ded0]'
         }`}
       >

@@ -33,7 +33,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-2xl mb-16 sm:mb-20">
-          <div className="flex items-center gap-2 mb-3">
+          {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
+          <div className="dark:flex hidden items-center gap-2 mb-3">
+            <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+              // {t('services.sectionTitle')}
+            </span>
+          </div>
+          <div className="dark:hidden flex items-center gap-2 mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
               {t('services.sectionTitle')}

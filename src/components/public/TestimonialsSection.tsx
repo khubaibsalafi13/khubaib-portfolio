@@ -340,7 +340,13 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
         {/* Section Header: Left Introduction & Right Leave a Review CTA */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16 sm:mb-20">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-3">
+            {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
+            <div className="dark:inline-flex hidden items-center gap-2 mb-3">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+                // CLIENT TESTIMONIALS
+              </span>
+            </div>
+            <div className="dark:hidden inline-flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 {localized('CLIENT TESTIMONIALS', 'ক্লায়েন্টদের মতামত')}

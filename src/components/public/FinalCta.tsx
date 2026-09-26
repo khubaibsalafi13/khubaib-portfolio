@@ -28,7 +28,13 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
         />
 
         <div className="relative z-10 max-w-2xl mx-auto">
-          <div className="inline-flex items-center justify-center gap-2 mb-4">
+          {/* Dark theme: original tech comment kicker; Light theme: editorial dot kicker */}
+          <div className="dark:inline-flex hidden items-center justify-center gap-2 mb-4">
+            <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
+              // COLLABORATION
+            </span>
+          </div>
+          <div className="dark:hidden inline-flex items-center justify-center gap-2 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
               {localized('COLLABORATION', 'সহযোগিতা')}

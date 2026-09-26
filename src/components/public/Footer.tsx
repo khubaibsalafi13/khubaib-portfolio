@@ -37,8 +37,11 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
 
           {/* Quick Navigation */}
           <div className="md:col-span-3">
-            <span className="text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] block mb-4">
-              {t('nav.work') ? 'Navigation' : 'Navigation'}
+            <span className="dark:block hidden text-xs font-mono text-[var(--accent)] uppercase tracking-widest mb-4">
+              // NAVIGATION
+            </span>
+            <span className="dark:hidden block text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] mb-4">
+              Navigation
             </span>
             <ul className="space-y-2.5 text-xs text-[var(--text-secondary)]">
               <li>
@@ -71,7 +74,10 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
 
           {/* Connect & Theme/Language controls */}
           <div className="md:col-span-3">
-            <span className="text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] block mb-4">
+            <span className="dark:block hidden text-xs font-mono text-[var(--accent)] uppercase tracking-widest mb-4">
+              // CONNECT
+            </span>
+            <span className="dark:hidden block text-xs font-semibold text-[var(--text-heading)] uppercase tracking-[0.16em] mb-4">
               Connect
             </span>
             <div className="flex flex-col gap-2.5">
