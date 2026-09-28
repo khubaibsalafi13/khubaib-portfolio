@@ -76,11 +76,11 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
   };
 
   return (
-    <section id="consultation" className="py-24 sm:py-36 relative transition-colors">
+    <section id="consultation" className="py-16 sm:py-28 md:py-36 relative transition-colors scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
           {/* Dark theme: original tech comment kicker; Light theme: editorial kicker */}
           <div className="dark:inline-flex hidden items-center justify-center gap-2 mb-3">
             <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
@@ -133,14 +133,14 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="px-7 py-3 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all cursor-pointer shadow-sm hover:-translate-y-0.5"
+                    className="px-7 py-3 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all cursor-pointer shadow-sm hover:-translate-y-0.5 min-h-[44px]"
                   >
                     {t('consultation.anotherRequest')}
                   </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                     {/* Full Name */}
                     <div>
                       <label
@@ -156,7 +156,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder={t('consultation.fullNamePlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -175,12 +175,12 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t('consultation.emailPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
                     {/* Organization/Company */}
                     <div>
                       <label
@@ -195,7 +195,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                         placeholder={t('consultation.companyPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
 
@@ -211,7 +211,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         id="service"
                         value={service}
                         onChange={(e) => setService(e.target.value)}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
+                        className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] outline-none transition-colors shadow-sm cursor-pointer"
                       >
                         {servicesList.map((srv) => (
                           <option key={srv} value={srv} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
@@ -235,7 +235,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                         value={budget}
                         onChange={(e) => setBudget(e.target.value)}
                         placeholder={t('consultation.budgetPlaceholder')}
-                        className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                        className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                       value={timeline}
                       onChange={(e) => setTimeline(e.target.value)}
                       placeholder={t('consultation.timelinePlaceholder')}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
+                      className="w-full px-4 py-3.5 min-h-[48px] rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors shadow-sm"
                     />
                   </div>
 
@@ -273,7 +273,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder={t('consultation.messagePlaceholder')}
-                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
+                      className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border border-[var(--border-medium)] dark:border-[var(--input-border)] focus:border-[var(--accent)] dark:focus:border-[var(--input-border-focus)] focus:ring-1 focus:ring-[var(--accent)] dark:focus:ring-[var(--input-border-focus)] text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none transition-colors resize-y shadow-sm"
                     />
                   </div>
 
@@ -282,7 +282,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 cursor-pointer w-full sm:w-auto hover:-translate-y-0.5 active:scale-98"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 min-h-[48px] rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 cursor-pointer w-full sm:w-auto hover:-translate-y-0.5 active:scale-98"
                     >
                       {submitting ? (
                         <span>{t('consultation.sending')}</span>

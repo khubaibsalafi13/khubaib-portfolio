@@ -187,15 +187,15 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
   return (
     <section
       id="experience"
-      className="py-20 sm:py-32 relative transition-colors"
+      className="py-16 sm:py-28 md:py-32 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Open Editorial Credibility Pillars Row */}
-        <div className="mb-14 sm:mb-20 py-6 sm:py-8 border-y border-[var(--border-subtle)] grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+        {/* Open Editorial Credibility Pillars Row: 1 col on 320-360px, 2 col on sm, 4 col on md+ */}
+        <div className="mb-10 sm:mb-16 py-6 sm:py-8 border-y border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
           {credibilityPillars.map((pillar, i) => (
             <div
               key={i}
-              className="flex flex-col border-l border-[var(--border-subtle)] pl-4 sm:pl-5 first:border-l-0 first:pl-0 [&:nth-child(3)]:sm:first:border-l-0"
+              className="flex flex-col sm:border-l sm:border-[var(--border-subtle)] sm:pl-5 sm:first:border-l-0 sm:first:pl-0 sm:[&:nth-child(2n+1)]:border-l-0 md:[&:nth-child(2n+1)]:border-l md:first:border-l-0"
             >
               <span className="text-xs font-semibold text-[var(--accent)] tracking-wider mb-1 uppercase">
                 Focus 0{i + 1}
@@ -203,7 +203,7 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
               <span className="text-sm sm:text-base font-bold text-[var(--text-heading)]">
                 {pillar.label}
               </span>
-              <span className="text-[11px] sm:text-xs text-[var(--text-muted)] mt-0.5">
+              <span className="text-xs text-[var(--text-muted)] mt-0.5">
                 {pillar.sub}
               </span>
             </div>

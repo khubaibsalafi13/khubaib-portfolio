@@ -211,7 +211,7 @@ export const Header: React.FC = () => {
             id="mobile-lang-toggle"
             type="button"
             onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
-            className="px-2.5 py-1 text-xs border border-[var(--border-medium)] rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium font-mono"
+            className="px-3 py-1.5 min-h-[40px] text-xs border border-[var(--border-medium)] rounded-full bg-[var(--bg-surface)] text-[var(--text-primary)] font-medium font-mono cursor-pointer flex items-center justify-center active:scale-95 transition-transform"
           >
             {language === 'en' ? 'বাংলা' : 'EN'}
           </button>
@@ -220,7 +220,7 @@ export const Header: React.FC = () => {
             id="mobile-menu-toggle-btn"
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-heading)] bg-[var(--bg-surface)] border border-[var(--border-medium)] rounded-lg"
+            className="p-2 min-h-[40px] min-w-[40px] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-heading)] bg-[var(--bg-surface)] border border-[var(--border-medium)] rounded-lg cursor-pointer active:scale-95 transition-transform"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -266,7 +266,7 @@ export const Header: React.FC = () => {
               <a
                 href="#consultation"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm"
+                className="w-full text-center py-2.5 min-h-[44px] flex items-center justify-center rounded-xl text-xs font-semibold uppercase tracking-wider bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm active:scale-98 transition-transform"
               >
                 {t('nav.letsTalk')}
               </a>

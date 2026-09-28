@@ -28,11 +28,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
   return (
     <section
       id="services"
-      className="py-24 sm:py-36 relative transition-colors"
+      className="py-16 sm:py-28 md:py-36 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-2xl mb-16 sm:mb-20">
+        <div className="max-w-2xl mb-10 sm:mb-16">
           {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
           <div className="dark:flex hidden items-center gap-2 mb-3">
             <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
@@ -54,14 +54,14 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
         </div>
 
         {/* Airy Editorial Disciplines Grid - Unboxed & Minimalist */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10">
           {services.map((service, index) => (
             <div
               key={service.id}
-              className="group flex flex-col justify-between pt-6 border-t border-[var(--border-subtle)] hover:border-[var(--accent)] transition-all duration-300"
+              className="group flex flex-col justify-between pt-5 sm:pt-6 border-t border-[var(--border-subtle)] hover:border-[var(--accent)] transition-all duration-300"
             >
               <div>
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-5 sm:mb-8">
                   <span className="text-sm font-semibold tracking-wider text-[var(--accent)]">
                     0{index + 1}
                   </span>
@@ -70,7 +70,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors mb-3">
+                <h3 className="text-xl font-bold text-[var(--text-heading)] group-hover:text-[var(--accent)] transition-colors mb-2.5 sm:mb-3">
                   {localized(service.titleEn, service.titleBn)}
                 </h3>
 
@@ -79,7 +79,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
                 </p>
               </div>
 
-              <div className="pt-8 flex items-center gap-2 text-xs text-[var(--text-muted)]">
+              <div className="pt-5 sm:pt-8 flex items-center gap-2 text-xs text-[var(--text-muted)]">
                 <span className="w-1 h-1 rounded-full bg-[var(--accent)] opacity-50 group-hover:opacity-100 transition-opacity" />
                 <span className="tracking-wider uppercase font-medium">Discipline</span>
               </div>

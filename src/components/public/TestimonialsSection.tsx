@@ -233,11 +233,11 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     return (
       <div
         key={test.id}
-        className="testimonial-card-el group relative rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] p-7 sm:p-8 flex flex-col justify-between transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1 cursor-default"
+        className="testimonial-card-el group relative rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] p-5 sm:p-7 md:p-8 flex flex-col justify-between transition-all duration-300 shadow-[var(--card-shadow)] hover:shadow-xl hover:-translate-y-1 cursor-default"
       >
         <div>
           {/* Top Bar: Yellow Stars & Quote/Anchor Badge */}
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4 sm:mb-5">
             {/* Rating Stars: Yellow #FFC83D */}
             <div
               className="flex items-center gap-1.5"
@@ -273,7 +273,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
           </div>
 
           {/* Review Text */}
-          <blockquote className="text-sm sm:text-[15px] text-[var(--text-secondary)] leading-relaxed mb-4 font-normal italic">
+          <blockquote className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed mb-4 font-normal italic">
             "{displayExcerpt}"
           </blockquote>
 
@@ -282,7 +282,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
             <button
               type="button"
               onClick={() => setReadMoreItem(test)}
-              className="text-xs font-semibold text-[var(--accent)] hover:underline mb-4 cursor-pointer inline-flex items-center gap-1"
+              className="text-xs font-semibold text-[var(--accent)] hover:underline mb-4 py-1 cursor-pointer inline-flex items-center gap-1"
             >
               <span>{localized('Read more', 'আরও পড়ুন')}</span>
               <span aria-hidden="true">&rarr;</span>
@@ -334,11 +334,11 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     <section
       ref={sectionRef}
       id="testimonials"
-      className="py-24 sm:py-36 relative transition-colors overflow-hidden"
+      className="py-16 sm:py-28 md:py-36 relative transition-colors overflow-hidden scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Left Introduction & Right Leave a Review CTA */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-16 sm:mb-20">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-16">
           <div className="max-w-2xl">
             {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
             <div className="dark:inline-flex hidden items-center gap-2 mb-3">
@@ -369,7 +369,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
               ref={triggerBtnRef}
               type="button"
               onClick={() => setIsSubmitModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-98"
+              className="inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--bg-card)] hover:bg-[var(--bg-surface)] text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] transition-all duration-200 cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-98"
             >
               <MessageSquarePlus className="w-4 h-4 text-[var(--accent)]" />
               <span>{localized('LEAVE A REVIEW', 'রিভিউ দিন')}</span>

@@ -10,15 +10,16 @@ export function smoothScrollTo(target: string | HTMLElement, smooth: boolean = t
 
   const smoother = ScrollSmoother.get();
   if (smoother) {
-    smoother.scrollTo(target, smooth, 'top top');
+    smoother.scrollTo(target, smooth, 'top 84px');
   } else {
     const el = typeof target === 'string' ? document.querySelector(target) : target;
     if (el) {
-      // Header offset compensation for fixed navigation bar (~72px)
+      // Header offset compensation with generous breathing room below sticky header (~20px extra)
       const header = document.querySelector('header');
       const headerHeight = header ? header.getBoundingClientRect().height : 72;
+      const breathingRoom = 20;
       const elementPosition = el.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+      const offsetPosition = elementPosition + window.pageYOffset - (headerHeight + breathingRoom);
 
       window.scrollTo({
         top: Math.max(0, offsetPosition),

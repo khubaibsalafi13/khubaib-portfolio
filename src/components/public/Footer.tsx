@@ -108,7 +108,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
                 <button
                   type="button"
                   onClick={() => setLanguage('en')}
-                  className={`px-2 py-0.5 text-xs rounded transition-colors ${
+                  className={`px-3 py-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center text-xs rounded transition-colors cursor-pointer ${
                     language === 'en' ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-bold' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
@@ -118,7 +118,7 @@ export const Footer: React.FC<FooterProps> = ({ settings }) => {
                 <button
                   type="button"
                   onClick={() => setLanguage('bn')}
-                  className={`px-2 py-0.5 text-xs rounded transition-colors font-bangla ${
+                  className={`px-3 py-1.5 min-h-[36px] min-w-[36px] flex items-center justify-center text-xs rounded transition-colors font-bangla cursor-pointer ${
                     language === 'bn' ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-bold' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >

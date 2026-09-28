@@ -15,11 +15,11 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
   const desc = localized(content.finalCtaDescEn, content.finalCtaDescBn);
 
   return (
-    <section id="final-cta" className="py-20 sm:py-32 relative transition-colors border-t border-[var(--border-subtle)] overflow-hidden">
+    <section id="final-cta" className="py-16 sm:py-28 md:py-36 relative transition-colors border-t border-[var(--border-subtle)] overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Dark Theme: Outlined premium CTA panel container; Light Theme: open/unboxed */}
-        <div className="relative overflow-hidden public-panel rounded-3xl py-14 sm:py-20 md:py-24 px-5 sm:px-10 md:px-12">
+        <div className="relative overflow-hidden public-panel rounded-3xl py-12 sm:py-20 md:py-24 px-5 sm:px-10 md:px-12">
           {/* Soft emerald aura */}
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[500px] h-[240px] sm:h-[300px] blur-[100px] sm:blur-[120px] rounded-full pointer-events-none"
@@ -47,7 +47,7 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
               {title}
             </h2>
 
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-10 max-w-xl mx-auto leading-relaxed font-normal">
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed font-normal">
               {desc}
             </p>
 
@@ -58,7 +58,7 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
                 e.preventDefault();
                 smoothScrollTo('#consultation-form', true);
               }}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5 active:scale-98"
+              className="inline-flex items-center gap-2 px-8 py-3.5 min-h-[46px] rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5 active:scale-98"
             >
               <span>{localized('START A PROJECT', 'প্রজেক্ট শুরু করুন')}</span>
               <ArrowUpRight className="w-4 h-4" />

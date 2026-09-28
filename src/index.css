@@ -31,8 +31,8 @@
     --bg-footer: #020704;
 
     --text-primary: #e8f1ec;
-    --text-secondary: #8ba394;
-    --text-muted: #567363;
+    --text-secondary: #9db5a6;
+    --text-muted: #739080;
     --text-heading: #f0f6f2;
 
     /* Consistent dark-theme border tokens */
@@ -131,12 +131,26 @@
     --selection-text: #052e16;
   }
 
+  html {
+    scroll-padding-top: 5rem;
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--bg-page);
     color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* Bengali font override when in Bangla mode */

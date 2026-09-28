@@ -52,12 +52,12 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
   return (
     <section
       id="hero"
-      className="relative min-h-[85vh] sm:min-h-[88vh] flex items-center justify-center pt-8 sm:pt-12 pb-20 sm:pb-28 overflow-hidden"
+      className="relative min-h-[85vh] sm:min-h-[88vh] flex items-center justify-center pt-6 sm:pt-12 pb-16 sm:pb-28 overflow-hidden"
     >
       {/* Soft ambient aura */}
       <div className="absolute inset-0 pointer-events-none">
         <div
-          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] sm:w-[750px] h-[380px] blur-[140px] rounded-full transition-all duration-700"
+          className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] sm:w-[750px] h-[280px] sm:h-[380px] blur-[120px] sm:blur-[140px] rounded-full transition-all duration-700"
           style={{
             backgroundColor: 'var(--accent)',
             opacity: 'var(--blur-opacity)',
@@ -141,13 +141,13 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
             {/* Supporting Description */}
             <p
               id="hero-description"
-              className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-xl font-normal"
+              className="text-sm sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-6 sm:mb-8 max-w-xl font-normal"
             >
               {description}
             </p>
 
             {/* Minimal Editorial CTA Buttons */}
-            <div id="hero-cta-group" className="flex flex-wrap items-center gap-3.5 mb-12">
+            <div id="hero-cta-group" className="flex flex-wrap items-center gap-3 sm:gap-3.5 mb-10 sm:mb-12">
               <a
                 id="hero-primary-cta"
                 href="#work"
@@ -155,7 +155,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                   e.preventDefault();
                   smoothScrollTo('#work', true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5 active:scale-98"
+                className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer hover:-translate-y-0.5 active:scale-98 min-h-[44px]"
               >
                 <span>{primaryCta}</span>
                 <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -168,7 +168,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                   e.preventDefault();
                   smoothScrollTo('#consultation', true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] transition-all duration-200 cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-98"
+                className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wider uppercase text-[var(--text-primary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] transition-all duration-200 cursor-pointer shadow-sm hover:-translate-y-0.5 active:scale-98 min-h-[44px]"
               >
                 <span>{secondaryCta}</span>
               </a>
