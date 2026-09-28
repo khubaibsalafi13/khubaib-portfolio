@@ -29,6 +29,7 @@ export interface Project {
   year: string;
   category: string; // or category slug/name
   coverImage: string;
+  carouselImage?: string;
   thumbnailAspectRatio?: ThumbnailAspectRatio;
   galleryImages: ProjectImage[];
   featured: boolean;

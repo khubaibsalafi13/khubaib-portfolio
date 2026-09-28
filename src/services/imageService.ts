@@ -520,6 +520,67 @@ export const imageService = {
   },
 
   /**
+   * Dedicated Carousel Thumbnail Uploader:
+   * Constrains/center-crops to 16:9 (up to 1600x900), WebP ~0.86,
+   * uploaded directly to Supabase Storage bucket 'portfolio-images' under 'carousel/'.
+   * Returns a persistent HTTPS CDN URL. Never falls back to Base64.
+   */
+  async uploadCarouselThumbnail(file: File, projectId?: string): Promise<string> {
+    if (!isSupabaseConfigured()) {
+      const err = new Error(
+        'Supabase Storage is not configured. Please enter your Supabase URL and Anon Key in Admin Settings before uploading images.'
+      );
+      console.error('[ImageService] Supabase not configured:', err.message);
+      throw err;
+    }
+
+    const { blob, mimeType, extension } = await this.optimizeThumbnailFile(file, 'landscape');
+
+    console.info(
+      `[ImageService] Carousel thumbnail optimized (${(blob.size / 1024).toFixed(1)}KB, ${mimeType})`
+    );
+
+    const sanitizedBase = file.name
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toLowerCase()
+      .slice(0, 40);
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    const folderPrefix = projectId ? `projects/${projectId}/carousel` : 'carousel';
+    const filePath = `${folderPrefix}/${timestamp}_${sanitizedBase}_16x9_${randomSuffix}.${extension}`;
+
+    console.info(`[ImageService] Carousel thumbnail uploading (${BUCKET_NAME}/${filePath})`);
+
+    const { error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, blob, {
+        contentType: mimeType,
+        cacheControl: '31536000, immutable',
+        upsert: false,
+      });
+
+    if (error) {
+      console.error('[ImageService] Carousel thumbnail upload error:', error);
+      throw new Error(
+        `Supabase Storage upload failed: ${error.message}. Please verify the '${BUCKET_NAME}' bucket exists with public read policy.`
+      );
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    const publicUrl = publicUrlData.publicUrl;
+    if (!publicUrl || !publicUrl.startsWith('http')) {
+      throw new Error(`Failed to generate public HTTPS Storage URL for ${filePath}`);
+    }
+
+    console.info('[ImageService] Carousel thumbnail upload successful:', publicUrl);
+    return publicUrl;
+  },
+
+  /**
    * Project Gallery: 1800px max, WebP ~0.85
    */
   async uploadProjectGalleryImage(file: File): Promise<string> {

@@ -190,6 +190,7 @@ export const projectToDb = (project: Partial<Project>): Record<string, any> => {
   if (project.year !== undefined) dbRecord.year = project.year;
   if (project.category !== undefined) dbRecord.category = project.category;
   if (project.coverImage !== undefined) dbRecord.cover_image = project.coverImage;
+  if (project.carouselImage !== undefined) dbRecord.carousel_image = project.carouselImage;
   if (project.thumbnailAspectRatio !== undefined) dbRecord.thumbnail_aspect_ratio = project.thumbnailAspectRatio;
   if (project.galleryImages !== undefined) dbRecord.gallery_images = project.galleryImages;
   if (project.featured !== undefined) dbRecord.featured = project.featured;
@@ -201,6 +202,27 @@ export const projectToDb = (project: Partial<Project>): Record<string, any> => {
 };
 
 export const projectFromDb = (row: any): Project => {
+  // Normalize gallery images for backwards compatibility
+  const rawGallery = Array.isArray(row.gallery_images) ? row.gallery_images : [];
+  const normalizedGallery = rawGallery.map((item: any, idx: number) => {
+    if (typeof item === 'string') {
+      return {
+        id: `gal-legacy-${idx}-${Date.now()}`,
+        url: item,
+        sortOrder: idx + 1,
+      };
+    }
+    return {
+      id: item.id || `gal-${idx}-${Date.now()}`,
+      url: item.url || '',
+      captionEn: item.captionEn || item.caption_en || '',
+      captionBn: item.captionBn || item.caption_bn || '',
+      altTextEn: item.altTextEn || item.alt_text_en || '',
+      altTextBn: item.altTextBn || item.alt_text_bn || '',
+      sortOrder: Number(item.sortOrder ?? item.sort_order ?? idx + 1),
+    };
+  });
+
   return {
     id: row.id,
     slug: row.slug,
@@ -218,8 +240,9 @@ export const projectFromDb = (row: any): Project => {
     year: row.year || '',
     category: row.category || '',
     coverImage: row.cover_image || '',
+    carouselImage: row.carousel_image || undefined,
     thumbnailAspectRatio: (row.thumbnail_aspect_ratio as ThumbnailAspectRatio) || 'square',
-    galleryImages: Array.isArray(row.gallery_images) ? row.gallery_images : [],
+    galleryImages: normalizedGallery,
     featured: Boolean(row.featured),
     heroFeatured: Boolean(row.hero_featured),
     published: Boolean(row.published),

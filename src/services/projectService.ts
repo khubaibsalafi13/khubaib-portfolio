@@ -14,8 +14,11 @@ const STORAGE_KEY = 'ks_portfolio_projects';
  * Minimal columns required for Homepage rendering (Selected Work Carousel & AllWork Cards).
  * Excludes heavy detail-page fields (gallery_images, overview_en/bn, concept_en/bn).
  */
-export const HOMEPAGE_PROJECT_COLUMNS =
+export const HOMEPAGE_PROJECT_COLUMNS_BASE =
   'id, slug, title_en, title_bn, short_description_en, short_description_bn, client, year, category, cover_image, thumbnail_aspect_ratio, featured, hero_featured, published, sort_order, role_en, role_bn';
+
+export const HOMEPAGE_PROJECT_COLUMNS =
+  'id, slug, title_en, title_bn, short_description_en, short_description_bn, client, year, category, cover_image, carousel_image, thumbnail_aspect_ratio, featured, hero_featured, published, sort_order, role_en, role_bn';
 
 /**
  * Safely strips heavy Base64 strings before storing in localStorage to prevent QuotaExceededError.
@@ -108,13 +111,25 @@ export const projectService = {
     if (isSupabaseConfigured()) {
       try {
         console.info('[Projects] Fast-path active featured project query started');
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('projects')
           .select(HOMEPAGE_PROJECT_COLUMNS)
           .eq('published', true)
           .or('featured.eq.true,hero_featured.eq.true')
           .order('sort_order', { ascending: true })
           .limit(1);
+
+        if (error && (error.message?.includes('carousel_image') || error.code === '42703')) {
+          const fallback = await supabase
+            .from('projects')
+            .select(HOMEPAGE_PROJECT_COLUMNS_BASE)
+            .eq('published', true)
+            .or('featured.eq.true,hero_featured.eq.true')
+            .order('sort_order', { ascending: true })
+            .limit(1);
+          data = fallback.data as any;
+          error = fallback.error;
+        }
 
         if (!error && data && data.length > 0) {
           const first = projectFromDb(data[0]);
@@ -139,12 +154,23 @@ export const projectService = {
     if (isSupabaseConfigured()) {
       try {
         console.info('[Projects] Supabase featured carousel query started');
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('projects')
           .select(HOMEPAGE_PROJECT_COLUMNS)
           .eq('published', true)
           .or('featured.eq.true,hero_featured.eq.true')
           .order('sort_order', { ascending: true });
+
+        if (error && (error.message?.includes('carousel_image') || error.code === '42703')) {
+          const fallback = await supabase
+            .from('projects')
+            .select(HOMEPAGE_PROJECT_COLUMNS_BASE)
+            .eq('published', true)
+            .or('featured.eq.true,hero_featured.eq.true')
+            .order('sort_order', { ascending: true });
+          data = fallback.data as any;
+          error = fallback.error;
+        }
 
         if (!error && data && data.length > 0) {
           const liveList = data.map(projectFromDb);
@@ -168,11 +194,21 @@ export const projectService = {
     if (isSupabaseConfigured()) {
       try {
         console.info('[Projects] Supabase lightweight AllWork query started');
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from('projects')
           .select(HOMEPAGE_PROJECT_COLUMNS)
           .eq('published', true)
           .order('sort_order', { ascending: true });
+
+        if (error && (error.message?.includes('carousel_image') || error.code === '42703')) {
+          const fallback = await supabase
+            .from('projects')
+            .select(HOMEPAGE_PROJECT_COLUMNS_BASE)
+            .eq('published', true)
+            .order('sort_order', { ascending: true });
+          data = fallback.data as any;
+          error = fallback.error;
+        }
 
         if (!error && data) {
           const liveList = data.map(projectFromDb);
@@ -304,6 +340,7 @@ export const projectService = {
         year: project.year || new Date().getFullYear().toString(),
         category: project.category || 'Social Media',
         coverImage: project.coverImage || 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80',
+        carouselImage: project.carouselImage || undefined,
         thumbnailAspectRatio: project.thumbnailAspectRatio || 'square',
         galleryImages: project.galleryImages || [],
         featured: project.featured ?? true,
@@ -321,7 +358,19 @@ export const projectService = {
     if (isSupabaseConfigured()) {
       try {
         const dbPayload = projectToDb(updated);
-        const { error } = await supabase.from('projects').upsert(dbPayload);
+        let { error } = await supabase.from('projects').upsert(dbPayload);
+
+        // Graceful retry if PostgreSQL column carousel_image does not exist yet
+        if (error && (error.message?.includes('carousel_image') || error.code === '42703')) {
+          console.warn(
+            '[Projects] carousel_image column not yet created in PostgreSQL table. Retrying save without carousel_image. Please run SQL migration in Supabase SQL editor.'
+          );
+          const fallbackPayload = { ...dbPayload };
+          delete fallbackPayload.carousel_image;
+          const retry = await supabase.from('projects').upsert(fallbackPayload);
+          error = retry.error;
+        }
+
         if (error) console.error('Supabase project upsert error:', error.message);
       } catch (err) {
         console.error('Supabase project save exception:', err);
