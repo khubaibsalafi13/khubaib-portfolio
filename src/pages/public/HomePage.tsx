@@ -222,14 +222,17 @@ export const HomePage: React.FC = () => {
         {/* 04. Expertise Scrolling Marquee */}
         <ExpertiseMarquee />
 
-        {/* 05 & 06. Featured Project Carousel (Center dominant, left/right partial) */}
-        <div className="pt-20 sm:pt-32 pb-12">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10">
+        {/* 05 & 06. Featured Project Carousel (Selected Work) */}
+        <section
+          id="work"
+          className="pt-24 sm:pt-32 md:pt-36 pb-8 sm:pb-12 relative scroll-mt-24 sm:scroll-mt-28 transition-colors"
+        >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
             {/* Dark theme: restored original tech/editorial kicker; Light theme: minimal dot kicker */}
-            <div className="dark:inline-flex hidden items-center justify-center gap-2 mb-3">
+            <div className="dark:flex hidden items-center gap-2 mb-3">
               <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">// SPOTLIGHT</span>
             </div>
-            <div className="dark:hidden inline-flex items-center justify-center gap-2 mb-3">
+            <div className="dark:hidden flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
                 {t('work.sectionTitle')}
@@ -245,7 +248,7 @@ export const HomePage: React.FC = () => {
             autoplay={settings.carouselAutoplay}
             intervalSeconds={settings.carouselInterval}
           />
-        </div>
+        </section>
 
         {/* 07. All Projects with Category Filters */}
         <AllWork
