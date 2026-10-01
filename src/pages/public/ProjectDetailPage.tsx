@@ -184,14 +184,16 @@ export const ProjectDetailPage: React.FC = () => {
           </div>
 
           {/* Hero Cover Image */}
-          <div className="w-full h-[360px] sm:h-[480px] md:h-[560px] rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-14 shadow-[var(--card-shadow)] bg-[var(--bg-card)]">
-            <img
-              src={project.coverImage}
-              alt={title}
-              onLoad={() => refreshScroll()}
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
+          {project.coverImage && typeof project.coverImage === 'string' && project.coverImage.trim() !== '' && (
+            <div className="w-full h-[360px] sm:h-[480px] md:h-[560px] rounded-3xl overflow-hidden border border-[var(--border-subtle)] mb-14 shadow-[var(--card-shadow)] bg-[var(--bg-card)]">
+              <img
+                src={project.coverImage}
+                alt={title}
+                onLoad={() => refreshScroll()}
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
+          )}
 
           {/* Project Summary / Short Desc */}
           {shortDesc && (
@@ -255,6 +257,7 @@ export const ProjectDetailPage: React.FC = () => {
               <div className="space-y-12 sm:space-y-16">
                 {galleryItems.map((img, i) => {
                   const src = typeof img === 'string' ? img : img.url;
+                  if (!src || typeof src !== 'string' || src.trim() === '') return null;
                   const caption = typeof img === 'object' ? localized(img.captionEn, img.captionBn) : undefined;
                   const alt = typeof img === 'object' ? localized(img.altTextEn, img.altTextBn) : `${title} showcase artifact ${i + 1}`;
 
@@ -389,24 +392,25 @@ export const ProjectDetailPage: React.FC = () => {
               </button>
             )}
 
-            <div className="max-w-5xl max-h-[80vh] flex items-center justify-center p-2">
-              <img
-                src={
-                  typeof galleryItems[lightboxIndex] === 'string'
-                    ? (galleryItems[lightboxIndex] as unknown as string)
-                    : galleryItems[lightboxIndex].url
-                }
-                alt={
-                  typeof galleryItems[lightboxIndex] === 'object'
-                    ? localized(
-                        galleryItems[lightboxIndex].altTextEn,
-                        galleryItems[lightboxIndex].altTextBn
-                      ) || `${title} artifact ${lightboxIndex + 1}`
-                    : `${title} artifact ${lightboxIndex + 1}`
-                }
-                className="max-w-full max-h-[78vh] object-contain rounded-xl shadow-2xl"
-              />
-            </div>
+            {(() => {
+              const item = galleryItems[lightboxIndex];
+              const activeSrc = typeof item === 'string' ? item : item?.url;
+              if (!activeSrc || typeof activeSrc !== 'string' || activeSrc.trim() === '') return null;
+              const activeAlt =
+                typeof item === 'object'
+                  ? localized(item.altTextEn, item.altTextBn) || `${title} artifact ${lightboxIndex + 1}`
+                  : `${title} artifact ${lightboxIndex + 1}`;
+
+              return (
+                <div className="max-w-5xl max-h-[80vh] flex items-center justify-center p-2">
+                  <img
+                    src={activeSrc}
+                    alt={activeAlt}
+                    className="max-w-full max-h-[78vh] object-contain rounded-xl shadow-2xl"
+                  />
+                </div>
+              );
+            })()}
 
             {galleryItems.length > 1 && (
               <button

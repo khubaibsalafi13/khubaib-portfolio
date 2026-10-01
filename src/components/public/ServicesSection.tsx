@@ -28,11 +28,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services }) =>
   return (
     <section
       id="services"
-      className="py-16 sm:py-28 md:py-36 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
+      className="pt-14 sm:pt-20 md:pt-24 pb-10 sm:pb-14 md:pb-16 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-2xl mb-10 sm:mb-16">
+        <div className="max-w-2xl mb-8 sm:mb-12">
           {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
           <div className="dark:flex hidden items-center gap-2 mb-3">
             <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">

@@ -42,10 +42,10 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
   ];
 
   return (
-    <section id="about" className="py-16 sm:py-28 md:py-36 relative transition-colors scroll-mt-20 sm:scroll-mt-24">
+    <section id="about" className="pt-14 sm:pt-20 md:pt-24 pb-8 sm:pb-10 md:pb-12 relative transition-colors scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-20 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-start">
           
           {/* Left Column: Editorial Information & Statement */}
           <div className="lg:col-span-7">
@@ -62,16 +62,16 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
               </span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight leading-[1.15] mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight leading-[1.15] mb-5">
               {title}
             </h2>
 
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-6 sm:mb-8 max-w-2xl">
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed mb-6 max-w-xl">
               {description}
             </p>
 
             {/* Core Capabilities Checklist */}
-            <div className="space-y-3.5 mb-8 sm:mb-10">
+            <div className="space-y-3 mb-6 sm:mb-8">
               {capabilities.map((cap, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <CheckCircle2 className="w-4 h-4 text-[var(--accent)] shrink-0" />
@@ -80,7 +80,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
               ))}
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-6 border-t border-[var(--border-subtle)]">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-5 border-t border-[var(--border-subtle)]">
               <a
                 href="#consultation"
                 onClick={(e) => {
@@ -97,7 +97,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
                 href="https://www.behance.net/khubaibsalafi13"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-0.5 min-h-[44px]"
+                className="group inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-heading)] border border-[var(--border-medium)] hover:border-[var(--accent)] bg-[var(--bg-card)] transition-all duration-200 shadow-sm cursor-pointer hover:-translate-y-0.5 min-h-[44px]"
               >
                 <BehanceIcon className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors shrink-0" />
                 <span>Behance Profile</span>
@@ -107,7 +107,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ content }) => {
           </div>
 
           {/* Right Column: Unboxed Editorial Profile & Tools Column */}
-          <div className="lg:col-span-5 space-y-8 pt-4 lg:pt-8">
+          <div className="lg:col-span-5 space-y-6 pt-2 lg:pt-4">
             <div className="border-t border-[var(--border-subtle)] pt-6">
               <span className="text-xs font-semibold text-[var(--accent)] tracking-[0.16em] uppercase block mb-2">
                 PRACTITIONER PROFILE

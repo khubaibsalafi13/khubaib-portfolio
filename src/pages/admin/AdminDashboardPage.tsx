@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Clock,
+  ImageIcon,
 } from 'lucide-react';
 import { projectService } from '../../services/projectService';
 import { clientLogoService } from '../../services/clientLogoService';
@@ -157,11 +158,17 @@ export const AdminDashboardPage: React.FC = () => {
                 className="p-3 rounded-xl bg-[#040e08] border border-[#12281a] flex items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <img
-                    src={p.coverImage}
-                    alt={p.titleEn}
-                    className="w-12 h-10 rounded-lg object-cover bg-[#091b11] border border-[#163825] shrink-0"
-                  />
+                  {p.coverImage && p.coverImage.trim() !== '' ? (
+                    <img
+                      src={p.coverImage}
+                      alt={p.titleEn}
+                      className="w-12 h-10 rounded-lg object-cover bg-[#091b11] border border-[#163825] shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-10 rounded-lg bg-[#091b11] border border-[#163825] shrink-0 flex items-center justify-center text-[#557361]">
+                      <ImageIcon className="w-4 h-4 opacity-50" />
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-[#f0f6f2] truncate">
                       {p.titleEn}

@@ -153,7 +153,7 @@ export const Header: React.FC = () => {
           {/* Theme Toggle (Dark / Light) */}
           <ThemeToggle />
 
-          {/* Language Switcher */}
+          {/* Language Switcher - Refined low-competition utility surface */}
           <div
             id="language-switcher"
             className="flex items-center bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full p-0.5 text-xs font-medium"
@@ -164,7 +164,7 @@ export const Header: React.FC = () => {
               onClick={() => setLanguage('en')}
               className={`px-2.5 py-1 rounded-full transition-all duration-200 cursor-pointer ${
                 language === 'en'
-                  ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
+                  ? 'bg-[var(--bg-card)] text-[var(--text-heading)] font-semibold shadow-xs border border-[var(--border-subtle)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               }`}
             >
@@ -176,7 +176,7 @@ export const Header: React.FC = () => {
               onClick={() => setLanguage('bn')}
               className={`px-2.5 py-1 rounded-full transition-all duration-200 cursor-pointer font-bangla ${
                 language === 'bn'
-                  ? 'bg-[var(--accent)] text-[var(--accent-contrast)] font-semibold shadow-sm'
+                  ? 'bg-[var(--bg-card)] text-[var(--text-heading)] font-semibold shadow-xs border border-[var(--border-subtle)]'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               }`}
             >

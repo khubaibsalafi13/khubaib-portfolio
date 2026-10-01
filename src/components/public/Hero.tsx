@@ -88,7 +88,7 @@ export const Hero: React.FC<HeroProps> = ({ content }) => {
                 </span>
               </div>
 
-              {hasLiveImage && (
+              {hasLiveImage && content.heroPersonalImage && content.heroPersonalImage.trim() !== '' && (
                 <img
                   ref={imageRef}
                   src={content.heroPersonalImage}

@@ -381,7 +381,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
               {/* 1. Client Photo Upload */}
               <div className="p-3.5 sm:p-4 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center gap-4">
                 <div className="shrink-0 relative">
-                  {clientImage ? (
+                  {clientImage && clientImage.trim() !== '' ? (
                     <div className="relative group">
                       <img
                         src={clientImage}

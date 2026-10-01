@@ -686,7 +686,7 @@ export const AdminPortfolioPage: React.FC = () => {
                             : 'aspect-square'
                         }`}
                       >
-                        {editingProject.coverImage ? (
+                        {editingProject.coverImage && editingProject.coverImage.trim() !== '' ? (
                           <>
                             <img
                               src={editingProject.coverImage}
@@ -846,7 +846,7 @@ export const AdminPortfolioPage: React.FC = () => {
                           : ''
                       }`}
                     >
-                      {editingProject.carouselImage ? (
+                      {editingProject.carouselImage && editingProject.carouselImage.trim() !== '' ? (
                         <>
                           <img
                             src={editingProject.carouselImage}
@@ -860,7 +860,7 @@ export const AdminPortfolioPage: React.FC = () => {
                             </span>
                           </div>
                         </>
-                      ) : editingProject.coverImage ? (
+                      ) : editingProject.coverImage && editingProject.coverImage.trim() !== '' ? (
                         <div className="relative w-full h-full">
                           <img
                             src={editingProject.coverImage}
@@ -1086,6 +1086,7 @@ export const AdminPortfolioPage: React.FC = () => {
 
                             <div
                               onClick={() =>
+                                item.url && item.url.trim() !== '' &&
                                 setPreviewModalImage({
                                   url: item.url,
                                   title: `Gallery Artifact #${idx + 1}`,
@@ -1095,11 +1096,15 @@ export const AdminPortfolioPage: React.FC = () => {
                               className="w-16 h-16 rounded-lg overflow-hidden bg-[#020704] border border-[#17462b] hover:border-[#10b981] flex items-center justify-center shrink-0 cursor-pointer relative group/thumb transition-colors shadow-inner"
                               title="Click to preview full size"
                             >
-                              <img
-                                src={item.url}
-                                alt={item.altTextEn || 'Gallery preview'}
-                                className="w-full h-full object-contain"
-                              />
+                              {item.url && item.url.trim() !== '' ? (
+                                <img
+                                  src={item.url}
+                                  alt={item.altTextEn || 'Gallery preview'}
+                                  className="w-full h-full object-contain"
+                                />
+                              ) : (
+                                <ImageIcon className="w-5 h-5 text-[#557361] opacity-50" />
+                              )}
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity">
                                 <Maximize2 className="w-3.5 h-3.5 text-white" />
                               </div>
@@ -1381,7 +1386,7 @@ export const AdminPortfolioPage: React.FC = () => {
                         }`}
                         title={p.coverImage ? 'Click to preview artwork' : 'No artwork assigned'}
                       >
-                        {p.coverImage ? (
+                        {p.coverImage && p.coverImage.trim() !== '' ? (
                           <>
                             <img
                               src={p.coverImage}
@@ -1554,11 +1559,15 @@ export const AdminPortfolioPage: React.FC = () => {
 
             {/* Modal Image Body */}
             <div className="flex-1 overflow-auto p-4 sm:p-6 flex items-center justify-center bg-[#010603] min-h-[300px]">
-              <img
-                src={previewModalImage.url}
-                alt={previewModalImage.title || 'Preview'}
-                className="max-w-full max-h-[72vh] object-contain rounded-lg shadow-lg border border-[#143222]"
-              />
+              {previewModalImage.url && previewModalImage.url.trim() !== '' ? (
+                <img
+                  src={previewModalImage.url}
+                  alt={previewModalImage.title || 'Preview'}
+                  className="max-w-full max-h-[72vh] object-contain rounded-lg shadow-lg border border-[#143222]"
+                />
+              ) : (
+                <div className="text-xs font-mono text-[#557361]">No preview image available</div>
+              )}
             </div>
 
             {/* Modal Footer */}

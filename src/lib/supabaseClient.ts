@@ -394,7 +394,7 @@ export const testimonialFromDb = (row: any): Testimonial => ({
   reviewTextEn: row.review_text_en,
   reviewTextBn: row.review_text_bn || row.review_text_en,
   rating: Number(row.rating ?? 5),
-  avatarImage: row.avatar_image || '',
+  avatarImage: row.avatar_image ? row.avatar_image : undefined,
   serviceOrCategory: row.service_or_category || '',
   date: row.date || '',
   sortOrder: Number(row.sort_order ?? 0),

@@ -99,7 +99,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, isHydrated, localize
           </span>
         </div>
 
-        {hasLiveCover && (
+        {hasLiveCover && project.coverImage && project.coverImage.trim() !== '' && (
           <img
             ref={imgRef}
             src={project.coverImage}
@@ -169,7 +169,7 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
   }, [projects, selectedFilterId]);
 
   return (
-    <section id="all-work" className="py-16 sm:py-28 relative scroll-mt-20 sm:scroll-mt-24">
+    <section id="all-work" className="pt-12 sm:pt-16 md:pt-20 pb-16 sm:pb-24 relative scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading & Category Filter Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 sm:pb-8 border-b border-[var(--border-subtle)] mb-8 sm:mb-12">
@@ -191,13 +191,13 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
           </div>
 
           {/* Filter Segmented Control in Requested Order: All | Social Media | Brand Identity | Thumbnail | Others */}
-          <div className="relative max-w-full">
-            <div className="flex items-center gap-1.5 p-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl sm:rounded-full max-w-full overflow-x-auto no-scrollbar sm:flex-wrap">
+          <div className="w-full md:w-auto">
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 p-1.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl md:rounded-full">
               <button
                 id="filter-all-btn"
                 type="button"
                 onClick={() => setSelectedFilterId('all')}
-                className={`px-4 py-2 min-h-[44px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer shrink-0 ${
+                className={`px-3.5 sm:px-4 py-2 min-h-[40px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                   selectedFilterId === 'all'
                     ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
@@ -212,7 +212,7 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
                   id={`filter-${filter.id}-btn`}
                   type="button"
                   onClick={() => setSelectedFilterId(filter.id)}
-                  className={`px-4 py-2 min-h-[44px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer shrink-0 ${
+                  className={`px-3.5 sm:px-4 py-2 min-h-[40px] whitespace-nowrap rounded-full text-xs font-semibold tracking-wider transition-all duration-200 cursor-pointer shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                     selectedFilterId === filter.id
                       ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-heading)]'
@@ -222,9 +222,6 @@ export const AllWork: React.FC<AllWorkProps> = ({ projects, isHydrated = false }
                 </button>
               ))}
             </div>
-
-            {/* Subtle right-edge scroll cue on mobile to indicate horizontally scrollable filters */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[var(--bg-page)] to-transparent sm:hidden rounded-r-2xl" />
           </div>
         </div>
 

@@ -19,15 +19,20 @@ export const ClientLogoMarquee: React.FC<ClientLogoMarqueeProps> = ({
   const { localized } = useLanguage();
   const { isDark } = useTheme();
 
-  // If no published logos exist, hide the section completely as per instructions
-  if (!logos || logos.length === 0) {
+  // Filter only logos that have a valid non-empty image source
+  const validLogos = (logos || []).filter(
+    (l) => l.logoImage && typeof l.logoImage === 'string' && l.logoImage.trim() !== ''
+  );
+
+  // If no published logos with valid images exist, hide the section completely
+  if (validLogos.length === 0) {
     return null;
   }
 
   const title = localized(titleEn, titleBn);
 
   // Duplicate for seamless right-to-left marquee loop
-  const repeatedLogos = [...logos, ...logos, ...logos, ...logos];
+  const repeatedLogos = [...validLogos, ...validLogos, ...validLogos, ...validLogos];
 
   return (
     <section id="clients" className="py-16 sm:py-20 relative overflow-hidden bg-[var(--bg-card-subtle)] border-y border-[var(--border-subtle)] transition-colors">
@@ -62,27 +67,31 @@ export const ClientLogoMarquee: React.FC<ClientLogoMarqueeProps> = ({
                   rel="noopener noreferrer"
                   className="group block transition-opacity duration-300 opacity-60 hover:opacity-100"
                 >
-                  <img
-                    src={logo.logoImage}
-                    alt={localized(logo.altTextEn, logo.altTextBn) || logo.companyName}
-                    className={`h-8 sm:h-10 w-auto object-contain transition-all duration-300 ${
-                      isDark
-                        ? 'filter grayscale invert brightness-125 group-hover:filter-none'
-                        : 'filter grayscale contrast-125 group-hover:filter-none'
-                    }`}
-                  />
+                  {logo.logoImage && logo.logoImage.trim() !== '' ? (
+                    <img
+                      src={logo.logoImage}
+                      alt={localized(logo.altTextEn, logo.altTextBn) || logo.companyName}
+                      className={`h-8 sm:h-10 w-auto object-contain transition-all duration-300 ${
+                        isDark
+                          ? 'filter grayscale invert brightness-125 group-hover:filter-none'
+                          : 'filter grayscale contrast-125 group-hover:filter-none'
+                      }`}
+                    />
+                  ) : null}
                 </a>
               ) : (
                 <div className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-                  <img
-                    src={logo.logoImage}
-                    alt={localized(logo.altTextEn, logo.altTextBn) || logo.companyName}
-                    className={`h-8 sm:h-10 w-auto object-contain transition-all duration-300 ${
-                      isDark
-                        ? 'filter grayscale invert brightness-125'
-                        : 'filter grayscale contrast-125'
-                    }`}
-                  />
+                  {logo.logoImage && logo.logoImage.trim() !== '' ? (
+                    <img
+                      src={logo.logoImage}
+                      alt={localized(logo.altTextEn, logo.altTextBn) || logo.companyName}
+                      className={`h-8 sm:h-10 w-auto object-contain transition-all duration-300 ${
+                        isDark
+                          ? 'filter grayscale invert brightness-125'
+                          : 'filter grayscale contrast-125'
+                      }`}
+                    />
+                  ) : null}
                 </div>
               )}
             </div>

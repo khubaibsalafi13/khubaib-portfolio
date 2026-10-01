@@ -449,7 +449,7 @@ export const AdminTestimonialsPage: React.FC = () => {
             {/* Photo preview & replacement */}
             <div className="p-4 rounded-xl bg-[#040e08] border border-[#143322] flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="shrink-0 flex items-center justify-center">
-                {editingSubmission.avatarImage ? (
+                {editingSubmission.avatarImage && editingSubmission.avatarImage.trim() !== '' ? (
                   <div className="relative group">
                     <img
                       src={editingSubmission.avatarImage}
@@ -682,7 +682,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                 </div>
 
                 <div className="pt-4 border-t border-[#133822] flex items-center gap-3.5">
-                  {previewItem.avatarImage ? (
+                  {previewItem.avatarImage && previewItem.avatarImage.trim() !== '' ? (
                     <img
                       src={previewItem.avatarImage}
                       alt={previewItem.clientName}
@@ -758,7 +758,7 @@ export const AdminTestimonialsPage: React.FC = () => {
           {/* Photo section */}
           <div className="p-4 rounded-xl bg-[#040e08] border border-[#143322] flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="shrink-0 flex items-center justify-center">
-              {editingTestimonial.avatarImage ? (
+              {editingTestimonial.avatarImage && editingTestimonial.avatarImage.trim() !== '' ? (
                 <div className="relative group">
                   <img
                     src={editingTestimonial.avatarImage}
@@ -979,7 +979,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                     className="p-5 sm:p-6 rounded-2xl bg-[#06140d] border border-[#1e4832] flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all hover:border-[#10b981]/50 shadow-md"
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0">
-                      {sub.clientImage ? (
+                      {sub.clientImage && sub.clientImage.trim() !== '' ? (
                         <img
                           src={sub.clientImage}
                           alt={sub.clientName}
@@ -1111,7 +1111,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                     <tr key={t.id} className="hover:bg-[#081a10]">
                       <td className="p-4 font-bold text-[#f0f6f2]">
                         <div className="flex items-center gap-3">
-                          {t.avatarImage ? (
+                          {t.avatarImage && t.avatarImage.trim() !== '' ? (
                             <img
                               src={t.avatarImage}
                               alt={t.clientName}
@@ -1283,7 +1283,7 @@ export const AdminTestimonialsPage: React.FC = () => {
                 <tr key={t.id} className="hover:bg-[#081a10]">
                   <td className="p-4 font-bold text-[#f0f6f2]">
                     <div className="flex items-center gap-3">
-                      {t.avatarImage ? (
+                      {t.avatarImage && t.avatarImage.trim() !== '' ? (
                         <img
                           src={t.avatarImage}
                           alt={t.clientName}

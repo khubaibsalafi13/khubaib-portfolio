@@ -15,11 +15,11 @@ export const FinalCta: React.FC<FinalCtaProps> = ({ content }) => {
   const desc = localized(content.finalCtaDescEn, content.finalCtaDescBn);
 
   return (
-    <section id="final-cta" className="py-16 sm:py-28 md:py-36 relative transition-colors border-t border-[var(--border-subtle)] overflow-hidden scroll-mt-20 sm:scroll-mt-24">
+    <section id="final-cta" className="pt-12 sm:pt-16 md:pt-20 pb-12 sm:pb-16 md:pb-20 relative transition-colors border-t border-[var(--border-subtle)] overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* Dark Theme: Outlined premium CTA panel container; Light Theme: open/unboxed */}
-        <div className="relative overflow-hidden public-panel rounded-3xl py-12 sm:py-20 md:py-24 px-5 sm:px-10 md:px-12">
+        <div className="relative overflow-hidden public-panel rounded-3xl py-10 sm:py-14 md:py-16 px-5 sm:px-10 md:px-12">
           {/* Soft emerald aura */}
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[500px] h-[240px] sm:h-[300px] blur-[100px] sm:blur-[120px] rounded-full pointer-events-none"

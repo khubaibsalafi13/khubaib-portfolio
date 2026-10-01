@@ -76,11 +76,11 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
   };
 
   return (
-    <section id="consultation" className="py-16 sm:py-28 md:py-36 relative transition-colors scroll-mt-20 sm:scroll-mt-24">
+    <section id="consultation" className="pt-12 sm:pt-16 md:pt-20 pb-14 sm:pb-20 md:pb-24 relative transition-colors scroll-mt-20 sm:scroll-mt-24">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
+        <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
           {/* Dark theme: original tech comment kicker; Light theme: editorial kicker */}
           <div className="dark:inline-flex hidden items-center justify-center gap-2 mb-3">
             <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">
@@ -106,7 +106,7 @@ export const ConsultationSection: React.FC<ConsultationSectionProps> = ({ conten
           id="consultation-form"
           className="relative z-10 w-full"
         >
-          <div className="max-w-3xl mx-auto public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10">
+          <div className="max-w-3xl mx-auto public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8">
             {errorMessage && (
               <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs sm:text-sm flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 shrink-0" />

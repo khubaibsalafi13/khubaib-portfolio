@@ -225,28 +225,14 @@ export const HomePage: React.FC = () => {
         {/* 05 & 06. Featured Project Carousel (Selected Work) */}
         <section
           id="work"
-          className="pt-24 sm:pt-32 md:pt-36 pb-8 sm:pb-12 relative scroll-mt-24 sm:scroll-mt-28 transition-colors"
+          className="pt-12 sm:pt-16 md:pt-20 pb-0 sm:pb-2 relative scroll-mt-24 sm:scroll-mt-28 transition-colors"
         >
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
-            {/* Dark theme: restored original tech/editorial kicker; Light theme: minimal dot kicker */}
-            <div className="dark:flex hidden items-center gap-2 mb-3">
-              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">// SPOTLIGHT</span>
-            </div>
-            <div className="dark:hidden flex items-center gap-2 mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
-                {t('work.sectionTitle')}
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight">
-              {content.selectedWorkTitleEn || 'SELECTED WORK'}
-            </h2>
-          </div>
           <ProjectCarousel
             projects={featuredProjects.length > 0 ? featuredProjects : projects}
             isHydrated={featuredHydrated}
             autoplay={settings.carouselAutoplay}
             intervalSeconds={settings.carouselInterval}
+            title={content.selectedWorkTitleEn || 'SELECTED WORK'}
           />
         </section>
 

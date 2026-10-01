@@ -187,11 +187,11 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
   return (
     <section
       id="experience"
-      className="py-16 sm:py-28 md:py-32 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
+      className="pt-4 sm:pt-6 md:pt-8 pb-14 sm:pb-20 md:pb-24 relative transition-colors scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Open Editorial Credibility Pillars Row: 1 col on 320-360px, 2 col on sm, 4 col on md+ */}
-        <div className="mb-10 sm:mb-16 py-6 sm:py-8 border-y border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
+        <div className="mb-10 sm:mb-14 py-5 sm:py-7 border-y border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
           {credibilityPillars.map((pillar, i) => (
             <div
               key={i}
@@ -210,8 +210,8 @@ export const ExperienceEducation: React.FC<ExperienceEducationProps> = ({
           ))}
         </div>
 
-        {/* Two Columns: Experience & Education */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        {/* Two Columns: Experience & Education - Natural Content Height with items-start */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Work Experience Panel */}
           <div className="lg:col-span-7 public-panel rounded-2xl sm:rounded-3xl p-5 sm:p-7 md:p-8">
             <div className="flex items-center gap-3 mb-8 pb-4 border-b border-[var(--border-subtle)]">

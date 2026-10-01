@@ -213,7 +213,7 @@ export const AdminHomepageEditorPage: React.FC = () => {
               {/* Preview Frame */}
               <div className="md:col-span-4 flex flex-col items-center">
                 <div className="relative w-full max-w-[240px] aspect-[3/3.8] rounded-xl overflow-hidden bg-[#06160e] border border-[#1b432c] shadow-lg flex flex-col justify-between p-2">
-                  {content.heroPersonalImage ? (
+                  {content.heroPersonalImage && content.heroPersonalImage.trim() !== '' ? (
                     <>
                       <img
                         src={content.heroPersonalImage}

@@ -142,11 +142,15 @@ export const AdminClientLogosPage: React.FC = () => {
             <label className="block text-xs font-mono text-[#8ba394] mb-1">Logo Image URL / Upload</label>
             <div className="flex items-center gap-4">
               <div className="w-20 h-14 rounded-lg bg-[#040e08] border border-[#143322] p-2 flex items-center justify-center">
-                <img
-                  src={editing.logoImage}
-                  alt="Preview"
-                  className="max-h-full max-w-full object-contain"
-                />
+                {editing.logoImage && editing.logoImage.trim() !== '' ? (
+                  <img
+                    src={editing.logoImage}
+                    alt="Preview"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <ImageIcon className="w-5 h-5 text-[#426450] opacity-50" />
+                )}
               </div>
               <div className="flex-1 space-y-2">
                 <input
@@ -208,11 +212,15 @@ export const AdminClientLogosPage: React.FC = () => {
           >
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-14 h-10 rounded-lg bg-[#040e08] border border-[#132d1e] p-1.5 flex items-center justify-center shrink-0">
-                <img
-                  src={logo.logoImage}
-                  alt={logo.companyName}
-                  className="max-h-full max-w-full object-contain"
-                />
+                {logo.logoImage && logo.logoImage.trim() !== '' ? (
+                  <img
+                    src={logo.logoImage}
+                    alt={logo.companyName}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <ImageIcon className="w-4 h-4 text-[#426450] opacity-50" />
+                )}
               </div>
               <div className="min-w-0">
                 <span className="font-bold text-sm text-[#f0f6f2] block truncate">

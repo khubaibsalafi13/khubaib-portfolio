@@ -8,8 +8,11 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
 
+// Disable x-powered-by header for security
+app.disable('x-powered-by');
+
 // Health check endpoints for container orchestrators (Cloud Run, Kubernetes)
-app.get(['/healthz', '/health', '/livez', '/readyz'], (_req, res) => {
+app.get(['/healthz', '/health', '/livez', '/readyz', '/_health'], (_req, res) => {
   res.status(200).send('OK');
 });
 
@@ -20,14 +23,28 @@ app.use(express.static(path.join(__dirname, 'dist'), { maxAge: '1h' }));
 app.get('*', (_req, res) => {
   const indexPath = path.join(__dirname, 'dist', 'index.html');
   res.sendFile(indexPath, (err) => {
-    if (err) {
-      res.status(200).send('<!doctype html><html><head><title>Khubaib Salafi Portfolio</title></head><body><div id="root"></div></body></html>');
+    if (err && !res.headersSent) {
+      res.status(200).send('<!doctype html><html lang="en"><head><meta charset="UTF-8"><title>Khubaib Salafi Portfolio</title></head><body><div id="root"></div></body></html>');
     }
   });
 });
 
 const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Production server running on http://0.0.0.0:${port}`);
+});
+
+server.on('error', (err: any) => {
+  console.error('Server listen error:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
 });
 
 process.on('SIGTERM', () => {

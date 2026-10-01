@@ -273,7 +273,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
           </div>
 
           {/* Review Text */}
-          <blockquote className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed mb-4 font-normal italic">
+          <blockquote className="text-sm sm:text-base text-[var(--text-primary)] leading-relaxed mb-4 font-normal italic">
             "{displayExcerpt}"
           </blockquote>
 
@@ -293,7 +293,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
         {/* Bottom: Client Profile Metadata */}
         <div className="pt-5 border-t border-[var(--border-subtle)] flex items-center gap-3.5 mt-2">
             {/* Client Avatar / Photo */}
-            {test.avatarImage ? (
+            {test.avatarImage && test.avatarImage.trim() !== '' ? (
               <img
                 src={test.avatarImage}
                 alt={test.clientName}
@@ -334,11 +334,11 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     <section
       ref={sectionRef}
       id="testimonials"
-      className="py-16 sm:py-28 md:py-36 relative transition-colors overflow-hidden scroll-mt-20 sm:scroll-mt-24"
+      className="py-14 sm:py-20 md:py-24 relative transition-colors overflow-hidden scroll-mt-20 sm:scroll-mt-24"
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header: Left Introduction & Right Leave a Review CTA */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-10 sm:mb-16">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 sm:mb-12">
           <div className="max-w-2xl">
             {/* Kicker: Dark theme preserves original monospace kicker; Light theme uses minimal dot kicker */}
             <div className="dark:inline-flex hidden items-center gap-2 mb-3">
@@ -485,7 +485,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
 
             {/* Client Profile */}
             <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center gap-3.5">
-              {readMoreItem.avatarImage ? (
+              {readMoreItem.avatarImage && readMoreItem.avatarImage.trim() !== '' ? (
                 <img
                   src={readMoreItem.avatarImage}
                   alt={readMoreItem.clientName}

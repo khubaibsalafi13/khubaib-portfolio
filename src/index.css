@@ -31,8 +31,8 @@
     --bg-footer: #020704;
 
     --text-primary: #e8f1ec;
-    --text-secondary: #9db5a6;
-    --text-muted: #739080;
+    --text-secondary: #b2c9bc;
+    --text-muted: #88a394;
     --text-heading: #f0f6f2;
 
     /* Consistent dark-theme border tokens */
@@ -295,6 +295,15 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--border-hover);
+}
+
+/* Scoped utility to hide scrollbars on scrollable containers */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 @keyframes marquee {

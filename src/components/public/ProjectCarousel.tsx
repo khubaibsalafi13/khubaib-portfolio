@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpRight, Tag, Calendar } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Project } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -10,6 +10,7 @@ interface ProjectCarouselProps {
   isHydrated?: boolean;
   autoplay?: boolean;
   intervalSeconds?: number;
+  title?: string;
 }
 
 /**
@@ -29,6 +30,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
   isHydrated = false,
   autoplay = true,
   intervalSeconds = 6,
+  title = 'SELECTED WORK',
 }) => {
   const { localized, t } = useLanguage();
   const navigate = useNavigate();
@@ -52,16 +54,17 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       if (isFirstHydrationRef.current) {
         isFirstHydrationRef.current = false;
         setCurrentIndex(0);
+        console.info('[Carousel] live dataset ready, count:', total);
       } else if (currentIndex >= total) {
         setCurrentIndex(0);
       }
     }
   }, [isHydrated, total]);
 
-  // Compute transform configuration for clean editorial presentation
+  // Compute transform configuration for a given relative distance
   const getTransformConfig = useCallback((diff: number) => {
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
-    const isTablet = typeof window !== 'undefined' && window.innerWidth >= 640 && window.innerWidth < 1024;
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const isTablet = typeof window !== 'undefined' && window.innerWidth >= 768 && window.innerWidth < 1024;
 
     if (diff === 0) {
       return {
@@ -69,55 +72,59 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         scale: 1,
         opacity: 1,
         zIndex: 30,
+        filter: 'brightness(1) blur(0px)',
         pointerEvents: 'auto' as const,
       };
     }
 
     if (diff === -1) {
-      // PREVIOUS (Left side peek: visible, clean preview without heavy black veil)
+      // PREVIOUS (Left side) - 18-22% visibility, well-balanced brightness
       return {
-        xPercent: isMobile ? -104 : isTablet ? -82 : -86,
-        scale: isMobile ? 0.88 : 0.90,
-        opacity: isMobile ? 0.25 : 0.62,
+        xPercent: isMobile ? -108 : isTablet ? -66 : -58,
+        scale: isMobile ? 0.88 : 0.86,
+        opacity: isMobile ? 0 : 0.52,
         zIndex: 20,
-        pointerEvents: 'auto' as const,
+        filter: 'brightness(0.68)',
+        pointerEvents: isMobile ? ('none' as const) : ('auto' as const),
       };
     }
 
     if (diff === 1) {
-      // NEXT (Right side peek: visible, clean preview without heavy black veil)
+      // NEXT (Right side) - 18-22% visibility, well-balanced brightness
       return {
-        xPercent: isMobile ? 104 : isTablet ? 82 : 86,
-        scale: isMobile ? 0.88 : 0.90,
-        opacity: isMobile ? 0.25 : 0.62,
+        xPercent: isMobile ? 108 : isTablet ? 66 : 58,
+        scale: isMobile ? 0.88 : 0.86,
+        opacity: isMobile ? 0 : 0.52,
         zIndex: 20,
-        pointerEvents: 'auto' as const,
+        filter: 'brightness(0.68)',
+        pointerEvents: isMobile ? ('none' as const) : ('auto' as const),
       };
     }
 
     // Queued / hidden cards beyond direct neighbors
     const direction = diff > 0 ? 1 : -1;
     return {
-      xPercent: direction * (isMobile ? 130 : 120),
-      scale: 0.80,
+      xPercent: direction * (isMobile ? 140 : 120),
+      scale: 0.75,
       opacity: 0,
       zIndex: 10,
+      filter: 'brightness(0.4)',
       pointerEvents: 'none' as const,
     };
   }, []);
 
-  // GSAP animation engine: clean translation & subtle scale
+  // GSAP animation engine: smoothly interpolates positions, scale, opacity, and depth
   const animateCards = useCallback((newIndex: number) => {
     if (!stageRef.current) return;
     const isReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const duration = isReduced ? 0.01 : 0.70;
+    const duration = isReduced ? 0.01 : 0.75;
 
     cardRefs.current.forEach((el, idx) => {
       if (!el) return;
       const diff = getDistance(idx, newIndex, total);
       const target = getTransformConfig(diff);
 
-      // Layer ordering
+      // Instant layer ordering prevents z-index jumping during continuous motion
       if (diff === 0) {
         gsap.set(el, { zIndex: 30 });
       } else if (Math.abs(diff) === 1) {
@@ -130,6 +137,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         xPercent: target.xPercent,
         scale: target.scale,
         opacity: target.opacity,
+        filter: target.filter,
         duration,
         ease: 'power3.inOut',
         overwrite: 'auto',
@@ -160,7 +168,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
 
     setTimeout(() => {
       isTransitioningRef.current = false;
-    }, 720);
+    }, 760);
   }, [total, animateCards]);
 
   const prevSlide = useCallback(() => changeSlide('prev'), [changeSlide]);
@@ -186,6 +194,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
         scale: target.scale,
         opacity: target.opacity,
         zIndex: target.zIndex,
+        filter: target.filter,
       });
     });
   }, [isHydrated, total, getTransformConfig]);
@@ -229,7 +238,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [prevSlide, nextSlide]);
 
-  // GSAP Observer: horizontal swipe without trapping vertical scrolling
+  // GSAP Observer Integration: horizontal swipe without trapping vertical scrolling
   useEffect(() => {
     if (!isHydrated || !carouselRef.current || total <= 1) return;
 
@@ -239,7 +248,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
       target: carouselRef.current,
       type: 'touch,pointer',
       tolerance: 28,
-      preventDefault: false, // Preserves native vertical page scrolling
+      preventDefault: false, // CRITICAL: Never lock or hijack vertical page scroll
       onLeft: () => {
         if (!isTransitioningRef.current && !gestureCooldown) {
           gestureCooldown = true;
@@ -300,7 +309,7 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }
   }, [isHydrated, currentIndex, activeCover]);
 
-  // Card click handler: clicking side cards activates them; clicking active card opens detail
+  // Card click handler: clicking side cards activates them, clicking active card opens detail
   const handleCardClick = (e: React.MouseEvent, index: number, slug: string) => {
     const diff = getDistance(index, currentIndex, total);
     if (diff !== 0) {
@@ -313,23 +322,52 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     }
   };
 
-  // Skeleton placeholder before live data arrives
+  // Skeleton placeholder before live Supabase data arrives
   if (!isHydrated || total === 0) {
     return (
       <div
         id="featured-project-carousel"
-        className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 select-none"
+        className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 select-none"
       >
         <div className="relative overflow-hidden transition-colors">
-          <div className="relative z-10 flex items-center justify-between pb-4 mb-6 border-b border-[var(--border-subtle)]">
-            <span className="font-mono text-xs text-[var(--text-muted)] tracking-wider">01 / --</span>
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] opacity-40" />
-              <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] opacity-40" />
+          {/* Combined Section Header & Controls Row */}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 mb-5 sm:mb-7 md:mb-8 border-b border-[var(--border-subtle)]">
+            <div>
+              <div className="dark:flex hidden items-center gap-2 mb-1.5 sm:mb-2">
+                <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">// SPOTLIGHT</span>
+              </div>
+              <div className="dark:hidden flex items-center gap-2 mb-1.5 sm:mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                  {t('work.sectionTitle')}
+                </span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight">
+                {title}
+              </h2>
+            </div>
+            <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pt-1 sm:pt-0 shrink-0">
+              <span className="font-mono text-xs sm:text-sm text-[var(--text-muted)] tracking-wider">01 / --</span>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] flex items-center justify-center opacity-40">
+                  <ChevronLeft className="w-4 h-4" />
+                </div>
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[var(--bg-surface)] text-[var(--text-muted)] border border-[var(--border-subtle)] flex items-center justify-center opacity-40">
+                  <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="relative w-full h-[210px] sm:h-[280px] md:h-[320px] lg:h-[400px] flex items-center justify-center overflow-hidden">
-            <div className="w-[88%] sm:w-[76%] md:w-[62%] lg:w-[58%] aspect-[16/9] rounded-2xl bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center animate-pulse" />
+          {/* Layered Reference Deck Stage with True 16:10 Desktop / 16:9 Mobile Frame */}
+          <div className="relative w-full overflow-hidden">
+            <div className="w-[92%] sm:w-[74%] md:w-[64%] lg:w-[66%] xl:w-[66%] mx-auto aspect-[16/9] sm:aspect-[16/10] rounded-2xl sm:rounded-3xl bg-[var(--bg-card)] border border-[var(--border-subtle)] overflow-hidden shadow-[var(--card-shadow)] flex flex-col items-center justify-center p-6 sm:p-8">
+              <div className="w-12 h-12 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent)] font-mono text-sm font-bold animate-pulse mb-2.5">
+                KS
+              </div>
+              <span className="text-xs text-[var(--text-muted)] tracking-wider">
+                Loading Featured Showcase...
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -340,55 +378,85 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
     <div
       ref={carouselRef}
       id="featured-project-carousel"
-      className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 sm:mb-24 select-none touch-pan-y"
+      className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8 select-none touch-pan-y"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative overflow-hidden transition-colors">
-        {/* Top Control Bar: Counter on left, Arrows on right */}
-        <div className="relative z-10 flex items-center justify-between pb-4 mb-6 border-b border-[var(--border-subtle)]">
-          <div className="flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-[var(--text-muted)]">
-            <span className="text-[var(--accent)] font-bold">
-              {String(currentIndex + 1).padStart(2, '0')}
-            </span>
-            <span>/</span>
-            <span>{String(total).padStart(2, '0')}</span>
+        {/* Combined Section Header & Controls Row */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 mb-5 sm:mb-7 md:mb-8 border-b border-[var(--border-subtle)]">
+          {/* Left: Section Title */}
+          <div>
+            <div className="dark:flex hidden items-center gap-2 mb-1.5 sm:mb-2">
+              <span className="font-mono text-xs text-[var(--accent)] tracking-widest uppercase">// SPOTLIGHT</span>
+            </div>
+            <div className="dark:hidden flex items-center gap-2 mb-1.5 sm:mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--accent)]">
+                {t('work.sectionTitle')}
+              </span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[var(--text-heading)] tracking-tight">
+              {title}
+            </h2>
           </div>
 
-          {/* Navigation Arrows */}
-          <div className="flex items-center gap-2">
-            <button
-              id="carousel-prev-btn"
-              type="button"
-              onClick={prevSlide}
-              aria-label="Previous project"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button
-              id="carousel-next-btn"
-              type="button"
-              onClick={nextSlide}
-              aria-label="Next project"
-              className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          {/* Right: Counter + Navigation Arrows aligned in the same row */}
+          <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pt-1 sm:pt-0 shrink-0">
+            <div className="flex items-center gap-1.5 font-mono text-xs sm:text-sm font-semibold text-[var(--text-muted)]">
+              <span className="text-[var(--accent)] font-bold">
+                {String(currentIndex + 1).padStart(2, '0')}
+              </span>
+              <span>/</span>
+              <span>{String(total).padStart(2, '0')}</span>
+            </div>
+
+            {/* Navigation Arrows */}
+            <div className="flex items-center gap-2">
+              <button
+                id="carousel-prev-btn"
+                type="button"
+                onClick={prevSlide}
+                aria-label="Previous project"
+                className="w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button
+                id="carousel-next-btn"
+                type="button"
+                onClick={nextSlide}
+                aria-label="Next project"
+                className="w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px] rounded-full bg-[var(--bg-card)] hover:bg-[var(--accent)] text-[var(--text-secondary)] hover:text-[var(--accent-contrast)] border border-[var(--border-medium)] hover:border-[var(--accent)] flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Carousel Visual Stage: Dominant 16:9 Central Artwork + Visible Side Previews */}
+        {/* Layered Reference Deck Stage with True 16:10 Desktop / 16:9 Mobile Frame */}
         <div
           ref={stageRef}
-          className="relative w-full h-[210px] sm:h-[280px] md:h-[320px] lg:h-[400px] overflow-hidden"
+          className="relative w-full overflow-hidden"
         >
+          {/* Natural responsive stage sizer matching the active card's responsive width and ratio */}
+          <div
+            className="w-[92%] sm:w-[74%] md:w-[64%] lg:w-[66%] xl:w-[66%] mx-auto aspect-[16/9] sm:aspect-[16/10] pointer-events-none invisible"
+            aria-hidden="true"
+          />
+
           {projects.map((proj, idx) => {
             const diff = getDistance(idx, currentIndex, total);
             const isActive = diff === 0;
             const isNeighbor = Math.abs(diff) === 1;
-            // Admin-managed Dedicated Carousel Visual with fallback to Cover Image
-            const imageSource = proj.carouselImage || proj.coverImage;
+            const rawImageSource =
+              proj.carouselImage && typeof proj.carouselImage === 'string' && proj.carouselImage.trim() !== ''
+                ? proj.carouselImage
+                : proj.coverImage && typeof proj.coverImage === 'string' && proj.coverImage.trim() !== ''
+                ? proj.coverImage
+                : null;
+            const imageSource = rawImageSource;
 
             return (
               <div
@@ -398,18 +466,17 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                   else cardRefs.current.delete(idx);
                 }}
                 onClick={(e) => handleCardClick(e, idx, proj.slug)}
-                className={`group absolute top-1/2 -translate-y-1/2 left-0 right-0 mx-auto w-[88%] sm:w-[76%] md:w-[62%] lg:w-[58%] aspect-[16/9] rounded-2xl overflow-hidden bg-[var(--bg-card)] border border-[var(--border-subtle)] dark:border-[#17462b] transition-colors duration-300 ${
+                className={`group absolute inset-0 top-0 left-0 right-0 mx-auto w-[92%] sm:w-[74%] md:w-[64%] lg:w-[66%] xl:w-[66%] h-full aspect-[16/9] sm:aspect-[16/10] rounded-2xl sm:rounded-3xl overflow-hidden transition-[box-shadow,border-color] duration-500 bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--border-hover)] dark:border-[#17462b] dark:hover:border-[#10b981] flex flex-col justify-between ${
                   isActive
-                    ? 'cursor-pointer shadow-md'
+                    ? 'shadow-[var(--card-shadow)] dark:shadow-[0_0_40px_rgba(16,185,129,0.18)] cursor-pointer'
                     : isNeighbor
-                    ? 'cursor-pointer hover:opacity-80'
+                    ? 'cursor-pointer hover:opacity-75'
                     : 'pointer-events-none'
                 }`}
                 style={{ willChange: 'transform, opacity' }}
-                title={isActive ? localized(proj.titleEn, proj.titleBn) : localized('Click to center', 'কেন্দ্রে আনতে ক্লিক করুন')}
               >
-                {/* Background Image Container - 100% PURE ARTWORK, NO WEBSITE TEXT OVERLAYS */}
-                <div className="relative w-full h-full overflow-hidden bg-[var(--bg-card-subtle)]">
+                {/* Background Image Container */}
+                <div className="absolute inset-0 overflow-hidden z-0 bg-[var(--bg-card-subtle)]">
                   {/* Subtle loader placeholder */}
                   <div
                     className={`absolute inset-0 bg-gradient-to-br from-[var(--bg-surface)] to-[var(--bg-card)] flex items-center justify-center pointer-events-none z-0 transition-opacity duration-300 ${
@@ -435,73 +502,114 @@ export const ProjectCarousel: React.FC<ProjectCarouselProps> = ({
                       onError={() => {
                         if (isActive) setActiveImageLoaded(true);
                       }}
-                      className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 ${
+                      className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 relative z-0 ${
                         isActive && activeImageLoaded ? 'opacity-100' : 'opacity-90'
                       }`}
                     />
                   )}
+
+                  {/* Contrast Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20 pointer-events-none z-10" />
+
+                  {/* Darkening Veil for Side Cards */}
+                  {!isActive && (
+                    <div className="absolute inset-0 bg-black/45 group-hover:bg-black/25 transition-colors duration-300 pointer-events-none z-15" />
+                  )}
+                </div>
+
+                {/* Top Meta Header */}
+                <div className="relative z-20 flex items-center justify-between gap-3 p-4 sm:p-5 md:p-6 shrink-0">
+                  <div className="inline-flex items-center gap-1.5 sm:gap-2 dark:bg-[#082014]/90 dark:border-[#17462b] dark:text-[#a7f3d0] dark:shadow-[0_0_12px_rgba(16,185,129,0.2)] bg-black/50 backdrop-blur-md px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs text-white/95 tracking-wider uppercase font-semibold border border-white/10">
+                    <Tag className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[var(--accent)] dark:inline hidden" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] dark:hidden inline" />
+                    <span>{proj.category}</span>
+                  </div>
+
+                  <div className="hidden sm:inline-flex items-center gap-1.5 dark:bg-[#082014]/90 dark:border-[#17462b] dark:text-[#8ba394] bg-black/50 backdrop-blur-md px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-xs text-white/80 border border-white/10 font-mono">
+                    <Calendar className="w-3.5 h-3.5 text-[var(--accent)] dark:inline hidden" />
+                    <span>{proj.year}</span>
+                  </div>
+                </div>
+
+                {/* Bottom Content Area */}
+                <div className="relative z-20 p-4 sm:p-5 md:p-6 pt-0 mt-auto">
+                  <h3 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-extrabold text-white tracking-tight mb-1.5 sm:mb-2.5 line-clamp-1 sm:line-clamp-2">
+                    {localized(proj.titleEn, proj.titleBn)}
+                  </h3>
+
+                  {/* Description: Hidden on mobile to prioritize artwork clarity, visible on sm+ */}
+                  <p className="hidden sm:block text-xs sm:text-sm text-white/85 line-clamp-2 max-w-xl mb-3.5 sm:mb-4.5 leading-relaxed font-normal">
+                    {localized(proj.shortDescriptionEn, proj.shortDescriptionBn)}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5">
+                    {proj.roleEn && (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs text-white/90 bg-black/40 backdrop-blur-md border border-white/10 font-medium">
+                        {localized(proj.roleEn, proj.roleBn)}
+                      </span>
+                    )}
+
+                    {!isActive && (
+                      <span className="text-[10px] sm:text-[11px] font-mono text-[var(--accent)] uppercase tracking-wider bg-black/60 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-[var(--accent)]/30">
+                        {diff === -1 ? '← Click to View' : 'Click to View →'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Project Information Below Image: Clean, compact hierarchy with ONE clear CTA */}
-        {activeProject && (
-          <div className="relative z-10 mt-6 sm:mt-8 max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
-            {/* Title & Category/Year */}
-            <div className="space-y-1">
-              <Link
-                to={`/work/${activeProject.slug}`}
-                className="group inline-block focus:outline-none"
-              >
-                <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[var(--text-heading)] tracking-tight group-hover:text-[var(--accent)] transition-colors">
-                  {localized(activeProject.titleEn, activeProject.titleBn)}
-                </h3>
-              </Link>
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-muted)]">
-                <span className="uppercase tracking-wider font-semibold text-[var(--accent)]">
-                  {activeProject.category}
-                </span>
-                {activeProject.year && (
-                  <>
-                    <span className="text-[var(--border-hover)]">/</span>
-                    <span>{activeProject.year}</span>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* ONLY ONE CTA */}
-            <div>
-              <Link
-                id="carousel-view-project-btn"
-                to={`/work/${activeProject.slug}`}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer group active:scale-95 min-h-[44px]"
-              >
-                <span>{t('work.viewProject')}</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              </Link>
-            </div>
+        {/* Bottom Control & Active Project Bar */}
+        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 sm:mt-7 pt-4 sm:pt-5 border-t border-[var(--border-subtle)]">
+          {/* Segmented Progress Indicators */}
+          <div className="flex items-center gap-1.5 order-2 sm:order-1" role="tablist" aria-label="Project slide navigation">
+            {projects.map((p, idx) => {
+              const isActive = currentIndex === idx;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => goToSlide(idx)}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className="min-h-[32px] py-2 px-1 cursor-pointer flex items-center justify-center group focus:outline-none"
+                >
+                  <span
+                    className={`h-[3px] rounded-full transition-all duration-300 ease-out motion-reduce:transition-none block ${
+                      isActive
+                        ? 'w-8 bg-[var(--accent)] opacity-100 shadow-[0_0_8px_var(--accent)]'
+                        : 'w-3 bg-[#c2d9cb] dark:bg-[#175233] opacity-40 group-hover:opacity-75 group-hover:w-4'
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </div>
-        )}
 
-        {/* Pagination Dots */}
-        <div className="relative z-10 flex items-center justify-center gap-2 mt-6">
-          {projects.map((p, idx) => (
-            <button
-              key={p.id}
-              onClick={() => goToSlide(idx)}
-              aria-label={`Go to slide ${idx + 1}`}
-              className={`transition-all duration-300 rounded-full cursor-pointer min-h-[24px] min-w-[12px] flex items-center justify-center ${
-                currentIndex === idx
-                  ? 'w-7 h-2 bg-[var(--accent)]'
-                  : 'w-2 h-2 bg-[var(--border-medium)] hover:bg-[var(--border-hover)]'
-              }`}
+          {/* Main Direct Action CTA Connected to Active Project - Single Focal CTA */}
+          {activeProject && (
+            <Link
+              id="carousel-main-view-project-btn"
+              to={`/work/${activeProject.slug}`}
+              className="order-1 sm:order-2 inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)] transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer group active:scale-95 min-h-[44px]"
             >
-              <span className="sr-only">Slide {idx + 1}</span>
-            </button>
-          ))}
+              <span>{t('work.viewProject')}</span>
+              <ArrowUpRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
+          )}
+
+          {/* Active Project Meta Info */}
+          {activeProject && (
+            <div className="order-3 hidden md:flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+              <span className="text-[var(--text-secondary)] font-medium">
+                {localized(activeProject.titleEn, activeProject.titleBn)}
+              </span>
+              <span>·</span>
+              <span>{activeProject.year}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
